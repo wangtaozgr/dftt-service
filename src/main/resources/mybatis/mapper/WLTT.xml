@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atao.dftt.mapper.WlttMapper">
+    <resultMap id="BaseResultMap" type="Wltt">
+    <id property="id" column="id" jdbcType="INTEGER" />
+
+    <result property="username" column="username" jdbcType="VARCHAR" />
+    <result property="pwd" column="pwd" jdbcType="VARCHAR" />
+    <result property="appKey" column="app_key" jdbcType="VARCHAR" />
+    <result property="userAgent" column="user_agent" jdbcType="VARCHAR" />
+    <result property="uid" column="uid" jdbcType="VARCHAR" />
+    <result property="openId" column="open_id" jdbcType="VARCHAR" />
+    <result property="x" column="x" jdbcType="VARCHAR" />
+    <result property="authToken" column="auth_token" jdbcType="VARCHAR" />
+    <result property="devid" column="devid" jdbcType="VARCHAR" />
+    <result property="deviceId" column="device_id" jdbcType="VARCHAR" />
+    <result property="androidid" column="androidId" jdbcType="VARCHAR" />
+    <result property="model" column="model" jdbcType="VARCHAR" />
+    <result property="vendor" column="vendor" jdbcType="VARCHAR" />
+    <result property="channel" column="channel" jdbcType="VARCHAR" />
+    <result property="imei" column="imei" jdbcType="VARCHAR" />
+    <result property="imsi" column="imsi" jdbcType="VARCHAR" />
+    <result property="cityKey" column="city_key" jdbcType="VARCHAR" />
+    <result property="lat" column="lat" jdbcType="VARCHAR" />
+    <result property="lon" column="lon" jdbcType="VARCHAR" />
+    <result property="device" column="device" jdbcType="VARCHAR" />
+    <result property="osv" column="osv" jdbcType="VARCHAR" />
+    <result property="up" column="up" jdbcType="VARCHAR" />
+    <result property="osVersion" column="os_version" jdbcType="VARCHAR" />
+    <result property="os" column="os" jdbcType="VARCHAR" />
+    <result property="pid" column="pid" jdbcType="VARCHAR" />
+    <result property="mac" column="mac" jdbcType="VARCHAR" />
+    <result property="visitCode" column="visit_code" jdbcType="VARCHAR" />
+    <result property="readNum" column="read_num" jdbcType="BIGINT" />
+    <result property="limitReadNum" column="limit_read_num" jdbcType="BIGINT" />
+    <result property="readTime" column="read_time" jdbcType="TIMESTAMP" />
+    <result property="vReadNum" column="v_read_num" jdbcType="BIGINT" />
+    <result property="vLimitReadNum" column="v_limit_read_num" jdbcType="BIGINT" />
+    <result property="vReadTime" column="v_read_time" jdbcType="TIMESTAMP" />
+    <result property="used" column="used" jdbcType="BIT" />
+    <result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+    <result property="qdTime" column="qd_time" jdbcType="TIMESTAMP" />
+</resultMap>
+
+    <sql id="BaseColumnList">
+        id,username,pwd,app_key,user_agent,
+        uid,open_id,x,auth_token,devid,
+        device_id,androidId,model,vendor,channel,
+        imei,imsi,city_key,lat,lon,
+        device,osv,up,os_version,os,
+        pid,mac,visit_code,read_num,limit_read_num,
+        read_time,v_read_num,v_limit_read_num,v_read_time,used,
+        create_time,qd_time
+    </sql>
+
+
+    <sql id="TableClause"> ${}.WLTT </sql>
+
+
+    <select id="queryByCriteria" resultMap="BaseResultMap" parameterType="CriteriaQuery">
+        <include refid="public.Select4Query" />
+    </select>
+
+    <select id="countByCriteria" resultType="int" parameterType="CriteriaQuery">
+        <include refid="public.Count4Query" />
+    </select>
+
+    <delete id="deleteByCriteria" parameterType="CriteriaQuery">
+        <include refid="public.Delete4Query" />
+    </delete>
+</mapper>
