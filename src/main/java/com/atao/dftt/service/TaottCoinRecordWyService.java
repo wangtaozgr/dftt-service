@@ -48,12 +48,25 @@ public class TaottCoinRecordWyService extends BaseService<TaottCoinRecord> {
 		record.setCoinDay(coinDay);
 		record.setUsername(user.getUsername());
 		JSONObject object = http.queryMyCoin();
-		if (object != null) {
-			record.setTodayCoin(object.getIntValue("todayGold"));
-			record.setBalance(object.getDoubleValue("balance") / 100);
-			record.setTotalIncome(object.getDoubleValue("totalIncome") / 100);
+		if (object.getIntValue("code") == 0) {
+			logger.info("taott-{}:查询今日获取的金币信息成功.", user.getUsername());
+			JSONObject result = object.getJSONObject("result");
+			record.setTodayCoin(result.getIntValue("todayGold"));
+			record.setBalance(result.getDoubleValue("balance") / 100);
+			record.setTotalIncome(result.getDoubleValue("totalIncome") / 100);
 			record.setUpdateTime(new Date());
 			super.save(record);
+		} else if (object.getIntValue("code") == 20012) {
+			JSONObject loginInfo = http.login();
+			if (loginInfo.getIntValue("code") == 0) {
+				logger.info("taott-{}:用户登陆已失效，重新登陆成功，更新用户信息", user.getUsername());
+				String ticket = loginInfo.getJSONObject("result").getString("ticket");
+				user.setTicket(ticket);
+				taoToutiaoUserWyService.updateBySelect(user);
+				http.user = user;
+			}
+		}
+		if (object != null) {
 		}
 	}
 

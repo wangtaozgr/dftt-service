@@ -75,12 +75,15 @@ public class TaottHttp {
 			heads.put("base-key", TaottUtils.baseKey(user));
 			String content = MobileHttpUrlConnectUtils.httpPost(url, null, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
-			if (object.getIntValue("code") == 0) {
+			return object;
+			/*if (object.getIntValue("code") == 0) {
 				JSONObject result = object.getJSONObject("result");
 				logger.info("taott-{}:查询今日获取的金币信息成功.");
 				return result;
-			}
-			logger.error("taott-{}:查询今日获取的金币信息失败,msg={}", user.getUsername(), content);
+			}else {
+				return 
+			}*/
+			//logger.error("taott-{}:查询今日获取的金币信息失败,msg={}", user.getUsername(), content);
 		} catch (Exception e) {
 			logger.error("taott-{}:查询今日获取的金币信息异常,msg={}", user.getUsername(), e.getMessage());
 		}
