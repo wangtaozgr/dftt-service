@@ -8,6 +8,7 @@ import java.util.Random;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -16,6 +17,7 @@ import com.atao.base.service.BaseService;
 import com.atao.base.util.StringUtils;
 import com.atao.dftt.http.WlttHttp;
 import com.atao.dftt.mapper.WlttMapper;
+import com.atao.dftt.model.CoinTxRecord;
 import com.atao.dftt.model.Wltt;
 import com.atao.dftt.util.WlttUtils;
 import com.atao.util.DateUtils;
@@ -32,6 +34,8 @@ public class WlttWyService extends BaseService<Wltt> {
 
 	@Resource
 	private WlttMapper wlttMapper;
+	@Resource
+	private CoinTxRecordWyService coinTxRecordWyService;
 
 	@Override
 	public BaseMapper<Wltt> getMapper() {
@@ -80,13 +84,60 @@ public class WlttWyService extends BaseService<Wltt> {
 	public void daka(Wltt wltt) {
 		WlttHttp wlttHttp = WlttHttp.getInstance(wltt);
 		JSONObject dk = wlttHttp.daka();
+		if(dk==null) return;
 		if (dk.getIntValue("status") == 1004) {
 			JSONObject userInfo = wlttHttp.login();
 			String authToken = WlttUtils.getAuthToken(wltt.getDevice(), userInfo.getString("acctk"));
 			wltt.setAuthToken(authToken);
 			super.updateBySelect(wltt);
-			wlttHttp.wltt = wltt;
+			wlttHttp = wlttHttp.refreshUser(wltt);
+			wlttHttp.daka();
 		}
+	}
+
+	public JSONObject cointx(Wltt user) {
+		JSONObject result = new JSONObject(true);
+		WlttHttp http = WlttHttp.getInstance(user);
+		if ("wx".equals(user.getTxType())) {
+			JSONArray txList = http.cointxList("wxpay");
+			for (int i = txList.size(); i > 0; i--) {
+				JSONObject coin = txList.getJSONObject(i - 1);
+				double price = coin.getDoubleValue("face_price") / 100;
+				if (coin.getBooleanValue("can_buy") && price > 1) {//微信只提1元以上的，每次都要手动提取，麻烦
+					int productId = coin.getIntValue("id");
+					boolean success = http.cointx(productId);
+					if (success) {
+						CoinTxRecord record = new CoinTxRecord("wltt", user.getUsername(), price, user.getTxType(),
+								user.getTxUser(), new Date());
+						coinTxRecordWyService.insert(record);
+						result.put("status", true);
+						result.put("msg", price + "元提现成功.");
+						return result;
+					}
+				}
+			}
+		} else if ("ali".equals(user.getTxType())) {
+			JSONArray txList = http.cointxList("alipay");
+			for (int i = txList.size(); i > 0; i--) {
+				JSONObject coin = txList.getJSONObject(i - 1);
+				if (coin.getBooleanValue("can_buy")) {
+					int productId = coin.getIntValue("id");
+					boolean success = http.cointx(productId);
+					if (success) {
+						double price = coin.getDoubleValue("face_price") / 100;
+						CoinTxRecord record = new CoinTxRecord("wltt", user.getUsername(), price, user.getTxType(),
+								user.getTxUser(), new Date());
+						coinTxRecordWyService.insert(record);
+						result.put("status", true);
+						result.put("msg", price + "元提现成功.");
+						return result;
+					}
+				}
+			}
+		}
+		result.put("status", false);
+		result.put("msg", "没有可以提现的金额.");
+		return result;
 	}
 
 	/**
@@ -108,7 +159,8 @@ public class WlttWyService extends BaseService<Wltt> {
 				String authToken = WlttUtils.getAuthToken(wltt.getDevice(), userInfo.getString("acctk"));
 				wltt.setAuthToken(authToken);
 				super.updateBySelect(wltt);
-				wlttHttp.wltt = wltt;
+				wlttHttp = wlttHttp.refreshUser(wltt);
+
 			} else {
 				return 3;
 			}
@@ -131,7 +183,7 @@ public class WlttWyService extends BaseService<Wltt> {
 					String authToken = WlttUtils.getAuthToken(wltt.getDevice(), userInfo.getString("acctk"));
 					wltt.setAuthToken(authToken);
 					super.updateBySelect(wltt);
-					wlttHttp.wltt = wltt;
+					wlttHttp = wlttHttp.refreshUser(wltt);
 				} else {
 					return 3;
 				}
@@ -140,7 +192,7 @@ public class WlttWyService extends BaseService<Wltt> {
 				String authToken = WlttUtils.getAuthToken(wltt.getDevice(), userInfo.getString("acctk"));
 				wltt.setAuthToken(authToken);
 				super.updateBySelect(wltt);
-				wlttHttp.wltt = wltt;
+				wlttHttp = wlttHttp.refreshUser(wltt);
 			}
 		}
 		return 0;
@@ -184,7 +236,7 @@ public class WlttWyService extends BaseService<Wltt> {
 						String authToken = WlttUtils.getAuthToken(user.getDevice(), userInfo.getString("acctk"));
 						user.setAuthToken(authToken);
 						super.updateBySelect(user);
-						wlttHttp.wltt = user;
+						wlttHttp = wlttHttp.refreshUser(user);
 					}
 				}
 			}

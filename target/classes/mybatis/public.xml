@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="public">
+
+    <sql id="WhereClause4Query">
+        <where>
+            <foreach item="value" index="index" collection="whereValues">
+                ${whereSqls[index]} #{value}
+            </foreach>
+            ${whereEndSql}
+        </where>
+    </sql>
+
+    <sql id="SelectById">
+        select
+        <include refid="BaseColumnList" />
+        from
+        <include refid="TableClause" />
+        <include refid="WhereClause4Id" />
+    </sql>
+
+    <sql id="Select4Query">
+        select
+        <if test="distinct" >
+            distinct
+        </if>
+        <choose>
+            <when test="selectClause != null">
+                ${selectClause}
+            </when>
+            <otherwise>
+                <include refid="BaseColumnList" />
+            </otherwise>
+        </choose>
+        from
+        <choose>
+            <when test="fromClause != null">
+                ${fromClause}
+            </when>
+            <otherwise>
+                <include refid="TableClause" />
+            </otherwise>
+        </choose>
+        <include refid="public.WhereClause4Query" />
+        <if test="orderByClause != null" >
+            order by ${orderByClause}
+        </if>
+    </sql>
+
+    <sql id="Count4Query">
+        select count(*) from
+        <choose>
+            <when test="fromClause != null">
+                ${fromClause}
+            </when>
+            <otherwise>
+                <include refid="TableClause" />
+            </otherwise>
+        </choose>
+        <include refid="public.WhereClause4Query" />
+    </sql>
+
+    <sql id="DeleteById">
+        delete from
+        <include refid="TableClause" />
+        <include refid="WhereClause4Id" />
+    </sql>
+
+    <sql id="LogicDeleteById">
+        update
+        <include refid="TableClause" />
+        set DEL_FLAG = '1'
+        <include refid="WhereClause4Id" />
+    </sql>
+
+    <sql id="Delete4Query">
+        delete from
+        <choose>
+            <when test="fromClause != null">
+                ${fromClause}
+            </when>
+            <otherwise>
+                <include refid="TableClause" />
+            </otherwise>
+        </choose>
+        <include refid="public.WhereClause4Query" />
+    </sql>
+
+    <sql id="LogicDelete4Query">
+        update
+        <choose>
+            <when test="fromClause != null">
+                ${fromClause}
+            </when>
+            <otherwise>
+                <include refid="TableClause" />
+            </otherwise>
+        </choose>
+        set DEL_FLAG = '1'
+        <include refid="public.WhereClause4Query" />
+    </sql>
+</mapper>

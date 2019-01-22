@@ -1,28 +1,29 @@
 package com.atao.dftt.service;
 
-import com.atao.dftt.model.TaoToutiaoUser;
-import com.atao.dftt.util.TaottUtils;
-import com.atao.util.DateUtils;
-
-import tk.mybatis.mapper.weekend.Weekend;
-import tk.mybatis.mapper.weekend.WeekendCriteria;
-
-import com.atao.dftt.http.TaottHttp;
-import com.atao.dftt.mapper.TaoToutiaoUserMapper;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.atao.base.mapper.BaseMapper;
-import com.atao.base.service.BaseService;
-import com.atao.base.util.StringUtils;
-
-import org.springframework.stereotype.Service;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
 import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.atao.base.mapper.BaseMapper;
+import com.atao.base.service.BaseService;
+import com.atao.base.util.StringUtils;
+import com.atao.dftt.http.TaottHttp;
+import com.atao.dftt.mapper.TaoToutiaoUserMapper;
+import com.atao.dftt.model.CoinTxRecord;
+import com.atao.dftt.model.TaoToutiaoUser;
+import com.atao.dftt.util.TaottUtils;
+import com.atao.util.DateUtils;
+
+import tk.mybatis.mapper.weekend.Weekend;
+import tk.mybatis.mapper.weekend.WeekendCriteria;
 
 /**
  *
@@ -33,6 +34,8 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 
 	@Resource
 	private TaoToutiaoUserMapper taoToutiaoUserMapper;
+	@Resource
+	private CoinTxRecordWyService coinTxRecordWyService;
 
 	@Override
 	public BaseMapper<TaoToutiaoUser> getMapper() {
@@ -56,8 +59,19 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 				user.setReadTime(new Date());
 				super.updateBySelect(user);
 			}
+			if (user.getVReadTime() == null || user.getVReadTime().getTime() < today.getTime()) {
+				user.setVReadNum(0l);
+				user.setVReadTime(new Date());
+				super.updateBySelect(user);
+			}
 		}
 		return users;
+	}
+
+	public TaoToutiaoUser queryUserByUsername(String username) {
+		TaoToutiaoUser p = new TaoToutiaoUser();
+		p.setUsername(username);
+		return super.queryOne(p, null);
 	}
 
 	public void readNewsCoin(TaoToutiaoUser user, Date endTime) throws Exception {
@@ -90,6 +104,8 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 			http.eventList.add(rw);
 			// 发送请求
 			http.sendData();
+			http.times = 0;
+			http.pubTime = 0l;
 		}
 		int readedNum = 0;
 		long readNum = user.getReadNum();
@@ -123,11 +139,11 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 					user.setReadTime(new Date());
 					this.updateBySelect(user);
 					if (readNum >= user.getLimitReadNum())
-						break;
+						return;
 					if (readedNum >= 10)
-						break;
+						return;
 					if (new Date().getTime() > endTime.getTime())
-						break;
+						return;
 				} else if (result.getIntValue("code") == 20012) {// 用户登陆过期
 					JSONObject loginInfo = http.login();
 					if (loginInfo.getIntValue("code") == 0) {
@@ -135,7 +151,7 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 						String ticket = loginInfo.getJSONObject("result").getString("ticket");
 						user.setTicket(ticket);
 						super.updateBySelect(user);
-						http.user = user;
+						http = http.refreshUser(user);
 					} else {
 						readNum = user.getLimitReadNum();
 						user.setReadNum(readNum);
@@ -149,7 +165,7 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 					user.setReadTime(new Date());
 					this.updateBySelect(user);
 					logger.error("taott-{}:阅读新闻金币报错或已达到上限", user.getUsername());
-					break;
+					return;
 				}
 			}
 		}
@@ -158,11 +174,73 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 	public void daka(TaoToutiaoUser user) {
 		TaottHttp http = TaottHttp.getInstance(user);
 		boolean dk = http.daka();
+		if (!dk) {
+			JSONObject loginInfo = http.login();
+			if (loginInfo.getIntValue("code") == 0) {
+				logger.info("taott-{}:用户登陆已失效，重新登陆成功，更新用户信息", user.getUsername());
+				String ticket = loginInfo.getJSONObject("result").getString("ticket");
+				user.setTicket(ticket);
+				super.updateBySelect(user);
+				http = http.refreshUser(user);
+			}
+		}
+
 	}
 
 	public void checkTask(TaoToutiaoUser user) {
 		TaottHttp http = TaottHttp.getInstance(user);
 		http.checkTask();
+	}
+
+	public JSONObject cointx(TaoToutiaoUser user) {
+		JSONObject result = new JSONObject(true);
+		TaottHttp http = TaottHttp.getInstance(user);
+		if ("wx".equals(user.getTxType())) {
+			JSONArray txList = http.cointxList("wxpay");
+			for (int i = 0; i < txList.size(); i++) {
+				JSONObject coin = txList.getJSONObject(i);
+				int productId = coin.getIntValue("id");
+				JSONObject txDetail = http.cointxDetail(productId);
+				boolean txed = txDetail.getBooleanValue("taskFinished");
+				if (txed) {
+					boolean success = http.cointx(productId);
+					if (success) {
+						double price = coin.getDoubleValue("price");
+						CoinTxRecord record = new CoinTxRecord("taott", user.getUsername(), price, user.getTxType(),
+								user.getTxUser(), new Date());
+						coinTxRecordWyService.insert(record);
+
+						result.put("status", true);
+						result.put("msg", price + "元提现成功.");
+						return result;
+					}
+				}
+			}
+		} else if ("ali".equals(user.getTxType())) {
+			JSONArray txList = http.cointxList("alipay");
+			for (int i = 0; i < txList.size(); i++) {
+				JSONObject coin = txList.getJSONObject(i);
+				int productId = coin.getIntValue("id");
+				JSONObject txDetail = http.cointxDetail(productId);
+				boolean txed = txDetail.getBooleanValue("taskFinished");
+				if (txed) {
+					boolean success = http.cointxAli(productId);
+					if (success) {
+						double price = coin.getDoubleValue("price");
+						CoinTxRecord record = new CoinTxRecord("taott", user.getUsername(), price, user.getTxType(),
+								user.getTxUser(), new Date());
+						coinTxRecordWyService.insert(record);
+						result.put("status", true);
+						result.put("msg", price + "元提现成功.");
+						return result;
+					}
+				}
+			}
+
+		}
+		result.put("status", false);
+		result.put("msg", "没有可以提现的金额.");
+		return result;
 	}
 
 	@Override

@@ -67,6 +67,8 @@ public class WlttCoinRecordWyService extends BaseService<WlttCoinRecord> {
 		WlttCoinRecord t = new WlttCoinRecord();
 		t.setRows(3);
 		t.setUsername(username);
+		String coinDay = DateUtils.formatDate(new Date(), "yyyyMMdd");
+		t.setCoinDay(coinDay);
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("sorts", "updateTime=1");
 		return super.queryPage(t, params);

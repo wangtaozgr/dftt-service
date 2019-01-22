@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atao.dftt.mapper.JkdttUserMapper">
+    <resultMap id="BaseResultMap" type="JkdttUser">
+    <id property="id" column="id" jdbcType="INTEGER" />
+
+    <result property="username" column="username" jdbcType="VARCHAR" />
+    <result property="password" column="password" jdbcType="VARCHAR" />
+    <result property="openId" column="open_id" jdbcType="VARCHAR" />
+    <result property="smid" column="smid" jdbcType="VARCHAR" />
+    <result property="uniqueid" column="uniqueid" jdbcType="VARCHAR" />
+    <result property="umengid" column="umengid" jdbcType="VARCHAR" />
+    <result property="x" column="x" jdbcType="VARCHAR" />
+    <result property="channel" column="channel" jdbcType="VARCHAR" />
+    <result property="model" column="model" jdbcType="VARCHAR" />
+    <result property="vendor" column="vendor" jdbcType="VARCHAR" />
+    <result property="os" column="os" jdbcType="VARCHAR" />
+    <result property="userAgent" column="user_agent" jdbcType="VARCHAR" />
+    <result property="readNum" column="read_num" jdbcType="BIGINT" />
+    <result property="readTime" column="read_time" jdbcType="TIMESTAMP" />
+    <result property="limitReadNum" column="limit_read_num" jdbcType="BIGINT" />
+    <result property="vReadNum" column="v_read_num" jdbcType="BIGINT" />
+    <result property="vReadTime" column="v_read_time" jdbcType="TIMESTAMP" />
+    <result property="vLimitReadNum" column="v_limit_read_num" jdbcType="BIGINT" />
+    <result property="qdTime" column="qd_time" jdbcType="TIMESTAMP" />
+    <result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+    <result property="used" column="used" jdbcType="BIT" />
+    <result property="autoTx" column="auto_tx" jdbcType="BIT" />
+    <result property="txType" column="tx_type" jdbcType="VARCHAR" />
+    <result property="txUser" column="tx_user" jdbcType="VARCHAR" />
+    <result property="txName" column="tx_name" jdbcType="VARCHAR" />
+    <result property="txIdcard" column="tx_idcard" jdbcType="VARCHAR" />
+</resultMap>
+
+    <sql id="BaseColumnList">
+        id,username,password,open_id,smid,
+        uniqueid,umengid,x,channel,model,
+        vendor,os,user_agent,read_num,read_time,
+        limit_read_num,v_read_num,v_read_time,v_limit_read_num,qd_time,
+        create_time,used,auto_tx,tx_type,tx_user,
+        tx_name,tx_idcard
+    </sql>
+
+
+    <sql id="TableClause"> ${}.JKDTT_USER </sql>
+
+
+    <select id="queryByCriteria" resultMap="BaseResultMap" parameterType="CriteriaQuery">
+        <include refid="public.Select4Query" />
+    </select>
+
+    <select id="countByCriteria" resultType="int" parameterType="CriteriaQuery">
+        <include refid="public.Count4Query" />
+    </select>
+
+    <delete id="deleteByCriteria" parameterType="CriteriaQuery">
+        <include refid="public.Delete4Query" />
+    </delete>
+</mapper>

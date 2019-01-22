@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atao.dftt.model.Wltt;
 import com.atao.dftt.util.MobileHttpUrlConnectUtils;
-import com.atao.dftt.util.TaottUtils;
 import com.atao.dftt.util.WlttUtils;
 import com.atao.util.StringUtils;
 
@@ -40,6 +39,12 @@ public class WlttHttp {
 			wlttMap.put(wltt.getUsername(), wlttHttp);
 		}
 		return wlttHttp;
+	}
+
+	public WlttHttp refreshUser(Wltt user) {
+		WlttHttp http = new WlttHttp(user);
+		wlttMap.put(user.getUsername(), http);
+		return http;
 	}
 
 	public JSONObject login() {
@@ -174,13 +179,13 @@ public class WlttHttp {
 			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
 			heads.put("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			logger.info("wltt-{}:打卡结果|result={}", wltt.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getIntValue("status") == 1000) {
 				logger.info("wltt-{}:打卡成功", wltt.getUsername());
-				return object;
+			} else {
+				logger.error("wltt-{}:打卡失败  content={}", wltt.getUsername(), content);
 			}
-			logger.error("wltt-{}:打卡失败 msg={}", wltt.getUsername(), content);
+			return object;
 		} catch (Exception e) {
 			logger.error("wltt-{}:打卡发生异常! msg={}", wltt.getUsername(), e.getMessage());
 		}
@@ -344,10 +349,6 @@ public class WlttHttp {
 	/**
 	 * 领奖 一天20次
 	 * 
-	 * @param itemId
-	 * @param taskId
-	 * @param timestamp
-	 * @return
 	 */
 	public JSONObject readGift(String giftId) {
 		try {
@@ -724,5 +725,67 @@ public class WlttHttp {
 			logger.error("wltt-{}:发送日志时发生异常!{}", wltt.getUsername(), e.getMessage());
 		}
 
+	}
+
+	/**
+	 * 可提现列表
+	 * 
+	 * @return
+	 */
+	public JSONArray cointxList(String type) {
+		try {
+			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/auth/withdraw/products?";
+			Map<String, String> map = WlttUtils.init(wltt);
+			map.put("application", "zhwnl");
+			map.put("type", type);
+			map.put("lon", wltt.getLon());
+			map.put("lat", wltt.getLat());
+			String sign = WlttUtils.sign(map);
+			map.put("app_sign", sign);
+			String params = WlttUtils.getStr(map);
+			url = url + params;
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 1000) {
+				JSONArray result = object.getJSONArray("data");
+				logger.info("wltt-{}:查询{}提现列表成功.content={}", wltt.getUsername(), type, content);
+				return result;
+			}
+			logger.error("wltt-{}:查询{}提现列表失败,msg={}", wltt.getUsername(), type, content);
+		} catch (Exception e) {
+			logger.error("wltt-{}:查询{}提现列表异常,msg={}", wltt.getUsername(), type, e.getMessage());
+		}
+		return new JSONArray();
+	}
+
+	public boolean cointx(int productId) {
+		try {
+			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/auth/withdraw/order?";
+			Map<String, String> map = WlttUtils.init(wltt);
+			map.put("lon", wltt.getLon());
+			map.put("lat", wltt.getLat());
+			String sign = WlttUtils.sign(map);
+			map.put("app_sign", sign);
+			String params = WlttUtils.getStr(map);
+			url = url + params;
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
+			heads.put("Content-Type", "application/json; charset=utf-8");
+			String postData = "{\"product_id\":" + productId + "}";
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 1000) {
+				logger.info("wltt-{}:微信提现成功.content={}", wltt.getUsername(), content);
+				return true;
+			}
+			logger.error("wltt-{}:微信提现失败,msg={}", wltt.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("wltt-{}:微信提现异常,msg={}", wltt.getUsername(), e.getMessage());
+		}
+		return false;
 	}
 }

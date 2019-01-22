@@ -24,7 +24,7 @@ public class TaottReadJob {
 	@Resource
 	private TaottCoinRecordWyService taottCoinRecordWyService;
 
-	@Scheduled(cron = "0 0/11 11-23 * * ?")
+	@Scheduled(cron = "0 14,25,36,47,58 6-8,11-23 * * ?")
 	public void readDfttNews() {
 		List<TaoToutiaoUser> users = taoToutiaoUserWyService.getUsedUser();
 		for (TaoToutiaoUser user : users) {
@@ -40,9 +40,9 @@ public class TaottReadJob {
 	}
 
 	/**
-	 * 每小时打一次卡
+	 * 每半小时打一次卡
 	 */
-	@Scheduled(cron = "0 3 * * * ?")
+	@Scheduled(cron = "0 0/30 6-23 * * ?")
 	public void daka() {
 		List<TaoToutiaoUser> users = taoToutiaoUserWyService.getUsedUser();
 		for (TaoToutiaoUser user : users) {
@@ -58,8 +58,7 @@ public class TaottReadJob {
 	public void checkTask() {
 		List<TaoToutiaoUser> users = taoToutiaoUserWyService.getUsedUser();
 		for (TaoToutiaoUser user : users) {
-			if (!user.getFirstDay())
-				taoToutiaoUserWyService.checkTask(user);
+			taoToutiaoUserWyService.checkTask(user);
 		}
 	}
 
@@ -69,5 +68,14 @@ public class TaottReadJob {
 	@Scheduled(cron = "0 0 12,18 * * ?")
 	public void queryMyCoin() {
 		taottCoinRecordWyService.updateAllCoin();
+	}
+
+	@Scheduled(cron = "0 5 8 * * ?")
+	public void cointx() {
+		List<TaoToutiaoUser> users = taoToutiaoUserWyService.getUsedUser();
+		for (TaoToutiaoUser user : users) {
+			if (user.getAutoTx())
+				taoToutiaoUserWyService.cointx(user);
+		}
 	}
 }

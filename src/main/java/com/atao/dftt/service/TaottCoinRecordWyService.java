@@ -63,7 +63,7 @@ public class TaottCoinRecordWyService extends BaseService<TaottCoinRecord> {
 				String ticket = loginInfo.getJSONObject("result").getString("ticket");
 				user.setTicket(ticket);
 				taoToutiaoUserWyService.updateBySelect(user);
-				http.user = user;
+				http = http.refreshUser(user);
 			}
 		}
 		if (object != null) {
@@ -81,6 +81,8 @@ public class TaottCoinRecordWyService extends BaseService<TaottCoinRecord> {
 		TaottCoinRecord t = new TaottCoinRecord();
 		t.setRows(3);
 		t.setUsername(username);
+		String coinDay = DateUtils.formatDate(new Date(), "yyyyMMdd");
+		t.setCoinDay(coinDay);
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("sorts", "updateTime=1");
 		return super.queryPage(t, params);

@@ -1,13 +1,11 @@
 package com.atao.dftt.http;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,17 +13,19 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.atao.base.util.StringUtils;
 import com.atao.dftt.model.TaoToutiaoUser;
+import com.atao.dftt.util.CommonUtils;
 import com.atao.dftt.util.MobileHttpUrlConnectUtils;
 import com.atao.dftt.util.TaottUtils;
-import com.atao.dftt.util.WlttUtils;
 
 public class TaottHttp {
 	private static Logger logger = LoggerFactory.getLogger(TaottHttp.class);
 	private static Map<String, TaottHttp> userMap = new HashMap<String, TaottHttp>();
 	public TaoToutiaoUser user;
-	public Long pubTime;
+	public Long pubTime = 0l;
+	public Integer times = 0;
 	public JSONArray eventList = new JSONArray();
 	public static Random random = new Random();
+	public String rwUrl = null;
 
 	public TaottHttp(TaoToutiaoUser user) {
 		this.user = user;
@@ -37,6 +37,12 @@ public class TaottHttp {
 			http = new TaottHttp(user);
 			userMap.put(user.getUsername(), http);
 		}
+		return http;
+	}
+
+	public TaottHttp refreshUser(TaoToutiaoUser user) {
+		TaottHttp http = new TaottHttp(user);
+		userMap.put(user.getUsername(), http);
 		return http;
 	}
 
@@ -64,7 +70,7 @@ public class TaottHttp {
 		}
 		return null;
 	}
-	
+
 	public JSONObject queryMyCoin() {
 		try {
 			String url = "https://xwz.coohua.com/credit/page";
@@ -76,14 +82,12 @@ public class TaottHttp {
 			String content = MobileHttpUrlConnectUtils.httpPost(url, null, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
 			return object;
-			/*if (object.getIntValue("code") == 0) {
-				JSONObject result = object.getJSONObject("result");
-				logger.info("taott-{}:查询今日获取的金币信息成功.");
-				return result;
-			}else {
-				return 
-			}*/
-			//logger.error("taott-{}:查询今日获取的金币信息失败,msg={}", user.getUsername(), content);
+			/*
+			 * if (object.getIntValue("code") == 0) { JSONObject result =
+			 * object.getJSONObject("result"); logger.info("taott-{}:查询今日获取的金币信息成功.");
+			 * return result; }else { return }
+			 */
+			// logger.error("taott-{}:查询今日获取的金币信息失败,msg={}", user.getUsername(), content);
 		} catch (Exception e) {
 			logger.error("taott-{}:查询今日获取的金币信息异常,msg={}", user.getUsername(), e.getMessage());
 		}
@@ -103,9 +107,9 @@ public class TaottHttp {
 				logger.info("taott-{}:签到成功", user.getUsername());
 				return true;
 			}
-			logger.error("taott:{}:签到失败,msg={}", user.getUsername(), content);
+			logger.error("taott-{}:签到失败,msg={}", user.getUsername(), content);
 		} catch (Exception e) {
-			logger.error("taott:{}:签到异常,msg={}", user.getUsername(), e.getMessage());
+			logger.error("taott-{}:签到异常,msg={}", user.getUsername(), e.getMessage());
 		}
 		return false;
 	}
@@ -119,15 +123,15 @@ public class TaottHttp {
 			heads.put("Content-Type", "application/x-www-form-urlencoded");
 			heads.put("base-key", TaottUtils.baseKey(user));
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-			logger.info("taott-{}:打卡结果,result={}", user.getUsername(), content);
+			// logger.info("taott-{}:打卡结果,result={}", user.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getIntValue("code") == 0) {
 				logger.info("taott-{}:打卡成功", user.getUsername());
 				return true;
 			}
-			logger.error("taott:{}:打卡失败,msg={}", content);
+			logger.error("taott:{}-打卡失败,msg={}", content);
 		} catch (Exception e) {
-			logger.error("taott:{}:打卡异常,msg={}", user.getUsername(), e.getMessage());
+			logger.error("taott:{}-打卡异常,msg={}", user.getUsername(), e.getMessage());
 		}
 		return false;
 	}
@@ -266,7 +270,7 @@ public class TaottHttp {
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getIntValue("code") == 0) {
-				TaottUtils.rwUrl = object.getJSONObject("result").getString("hotArticleDomainNameH5");
+				rwUrl = object.getJSONObject("result").getString("hotArticleDomainNameH5");
 				return true;
 			}
 			logger.error("taott-{}:获取基础配置失败,msg={}", user.getUsername(), content);
@@ -285,14 +289,13 @@ public class TaottHttp {
 			map.put("androidId", user.getAndroidId());
 			map.put("imei", user.getImei());
 			map.put("userId", user.getUserId());
-			if (pubTime == null)
-				pubTime = System.currentTimeMillis();
+			map.put("times", times + "");
 			map.put("pubTime", pubTime + "");
-			map.put("typeId", "26");
-			map.put("channel", "shouji-guanwang");
+			//map.put("typeId", "26");
+			map.put("channel", CommonUtils.encode("shouji-guanwang"));
 			map.put("os", "Android");
 			map.put("direction", "1");
-			map.put("model", user.getModel());
+			map.put("model", CommonUtils.encode(user.getModel()));
 			String postData = TaottUtils.getStr(map);
 			Map<String, String> heads = new HashMap<String, String>();
 			heads.put("Accept-Encoding", "gzip");
@@ -303,6 +306,7 @@ public class TaottHttp {
 			if (object.getIntValue("code") == 0) {
 				JSONArray list = object.getJSONArray("result");
 				pubTime = list.getJSONObject(list.size() - 1).getLong("pubTime");
+				times++;
 				return list;
 			}
 			logger.error("taott-{}:获取新闻列表失败,msg={}", user.getUsername(), content);
@@ -339,37 +343,47 @@ public class TaottHttp {
 
 	// 新闻详细页面发送日志
 	public boolean newsDetailSendLog(String newsId) {
+		/*
+		 * try { if (StringUtils.isBlank(TaottUtils.rwUrl)) { boolean common =
+		 * commonV3(); if (!common) return false; } String url = TaottUtils.rwUrl +
+		 * "?id=" + newsId + "&userId=" + user.getUserId() +
+		 * "&environment=production&baseKey=" + TaottUtils.baseKey(user) + "&cuid=" +
+		 * user.getUserId() + "&typeId=26&origin=feed&source=4&textSize=1&version=" +
+		 * TaottUtils.app_version + "&recommend=1"; String cookie =
+		 * "sensorsdata2015jssdkcross={\"distinct_id\":\"" + user.getDistinctId() +
+		 * "\",\"$device_id\":\"" + user.getDistinctId() +
+		 * "\",\"props\":{\"$latest_referrer\":\"\",\"$latest_referrer_host\":\"\"}}";
+		 * Map<String, String> heads = new HashMap<String, String>();
+		 * heads.put("User-Agent", user.getUserAgent()); heads.put("X-Requested-With",
+		 * "com.coohua.xinwenzhuan"); heads.put("Upgrade-Insecure-Requests", "1");
+		 * heads.put("Cookie", cookie); String content =
+		 * MobileHttpUrlConnectUtils.httpGet(url, heads, null); Document doc =
+		 * Jsoup.parse(content); Elements adBoxs =
+		 * doc.body().getElementsByClass("adBox"); boolean success = true; for (int i =
+		 * 0; i < adBoxs.size(); i++) { Element adBox = adBoxs.get(i); String v =
+		 * adBox.toString(); v = v.replace("\r\n", "").replace("\r", ""); String adId =
+		 * v.substring(v.indexOf("sogou_ad_id=") + 12, v.indexOf(";",
+		 * v.indexOf("sogou_ad_id="))); JSONObject adObject =
+		 * TaottUtils.getJsObject(user, adId, i); String x =
+		 * TaottUtils.jsEncode(adObject.toJSONString()); success = newsDetailLog(x,
+		 * url); if (!success) return false; Thread.sleep(new Random().nextInt(300)); }
+		 * } catch (Exception e) { logger.error("taott-{}:获取新闻详细页面广告id异常,msg={}",
+		 * user.getUsername(), e.getMessage()); return false; }
+		 */
 		try {
-			if (StringUtils.isBlank(TaottUtils.rwUrl)) {
+			if (StringUtils.isBlank(rwUrl)) {
 				boolean common = commonV3();
 				if (!common)
 					return false;
 			}
-			String url = TaottUtils.rwUrl + "?id=" + newsId + "&userId=" + user.getUserId()
-					+ "&environment=production&baseKey=" + TaottUtils.baseKey(user) + "&cuid=" + user.getUserId()
+			String url = rwUrl + "?id=" + newsId + "&userId=" + user.getUserId() + "&environment=production&baseKey="
+					+ TaottUtils.baseKey(user) + "&cuid=" + user.getUserId()
 					+ "&typeId=26&origin=feed&source=4&textSize=1&version=" + TaottUtils.app_version + "&recommend=1";
-			String cookie = "sensorsdata2015jssdkcross={\"distinct_id\":\"" + user.getDistinctId()
-					+ "\",\"$device_id\":\"" + user.getDistinctId()
-					+ "\",\"props\":{\"$latest_referrer\":\"\",\"$latest_referrer_host\":\"\"}}";
-			Map<String, String> heads = new HashMap<String, String>();
-			heads.put("Accept",
-					"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-			heads.put("User-Agent", user.getUserAgent());
-			heads.put("X-Requested-With", "com.coohua.xinwenzhuan");
-			heads.put("Upgrade-Insecure-Requests", "1");
-			heads.put("Cookie", cookie);
-			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-			Document doc = Jsoup.parse(content);
-			Elements adBoxs = doc.body().getElementsByClass("adBox");
-			boolean success = true;
+			List<String> adBoxs = getAdBoxs();
 			for (int i = 0; i < adBoxs.size(); i++) {
-				Element adBox = adBoxs.get(i);
-				String v = adBox.toString();
-				v = v.replace("\r\n", "").replace("\r", "");
-				String adId = v.substring(v.indexOf("sogou_ad_id=") + 12, v.indexOf(";", v.indexOf("sogou_ad_id=")));
-				JSONObject adObject = TaottUtils.getJsObject(user, adId, i);
+				JSONObject adObject = TaottUtils.getJsObject(user, adBoxs.get(i), i, url);
 				String x = TaottUtils.jsEncode(adObject.toJSONString());
-				success = newsDetailLog(x, url);
+				boolean success = newsDetailLog(x, "");
 				if (!success)
 					return false;
 				Thread.sleep(new Random().nextInt(300));
@@ -462,13 +476,188 @@ public class TaottHttp {
 		return false;
 	}
 
+	public JSONArray cointxList(String type) {
+		try {
+			int categoryId = 73;
+			if ("wxpay".equals(type))// wx
+				categoryId = 73;
+			else if ("alipay".equals(type)) {// ali
+				categoryId = 74;
+			}
+			String url = "https://newsearnmall.coohua.com/mall/api/category/product/list?categoryId=" + categoryId
+					+ "&userId=" + user.getUserId() + "&ticket=" + user.getTicket();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
+			heads.put("Accept-Encoding", "gzip, deflate");
+			heads.put("Accept-Language", "zh-CN,en-US;q=0.8");
+			heads.put("X-Requested-With", "XMLHttpRequest");
+			heads.put("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Referer",
+					"https://newsearnmall.coohua.com/mall/static/index.html?userId=" + user.getUserId() + "&ticket="
+							+ user.getTicket() + "&baseKey=" + TaottUtils.baseKey(user) + "&version="
+							+ TaottUtils.app_version);
+			String cookie = "sensorsdata2015jssdkcross={\"distinct_id\":\"" + user.getDistinctId()
+					+ "\",\"$device_id\":\"" + user.getDistinctId()
+					+ "\",\"props\":{\"$latest_referrer\":\"\",\"$latest_referrer_host\":\"\"}}";
+			heads.put("Cookie", cookie);
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 200) {
+				return object.getJSONArray("dataList");
+			}
+			logger.info("taott-{}:查询可提现金币列表失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("taott-{}:查询可提现金币列表异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	public JSONObject cointxDetail(int productId) {
+		try {
+			String url = "https://newsearnmall.coohua.com/mall/api/product/simpleDetail";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
+			heads.put("Accept-Encoding", "gzip, deflate");
+			heads.put("Accept-Language", "zh-CN,en-US;q=0.8");
+			heads.put("X-Requested-With", "XMLHttpRequest");
+			heads.put("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Referer",
+					"https://newsearnmall.coohua.com/mall/static/index.html?userId=" + user.getUserId() + "&ticket="
+							+ user.getTicket() + "&baseKey=" + TaottUtils.baseKey(user) + "&version="
+							+ TaottUtils.app_version);
+			heads.put("Origin", "https://newsearnmall.coohua.com");
+			String cookie = "sensorsdata2015jssdkcross={\"distinct_id\":\"" + user.getDistinctId()
+					+ "\",\"$device_id\":\"" + user.getDistinctId()
+					+ "\",\"props\":{\"$latest_referrer\":\"\",\"$latest_referrer_host\":\"\"}}";
+			heads.put("Cookie", cookie);
+			String postData = "userId=" + user.getUserId() + "&ticket=" + user.getTicket() + "&id=" + productId;
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 200) {
+				return object.getJSONObject("data");
+			}
+			logger.info("taott-{}:查询可提现金币详细失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("taott-{}:查询可提现金币详细异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	public boolean cointx(int productId) {
+		try {
+			String url = "https://newsearnmall.coohua.com/mall/api/order/create";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
+			heads.put("Accept-Encoding", "gzip, deflate");
+			heads.put("Accept-Language", "zh-CN,en-US;q=0.8");
+			heads.put("X-Requested-With", "XMLHttpRequest");
+			heads.put("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Referer",
+					"https://newsearnmall.coohua.com/mall/static/index.html?userId=" + user.getUserId() + "&ticket="
+							+ user.getTicket() + "&baseKey=" + TaottUtils.baseKey(user) + "&version="
+							+ TaottUtils.app_version);
+			heads.put("Origin", "https://newsearnmall.coohua.com");
+			String cookie = "sensorsdata2015jssdkcross={\"distinct_id\":\"" + user.getDistinctId()
+					+ "\",\"$device_id\":\"" + user.getDistinctId()
+					+ "\",\"props\":{\"$latest_referrer\":\"\",\"$latest_referrer_host\":\"\"}}";
+			heads.put("Cookie", cookie);
+			String postData = "userId=" + user.getUserId() + "&ticket=" + user.getTicket() + "&productId=" + productId
+					+ "&verifyCode=hasWxWithdrawBefore";
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("code") == 200) {
+				logger.info("taott-{}:微信提现金币成功.content={}", user.getUsername(), content);
+				return true;
+			}
+			logger.error("taott-{}:微信提现金币失败,msg={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("taott-{}:微信提现金币异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return false;
+	}
+
+	public boolean cointxAli(int productId) {
+		try {
+			String url = "https://newsearnmall.coohua.com/mall/api/order/create";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
+			heads.put("Accept-Encoding", "gzip, deflate");
+			heads.put("Accept-Language", "zh-CN,en-US;q=0.8");
+			heads.put("X-Requested-With", "XMLHttpRequest");
+			heads.put("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Referer",
+					"https://newsearnmall.coohua.com/mall/static/index.html?userId=" + user.getUserId() + "&ticket="
+							+ user.getTicket() + "&baseKey=" + TaottUtils.baseKey(user) + "&version="
+							+ TaottUtils.app_version);
+			heads.put("Origin", "https://newsearnmall.coohua.com");
+			String cookie = "sensorsdata2015jssdkcross={\"distinct_id\":\"" + user.getDistinctId()
+					+ "\",\"$device_id\":\"" + user.getDistinctId()
+					+ "\",\"props\":{\"$latest_referrer\":\"\",\"$latest_referrer_host\":\"\"}}";
+			heads.put("Cookie", cookie);
+			String postData = "userId=" + user.getUserId() + "&ticket=" + user.getTicket() + "&productId=" + productId
+					+ "&realName=" + CommonUtils.encode(user.getTxName()) + "&rechargeAccount=" + user.getTxUser()
+					+ "&idCard=";
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("code") == 200) {
+				logger.info("taott-{}:支付宝提现金币成功.content={}", user.getUsername(), content);
+				return true;
+			}
+			logger.error("taott-{}:支付宝提现金币失败,msg={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("taott-{}:支付宝提现金币异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return false;
+	}
+
+	public JSONObject adJs() {
+		try {
+			String url = "https://www.coohua.com/share/xwz_article/js/advData.js?v=1.0.1";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
+
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			content = content.replace("\r\n", "").replace("\r", "").replace("\t", "");
+			int end = content.indexOf("var nowUrlAdvData");
+			int start = content.indexOf("var advJson = ") + 14;
+			content = content.substring(start, end);
+			JSONObject object = JSONObject.parseObject(content);
+			return object;
+		} catch (Exception e) {
+			logger.error("taott-{}:查询广告id异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	public List<String> getAdBoxs() {
+		if (StringUtils.isBlank(rwUrl)) {
+			commonV3();
+		}
+		List<String> adIds = new ArrayList<String>();
+		JSONObject adJs = adJs();
+		String adPrefix = rwUrl.substring(rwUrl.indexOf("article_") + 8, rwUrl.indexOf(".html"));
+		JSONObject ad = adJs.getJSONObject(adPrefix);
+		adIds.add(ad.getJSONObject("sixPic").getString("advid"));
+		JSONArray threePics = ad.getJSONArray("threePic");
+		int len = threePics.size() > 10 ? 10 : threePics.size();
+		for (int i = 0; i < len; i++) {
+			JSONObject threePic = threePics.getJSONObject(i);
+			adIds.add(threePic.getString("advid"));
+		}
+		return adIds;
+	}
+
 	public static void main(String[] args) {
-		TaoToutiaoUser user = new TaoToutiaoUser();
-		user.setUsername("17755117870");
-		user.setUserId("39781740");
-		user.setTicket("f69f33bdfe08a3728a83baf7bd995968");
-		TaottHttp http = TaottHttp.getInstance(user);
-		http.finishTask("29");
+		/*
+		 * TaoToutiaoUser user = new TaoToutiaoUser(); user.setUsername("17755117870");
+		 * user.setUserId("39781740");
+		 * user.setTicket("f69f33bdfe08a3728a83baf7bd995968"); TaottHttp http =
+		 * TaottHttp.getInstance(user); http.finishTask("29");
+		 */
 	}
 
 }

@@ -159,6 +159,26 @@ public class WlttVo extends BaseVo {
      * 
      */
     private Date qdTime;
+    /**
+     * 
+     */
+    private Boolean autoTx;
+    /**
+     * 
+     */
+    private String txType;
+    /**
+     * 
+     */
+    private String txUser;
+    /**
+     * 
+     */
+    private String txName;
+    /**
+     * 
+     */
+    private String txIdcard;
 
     public Integer getId() {
         return id;
@@ -419,6 +439,41 @@ public class WlttVo extends BaseVo {
     public void setQdTime(Date qdTime) {
         this.qdTime = qdTime;
     }
+    public Boolean getAutoTx() {
+        return autoTx;
+    }
+
+    public void setAutoTx(Boolean autoTx) {
+        this.autoTx = autoTx;
+    }
+    public String getTxType() {
+        return txType;
+    }
+
+    public void setTxType(String txType) {
+        this.txType = txType;
+    }
+    public String getTxUser() {
+        return txUser;
+    }
+
+    public void setTxUser(String txUser) {
+        this.txUser = txUser;
+    }
+    public String getTxName() {
+        return txName;
+    }
+
+    public void setTxName(String txName) {
+        this.txName = txName;
+    }
+    public String getTxIdcard() {
+        return txIdcard;
+    }
+
+    public void setTxIdcard(String txIdcard) {
+        this.txIdcard = txIdcard;
+    }
 
     public static class TF {
         public static String id = "id";  // 
@@ -458,6 +513,11 @@ public class WlttVo extends BaseVo {
         public static String used = "used";  // 
         public static String createTime = "createTime";  // 
         public static String qdTime = "qdTime";  // 
+        public static String autoTx = "autoTx";  // 
+        public static String txType = "txType";  // 
+        public static String txUser = "txUser";  // 
+        public static String txName = "txName";  // 
+        public static String txIdcard = "txIdcard";  // 
 
     }
 

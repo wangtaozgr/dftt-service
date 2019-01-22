@@ -1,11 +1,9 @@
 package com.atao.dftt.model;
 
-import java.util.Date;
-
+import com.atao.base.model.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Id;
-
-import com.atao.base.model.BaseEntity;
+import java.util.Date;
 
 /**
  * 
@@ -201,6 +199,31 @@ public class Wltt extends BaseEntity {
      */
     @Column(name = "qd_time")
     private Date qdTime;
+    /**
+     * 
+     */
+    @Column(name = "auto_tx")
+    private Boolean autoTx;
+    /**
+     * 
+     */
+    @Column(name = "tx_type")
+    private String txType;
+    /**
+     * 
+     */
+    @Column(name = "tx_user")
+    private String txUser;
+    /**
+     * 
+     */
+    @Column(name = "tx_name")
+    private String txName;
+    /**
+     * 
+     */
+    @Column(name = "tx_idcard")
+    private String txIdcard;
 
     public Integer getId() {
         return id;
@@ -461,6 +484,41 @@ public class Wltt extends BaseEntity {
     public void setQdTime(Date qdTime) {
         this.qdTime = qdTime;
     }
+    public Boolean getAutoTx() {
+        return autoTx;
+    }
+
+    public void setAutoTx(Boolean autoTx) {
+        this.autoTx = autoTx;
+    }
+    public String getTxType() {
+        return txType;
+    }
+
+    public void setTxType(String txType) {
+        this.txType = txType;
+    }
+    public String getTxUser() {
+        return txUser;
+    }
+
+    public void setTxUser(String txUser) {
+        this.txUser = txUser;
+    }
+    public String getTxName() {
+        return txName;
+    }
+
+    public void setTxName(String txName) {
+        this.txName = txName;
+    }
+    public String getTxIdcard() {
+        return txIdcard;
+    }
+
+    public void setTxIdcard(String txIdcard) {
+        this.txIdcard = txIdcard;
+    }
 
     public static class TF {
 
@@ -505,7 +563,11 @@ public class Wltt extends BaseEntity {
         public static String used = "used";  // 
         public static String createTime = "create_time";  // 
         public static String qdTime = "qd_time";  // 
+        public static String autoTx = "auto_tx";  // 
+        public static String txType = "tx_type";  // 
+        public static String txUser = "tx_user";  // 
+        public static String txName = "tx_name";  // 
+        public static String txIdcard = "tx_idcard";  // 
 
     }
-
 }

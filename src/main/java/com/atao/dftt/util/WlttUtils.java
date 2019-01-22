@@ -35,7 +35,7 @@ public class WlttUtils {
 	public static String verCode = "793";
 	public static String verName = "1.2.5";
 
-	public static Map<String, String> init(Wltt wltt) {
+	public static Map<String, String> init(Wltt wltt) {// 13个初始化参数
 		Map<String, String> map = new HashMap<String, String>();
 		if (map != null) {
 			if (!map.containsKey("app_key")) {
@@ -85,7 +85,7 @@ public class WlttUtils {
 			if (!map.containsKey("up")) {
 				map.put("up", wltt.getUp());
 			}
-			
+
 			if (!map.containsKey("device")) {
 				map.put("device", wltt.getDevice());
 			}
@@ -281,15 +281,35 @@ public class WlttUtils {
 	}
 
 	public static void main(String[] args) throws Exception {
-		/*
-		 * Map<String, String> map = new HashMap<String, String>();
-		 * //37b93b06565282587ed4f3bc18a0a2e7 map.put("open_uid",
-		 * "66917d4a42d1f4c19ec62fecf6f97264"); map.put("timestamp", "1544063951562");
-		 * map.put("device_id", "0cf86601149fe34e9bfe5c3c759e5735"); map.put("app_key",
-		 * "91988061"); map.put("ver_name", "v1.2.5"); //String app_sign =
-		 * WlttUtils.qiandaoEncode(t); //System.out.println(app_sign); String t =
-		 * "1544063951805"; t = qiandaoEncode(t); System.out.println(t);
-		 */
+
+		Map<String, String> map = new HashMap<String, String>();
+		//device=MI5X99001065551084&city_key=101220101&lon=117.27743&app_ts=1545699941850&devid=d62dcb6f4445d853a54e0b87910543cf
+		//&ver_code=793&app_sign=4f9d9de73c0119e9d225ab28e5af8ac3&auth_token=&app_key=91988061&device_id=0cf86601149fe34e9bfe5c3c759e5735&
+		//ver_name=1.2.5&uid=2070633781476&os_version=71&lat=31.890524&channel=xiaomi&up=ANDROID
+		//4f9d9de73c0119e9d225ab28e5af8ac3
+		
+		map.put("device", "MI5X99001065551084");
+		map.put("city_key", "101220101");
+		map.put("lon", "117.27743");
+		map.put("app_ts", "1545699941850");
+		map.put("devid", "d62dcb6f4445d853a54e0b87910543cf");
+		map.put("ver_code", "793");
+		map.put("auth_token", "eyJhY2N0ayI6IjAuNTc2OTc4MTQ3MTY3NjI3OTo3OHBpMGtqZmkuMTU0NTY5OTkyNDU2Ny5FVE9VQ0giLCJ1cCI6IkFORFJPSUQiLCJkZXZpY2UiOiJNSTVYOTkwMDEwNjU1NTEwODQifQ==");
+
+		//map.put("auth_token", "eyJhY2N0ayI6IjAuNTc2OTc4MTQ3MTY3NjI3OTo3OHBpMGtqZmkuMTU0NTY5OTkyNDU2Ny5FVE9VQ0giLCJ1cCI6IkFORFJPSUQiLCJkZXZpY2UiOiJNSTVYOTkwMDEwNjU1NTEwODQifQ%3D%3D");
+		map.put("device_id", "0cf86601149fe34e9bfe5c3c759e5735");
+		map.put("app_key", "91988061");
+		map.put("ver_name", "1.2.5");
+		map.put("uid", "2070633781476");
+		map.put("os_version", "71");
+		map.put("lat", "31.890524");
+		map.put("channel", "xiaomi");
+		map.put("up", "ANDROID");
+		//4f9d9de73c0119e9d225ab28e5af8ac3
+		//map.put("product_id", "7");
+
+		String app_sign = WlttUtils.sign(map);
+		System.out.println(app_sign);
 
 		// 7abe8fc69e6f07ad44c5e1e912bbbaae
 

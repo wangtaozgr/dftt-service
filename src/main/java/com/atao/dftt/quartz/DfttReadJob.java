@@ -18,23 +18,18 @@ public class DfttReadJob {
 	@Resource
 	private DfToutiaoUserWyService dfToutiaoUserWyService;
 
-	@Scheduled(cron = "0 0/15 11-23 * * ?")
+	@Scheduled(cron = "0 13,24,35,46,57 6-8,11-23 * * ?")
 	public void readDfttNews() {
 		List<DfToutiaoUser> users = dfToutiaoUserWyService.getUsedUser();
 		for (DfToutiaoUser user : users) {
 			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
 			DfttReadCoinThread thread = new DfttReadCoinThread(endTime, user, dfToutiaoUserWyService);
 			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
 	
-	@Scheduled(cron = "0 0/16 11-23 * * ?")
+	@Scheduled(cron = "0 0/16 8,11-23 * * ?")
 	public void readDfttVideo() {
 		List<DfToutiaoUser> users = dfToutiaoUserWyService.getUsedUser();
 		for (DfToutiaoUser user : users) {

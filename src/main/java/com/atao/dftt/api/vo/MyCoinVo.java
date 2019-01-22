@@ -8,8 +8,14 @@ public class MyCoinVo {
 	public static String wlttName = "微鲤头条";
 	public static Integer taott = 2;
 	public static String taottName = "淘头条";
-
-	
+	public static Integer jkdtt = 3;
+	public static String jkdttName = "聚看点";
+	public static Integer mayitt = 4;
+	public static String mayittName = "蚂蚁头条";
+	public static Integer hstt = 5;
+	public static String hsttName = "花生头条";
+	public static Integer zqtt = 6;
+	public static String zqttName = "中青看点";
 
 	private int type;
 	private String typeName;

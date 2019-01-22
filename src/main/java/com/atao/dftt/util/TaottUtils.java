@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,12 +43,15 @@ public class TaottUtils {
 			'C', 'D', 'E', 'F' };
 	public static String lib_version = "1.8.18";
 	public static String js_lib_version = "1.7.14";
-	public static String app_version = "3.2.8.5";
+	public static String app_version = "3.3.2.2";
 	// public static String rwUrl =
 	// "https://a.dazhongapp.com/share/xwz_article/new_article/article_newby5_dazhongapp_long.html";
-	public static String rwUrl = null;
-
 	public static void main(String[] args) throws IOException {
+		/*String p = "3.3.2.2" + "^" + "39781740" + "^" + "673bd95fa7727c8d0a87ff4cb0165932";
+		byte[] b = AndroidBase64.decode("7WcNcg2P2YAruAO5Y1WoRw==".getBytes(), 8);
+		String s = new String(AndroidBase64.encode(baseKey02(p.getBytes(), b), 10));
+		System.out.println(s);*/
+		System.out.println(new Date(1545296962000l));
 		/*
 		 * System.out.println(new Date(1543482022195l)); System.out.println(new
 		 * Date(1543482022219l)); System.out.println(new Date(1543482022276l));
@@ -80,9 +84,9 @@ public class TaottUtils {
 		// System.out.println(s);
 		// (String(Math.random()) + String(Math.random()) +
 		// String(Math.random())).replace(/\./g, "").slice(0, 15);
-		System.out.println(i1i1iI1I11iI("LyEQVGI="));
-		System.out.println(getErrorMsg());
-		System.out.println(c("eyJvcyI6IkFuZHJvaWQiLCJ2ZXJzaW9uIjoiMy4xLjgiLCJwYWNrYWdlcyI6ImNvbS5jb29odWEueGlud2Vuemh1YW4qJjMuMi44LjUiLCJlcnJvcl9pbml0Ijp7ImVycm9yX2NvZGUiOiJbXSIsImVycm9yX21zZyI6IltdNjNiZGZlNDRhODY5NGE0NTRjYTZhMjhlMDk0OWQxOWUiLCJkZXZpY2UiOiJ4aWFvbWleXk1JIDVYXl4yNV5eZTg5YjE1OGU0YmNmOTg4ZWJkMDllYjgzZjUzNzhlODdeXlthcm02NC12OGEsIGFybWVhYmktdjdhLCBhcm1lYWJpXV5eYXJtZWFiaSJ9fQ==%$%_17755117870_ch"));
+		//System.out.println(i1i1iI1I11iI("LyEQVGI="));
+		//System.out.println(getErrorMsg());
+		//System.out.println(c("eyJvcyI6IkFuZHJvaWQiLCJ2ZXJzaW9uIjoiMy4xLjgiLCJwYWNrYWdlcyI6ImNvbS5jb29odWEueGlud2Vuemh1YW4qJjMuMi44LjUiLCJlcnJvcl9pbml0Ijp7ImVycm9yX2NvZGUiOiJbXSIsImVycm9yX21zZyI6IltdNjNiZGZlNDRhODY5NGE0NTRjYTZhMjhlMDk0OWQxOWUiLCJkZXZpY2UiOiJ4aWFvbWleXk1JIDVYXl4yNV5eZTg5YjE1OGU0YmNmOTg4ZWJkMDllYjgzZjUzNzhlODdeXlthcm02NC12OGEsIGFybWVhYmktdjdhLCBhcm1lYWJpXV5eYXJtZWFiaSJ9fQ==%$%_17755117870_ch"));
 	}
 
 	public static String getStr(Map<String, String> map) {
@@ -461,7 +465,7 @@ public class TaottUtils {
 	 * @param position
 	 * @return
 	 */
-	public static JSONObject getJsObject(TaoToutiaoUser user, String adId, int position) {
+	public static JSONObject getJsObject(TaoToutiaoUser user, String adId, int position, String rwUrl) {
 		JSONObject object = new JSONObject(true);
 		object.put("distinct_id", user.getDistinctId());
 		JSONObject lib = new JSONObject(true);

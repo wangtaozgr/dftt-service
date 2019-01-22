@@ -123,6 +123,26 @@ public class TaoToutiaoUserVo extends BaseVo {
      * 
      */
     private Boolean used;
+    /**
+     * 
+     */
+    private Boolean autoTx;
+    /**
+     * 
+     */
+    private String txType;
+    /**
+     * 
+     */
+    private String txUser;
+    /**
+     * 
+     */
+    private String txName;
+    /**
+     * 
+     */
+    private String txIdcard;
 
     public Integer getId() {
         return id;
@@ -320,6 +340,41 @@ public class TaoToutiaoUserVo extends BaseVo {
     public void setUsed(Boolean used) {
         this.used = used;
     }
+    public Boolean getAutoTx() {
+        return autoTx;
+    }
+
+    public void setAutoTx(Boolean autoTx) {
+        this.autoTx = autoTx;
+    }
+    public String getTxType() {
+        return txType;
+    }
+
+    public void setTxType(String txType) {
+        this.txType = txType;
+    }
+    public String getTxUser() {
+        return txUser;
+    }
+
+    public void setTxUser(String txUser) {
+        this.txUser = txUser;
+    }
+    public String getTxName() {
+        return txName;
+    }
+
+    public void setTxName(String txName) {
+        this.txName = txName;
+    }
+    public String getTxIdcard() {
+        return txIdcard;
+    }
+
+    public void setTxIdcard(String txIdcard) {
+        this.txIdcard = txIdcard;
+    }
 
     public static class TF {
         public static String id = "id";  // 
@@ -350,6 +405,11 @@ public class TaoToutiaoUserVo extends BaseVo {
         public static String qdTime = "qdTime";  // 最后签到时间
         public static String createTime = "createTime";  // 
         public static String used = "used";  // 
+        public static String autoTx = "autoTx";  // 
+        public static String txType = "txType";  // 
+        public static String txUser = "txUser";  // 
+        public static String txName = "txName";  // 
+        public static String txIdcard = "txIdcard";  // 
 
     }
 

@@ -1,14 +1,9 @@
 package com.atao.dftt.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.atao.base.model.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Id;
-import javax.persistence.Transient;
-
-import com.atao.base.model.BaseEntity;
+import java.util.Date;
 
 /**
  * 
@@ -17,406 +12,445 @@ import com.atao.base.model.BaseEntity;
  */
 public class TaoToutiaoUser extends BaseEntity {
 
-	/**
-	* 
-	*/
-	@Id
-	@Column(name = "id")
-	private Integer id;
+    /**
+    * 
+    */
+    @Id
+    @Column(name = "id")
+    private Integer id;
 
-	/**
-	 * 
-	 */
-	@Column(name = "username")
-	private String username;
-	/**
-	 * 
-	 */
-	@Column(name = "password")
-	private String password;
-	/**
-	 * 
-	 */
-	@Column(name = "user_id")
-	private String userId;
-	/**
-	 * 
-	 */
-	@Column(name = "ticket")
-	private String ticket;
-	/**
-	 * 
-	 */
-	@Column(name = "distinct_id")
-	private String distinctId;
-	/**
-	 * 
-	 */
-	@Column(name = "x")
-	private String x;
-	/**
-	 * 
-	 */
-	@Column(name = "imei")
-	private String imei;
-	/**
-	 * 
-	 */
-	@Column(name = "imsi")
-	private String imsi;
-	/**
-	 * 
-	 */
-	@Column(name = "sdk")
-	private String sdk;
-	/**
-	 * 
-	 */
-	@Column(name = "android_id")
-	private String androidId;
-	/**
-	 * 
-	 */
-	@Column(name = "model")
-	private String model;
-	/**
-	 * 
-	 */
-	@Column(name = "vendor")
-	private String vendor;
-	/**
-	 * 
-	 */
-	@Column(name = "os")
-	private String os;
-	/**
-	 * 
-	 */
-	@Column(name = "os_version")
-	private String osVersion;
-	/**
-	 * 
-	 */
-	@Column(name = "carrier")
-	private String carrier;
-	/**
-	 * 
-	 */
-	@Column(name = "device_id")
-	private String deviceId;
-	/**
-	 * 
-	 */
-	@Column(name = "user_agent")
-	private String userAgent;
-	/**
-	 * 
-	 */
-	@Column(name = "first_day")
-	private Boolean firstDay;
-	/**
-	 * 
-	 */
-	@Column(name = "read_num")
-	private Long readNum;
-	/**
-	 * 
-	 */
-	@Column(name = "read_time")
-	private Date readTime;
-	/**
-	 * 
-	 */
-	@Column(name = "limit_read_num")
-	private Long limitReadNum;
-	/**
-	 * 
-	 */
-	@Column(name = "v_read_num")
-	private Long vReadNum;
-	/**
-	 * 
-	 */
-	@Column(name = "v_read_time")
-	private Date vReadTime;
-	/**
-	 * 
-	 */
-	@Column(name = "v_limit_read_num")
-	private Long vLimitReadNum;
-	/**
-	 * 最后签到时间
-	 */
-	@Column(name = "qd_time")
-	private Date qdTime;
-	/**
-	 * 
-	 */
-	@Column(name = "create_time")
-	private Date createTime;
-	/**
-	 * 
-	 */
-	@Column(name = "used")
-	private Boolean used;
+    /**
+     * 
+     */
+    @Column(name = "username")
+    private String username;
+    /**
+     * 
+     */
+    @Column(name = "password")
+    private String password;
+    /**
+     * 
+     */
+    @Column(name = "user_id")
+    private String userId;
+    /**
+     * 
+     */
+    @Column(name = "ticket")
+    private String ticket;
+    /**
+     * 
+     */
+    @Column(name = "distinct_id")
+    private String distinctId;
+    /**
+     * 
+     */
+    @Column(name = "x")
+    private String x;
+    /**
+     * 
+     */
+    @Column(name = "imei")
+    private String imei;
+    /**
+     * 
+     */
+    @Column(name = "imsi")
+    private String imsi;
+    /**
+     * 
+     */
+    @Column(name = "sdk")
+    private String sdk;
+    /**
+     * 
+     */
+    @Column(name = "android_id")
+    private String androidId;
+    /**
+     * 
+     */
+    @Column(name = "model")
+    private String model;
+    /**
+     * 
+     */
+    @Column(name = "vendor")
+    private String vendor;
+    /**
+     * 
+     */
+    @Column(name = "os")
+    private String os;
+    /**
+     * 
+     */
+    @Column(name = "os_version")
+    private String osVersion;
+    /**
+     * 
+     */
+    @Column(name = "carrier")
+    private String carrier;
+    /**
+     * 
+     */
+    @Column(name = "device_id")
+    private String deviceId;
+    /**
+     * 
+     */
+    @Column(name = "user_agent")
+    private String userAgent;
+    /**
+     * 
+     */
+    @Column(name = "first_day")
+    private Boolean firstDay;
+    /**
+     * 
+     */
+    @Column(name = "read_num")
+    private Long readNum;
+    /**
+     * 
+     */
+    @Column(name = "read_time")
+    private Date readTime;
+    /**
+     * 
+     */
+    @Column(name = "limit_read_num")
+    private Long limitReadNum;
+    /**
+     * 
+     */
+    @Column(name = "v_read_num")
+    private Long vReadNum;
+    /**
+     * 
+     */
+    @Column(name = "v_read_time")
+    private Date vReadTime;
+    /**
+     * 
+     */
+    @Column(name = "v_limit_read_num")
+    private Long vLimitReadNum;
+    /**
+     * 最后签到时间
+     */
+    @Column(name = "qd_time")
+    private Date qdTime;
+    /**
+     * 
+     */
+    @Column(name = "create_time")
+    private Date createTime;
+    /**
+     * 
+     */
+    @Column(name = "used")
+    private Boolean used;
+    /**
+     * 
+     */
+    @Column(name = "auto_tx")
+    private Boolean autoTx;
+    /**
+     * 
+     */
+    @Column(name = "tx_type")
+    private String txType;
+    /**
+     * 
+     */
+    @Column(name = "tx_user")
+    private String txUser;
+    /**
+     * 
+     */
+    @Column(name = "tx_name")
+    private String txName;
+    /**
+     * 
+     */
+    @Column(name = "tx_idcard")
+    private String txIdcard;
 
-	public Integer getId() {
-		return id;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public String getUsername() {
+        return username;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public String getPassword() {
+        return password;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    public String getUserId() {
+        return userId;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    public String getTicket() {
+        return ticket;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setTicket(String ticket) {
+        this.ticket = ticket;
+    }
+    public String getDistinctId() {
+        return distinctId;
+    }
 
-	public String getUserId() {
-		return userId;
-	}
+    public void setDistinctId(String distinctId) {
+        this.distinctId = distinctId;
+    }
+    public String getX() {
+        return x;
+    }
 
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    public void setX(String x) {
+        this.x = x;
+    }
+    public String getImei() {
+        return imei;
+    }
 
-	public String getTicket() {
-		return ticket;
-	}
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
+    public String getImsi() {
+        return imsi;
+    }
 
-	public void setTicket(String ticket) {
-		this.ticket = ticket;
-	}
+    public void setImsi(String imsi) {
+        this.imsi = imsi;
+    }
+    public String getSdk() {
+        return sdk;
+    }
 
-	public String getDistinctId() {
-		return distinctId;
-	}
+    public void setSdk(String sdk) {
+        this.sdk = sdk;
+    }
+    public String getAndroidId() {
+        return androidId;
+    }
 
-	public void setDistinctId(String distinctId) {
-		this.distinctId = distinctId;
-	}
+    public void setAndroidId(String androidId) {
+        this.androidId = androidId;
+    }
+    public String getModel() {
+        return model;
+    }
 
-	public String getX() {
-		return x;
-	}
+    public void setModel(String model) {
+        this.model = model;
+    }
+    public String getVendor() {
+        return vendor;
+    }
 
-	public void setX(String x) {
-		this.x = x;
-	}
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
+    }
+    public String getOs() {
+        return os;
+    }
 
-	public String getImei() {
-		return imei;
-	}
+    public void setOs(String os) {
+        this.os = os;
+    }
+    public String getOsVersion() {
+        return osVersion;
+    }
 
-	public void setImei(String imei) {
-		this.imei = imei;
-	}
+    public void setOsVersion(String osVersion) {
+        this.osVersion = osVersion;
+    }
+    public String getCarrier() {
+        return carrier;
+    }
 
-	public String getImsi() {
-		return imsi;
-	}
+    public void setCarrier(String carrier) {
+        this.carrier = carrier;
+    }
+    public String getDeviceId() {
+        return deviceId;
+    }
 
-	public void setImsi(String imsi) {
-		this.imsi = imsi;
-	}
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+    public String getUserAgent() {
+        return userAgent;
+    }
 
-	public String getSdk() {
-		return sdk;
-	}
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+    public Boolean getFirstDay() {
+        return firstDay;
+    }
 
-	public void setSdk(String sdk) {
-		this.sdk = sdk;
-	}
+    public void setFirstDay(Boolean firstDay) {
+        this.firstDay = firstDay;
+    }
+    public Long getReadNum() {
+        return readNum;
+    }
 
-	public String getAndroidId() {
-		return androidId;
-	}
+    public void setReadNum(Long readNum) {
+        this.readNum = readNum;
+    }
+    public Date getReadTime() {
+        return readTime;
+    }
 
-	public void setAndroidId(String androidId) {
-		this.androidId = androidId;
-	}
+    public void setReadTime(Date readTime) {
+        this.readTime = readTime;
+    }
+    public Long getLimitReadNum() {
+        return limitReadNum;
+    }
 
-	public String getModel() {
-		return model;
-	}
+    public void setLimitReadNum(Long limitReadNum) {
+        this.limitReadNum = limitReadNum;
+    }
+    public Long getVReadNum() {
+        return vReadNum;
+    }
 
-	public void setModel(String model) {
-		this.model = model;
-	}
+    public void setVReadNum(Long vReadNum) {
+        this.vReadNum = vReadNum;
+    }
+    public Date getVReadTime() {
+        return vReadTime;
+    }
 
-	public String getVendor() {
-		return vendor;
-	}
+    public void setVReadTime(Date vReadTime) {
+        this.vReadTime = vReadTime;
+    }
+    public Long getVLimitReadNum() {
+        return vLimitReadNum;
+    }
 
-	public void setVendor(String vendor) {
-		this.vendor = vendor;
-	}
+    public void setVLimitReadNum(Long vLimitReadNum) {
+        this.vLimitReadNum = vLimitReadNum;
+    }
+    public Date getQdTime() {
+        return qdTime;
+    }
 
-	public String getOs() {
-		return os;
-	}
+    public void setQdTime(Date qdTime) {
+        this.qdTime = qdTime;
+    }
+    public Date getCreateTime() {
+        return createTime;
+    }
 
-	public void setOs(String os) {
-		this.os = os;
-	}
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+    public Boolean getUsed() {
+        return used;
+    }
 
-	public String getOsVersion() {
-		return osVersion;
-	}
+    public void setUsed(Boolean used) {
+        this.used = used;
+    }
+    public Boolean getAutoTx() {
+        return autoTx;
+    }
 
-	public void setOsVersion(String osVersion) {
-		this.osVersion = osVersion;
-	}
+    public void setAutoTx(Boolean autoTx) {
+        this.autoTx = autoTx;
+    }
+    public String getTxType() {
+        return txType;
+    }
 
-	public String getCarrier() {
-		return carrier;
-	}
+    public void setTxType(String txType) {
+        this.txType = txType;
+    }
+    public String getTxUser() {
+        return txUser;
+    }
 
-	public void setCarrier(String carrier) {
-		this.carrier = carrier;
-	}
+    public void setTxUser(String txUser) {
+        this.txUser = txUser;
+    }
+    public String getTxName() {
+        return txName;
+    }
 
-	public String getDeviceId() {
-		return deviceId;
-	}
+    public void setTxName(String txName) {
+        this.txName = txName;
+    }
+    public String getTxIdcard() {
+        return txIdcard;
+    }
 
-	public void setDeviceId(String deviceId) {
-		this.deviceId = deviceId;
-	}
+    public void setTxIdcard(String txIdcard) {
+        this.txIdcard = txIdcard;
+    }
 
-	public String getUserAgent() {
-		return userAgent;
-	}
+    public static class TF {
 
-	public void setUserAgent(String userAgent) {
-		this.userAgent = userAgent;
-	}
+        public static String TABLE_NAME = "TAO_TOUTIAO_USER";   // 表名
 
-	public Boolean getFirstDay() {
-		return firstDay;
-	}
+        //public static String TABLE_SCHEMA = ConfigUtils.getValue("");   // 库名
 
-	public void setFirstDay(Boolean firstDay) {
-		this.firstDay = firstDay;
-	}
+        public static String id = "id";  // 
+        public static String username = "username";  // 
+        public static String password = "password";  // 
+        public static String userId = "user_id";  // 
+        public static String ticket = "ticket";  // 
+        public static String distinctId = "distinct_id";  // 
+        public static String x = "x";  // 
+        public static String imei = "imei";  // 
+        public static String imsi = "imsi";  // 
+        public static String sdk = "sdk";  // 
+        public static String androidId = "android_id";  // 
+        public static String model = "model";  // 
+        public static String vendor = "vendor";  // 
+        public static String os = "os";  // 
+        public static String osVersion = "os_version";  // 
+        public static String carrier = "carrier";  // 
+        public static String deviceId = "device_id";  // 
+        public static String userAgent = "user_agent";  // 
+        public static String firstDay = "first_day";  // 
+        public static String readNum = "read_num";  // 
+        public static String readTime = "read_time";  // 
+        public static String limitReadNum = "limit_read_num";  // 
+        public static String vReadNum = "v_read_num";  // 
+        public static String vReadTime = "v_read_time";  // 
+        public static String vLimitReadNum = "v_limit_read_num";  // 
+        public static String qdTime = "qd_time";  // 最后签到时间
+        public static String createTime = "create_time";  // 
+        public static String used = "used";  // 
+        public static String autoTx = "auto_tx";  // 
+        public static String txType = "tx_type";  // 
+        public static String txUser = "tx_user";  // 
+        public static String txName = "tx_name";  // 
+        public static String txIdcard = "tx_idcard";  // 
 
-	public Long getReadNum() {
-		return readNum;
-	}
-
-	public void setReadNum(Long readNum) {
-		this.readNum = readNum;
-	}
-
-	public Date getReadTime() {
-		return readTime;
-	}
-
-	public void setReadTime(Date readTime) {
-		this.readTime = readTime;
-	}
-
-	public Long getLimitReadNum() {
-		return limitReadNum;
-	}
-
-	public void setLimitReadNum(Long limitReadNum) {
-		this.limitReadNum = limitReadNum;
-	}
-
-	public Long getVReadNum() {
-		return vReadNum;
-	}
-
-	public void setVReadNum(Long vReadNum) {
-		this.vReadNum = vReadNum;
-	}
-
-	public Date getVReadTime() {
-		return vReadTime;
-	}
-
-	public void setVReadTime(Date vReadTime) {
-		this.vReadTime = vReadTime;
-	}
-
-	public Long getVLimitReadNum() {
-		return vLimitReadNum;
-	}
-
-	public void setVLimitReadNum(Long vLimitReadNum) {
-		this.vLimitReadNum = vLimitReadNum;
-	}
-
-	public Date getQdTime() {
-		return qdTime;
-	}
-
-	public void setQdTime(Date qdTime) {
-		this.qdTime = qdTime;
-	}
-
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
-
-	public Boolean getUsed() {
-		return used;
-	}
-
-	public void setUsed(Boolean used) {
-		this.used = used;
-	}
-
-	public static class TF {
-
-		public static String TABLE_NAME = "TAO_TOUTIAO_USER"; // 表名
-
-		// public static String TABLE_SCHEMA = ConfigUtils.getValue(""); // 库名
-
-		public static String id = "id"; //
-		public static String username = "username"; //
-		public static String password = "password"; //
-		public static String userId = "user_id"; //
-		public static String ticket = "ticket"; //
-		public static String distinctId = "distinct_id"; //
-		public static String x = "x"; //
-		public static String imei = "imei"; //
-		public static String imsi = "imsi"; //
-		public static String sdk = "sdk"; //
-		public static String androidId = "android_id"; //
-		public static String model = "model"; //
-		public static String vendor = "vendor"; //
-		public static String os = "os"; //
-		public static String osVersion = "os_version"; //
-		public static String carrier = "carrier"; //
-		public static String deviceId = "device_id"; //
-		public static String userAgent = "user_agent"; //
-		public static String firstDay = "first_day"; //
-		public static String readNum = "read_num"; //
-		public static String readTime = "read_time"; //
-		public static String limitReadNum = "limit_read_num"; //
-		public static String vReadNum = "v_read_num"; //
-		public static String vReadTime = "v_read_time"; //
-		public static String vLimitReadNum = "v_limit_read_num"; //
-		public static String qdTime = "qd_time"; // 最后签到时间
-		public static String createTime = "create_time"; //
-		public static String used = "used"; //
-	}
+    }
 }
