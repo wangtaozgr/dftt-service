@@ -57,7 +57,7 @@ public class ZqttReadJob {
 		logger.info("zqtt:结束阅读看看赚金币任务");
 	}
 	
-	//@Scheduled(cron = "0 0,10,20,30,40,50 15,20 * * ?")
+	@Scheduled(cron = "0 0,10,20,30,40,50 15,20 * * ?")
 	public void searchTask() throws Exception {
 		logger.info("zqtt:开始阅读搜索任务金币任务");
 		List<ZqttUser> users = zqttUserWyService.getUsedUser();
@@ -75,7 +75,7 @@ public class ZqttReadJob {
 	/**
 	 * 每小时打一次卡
 	 */
-	//@Scheduled(cron = "0 4 6-23 * * ?")
+	@Scheduled(cron = "0 4 6-23 * * ?")
 	public void daka() {
 		List<ZqttUser> users = zqttUserWyService.getUsedUser();
 		for (ZqttUser user : users) {
