@@ -141,13 +141,13 @@ public class DfToutiaoUserWyService extends BaseService<DfToutiaoUser> {
 		return users;
 	}
 
-	public void readNewsCoin(DfToutiaoUser user, Date endTime) throws Exception {
+	public int readNewsCoin(DfToutiaoUser user) throws Exception {
 		DtffHttp df = DtffHttp.getInstance(user);
 		int readedNum = 0;
 		long readNum = user.getReadNum();
 		int time = 60 * 1000;
 		logger.info("dftt-{}:readNum={},limitReadNum={}", user.getUsername(), readNum, user.getLimitReadNum());
-		while (readNum < user.getLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while (readNum < user.getLimitReadNum()) {
 			JSONObject json = df.getNewsList();
 			if (json == null) {
 				logger.error("dftt-{}:没有查到新闻列表!", user.getUsername());
@@ -163,8 +163,6 @@ public class DfToutiaoUserWyService extends BaseService<DfToutiaoUser> {
 					continue;
 				}
 				Thread.sleep(time);
-				if (new Date().getTime() > endTime.getTime())
-					return;
 				JSONObject result = df.readNews(url);
 				if (result.getBooleanValue("status")) {
 					readNum = result.getIntValue("cur_read_nums");
@@ -174,33 +172,31 @@ public class DfToutiaoUserWyService extends BaseService<DfToutiaoUser> {
 					user.setReadTime(new Date());
 					this.updateBySelect(user);
 					time = result.getIntValue("next_timer_duration") * 1000 + new Random().nextInt(15000);
-					if (readNum >= user.getLimitReadNum())
-						return;
-					if (readedNum >= 10)
-						return;
-					if (new Date().getTime() > endTime.getTime())
-						return;
+					if (readNum >= user.getLimitReadNum()) {
+						return readedNum;
+					}
 				} else if ("read nums gt max limit!".equals(result.getString("msg"))) {
 					readNum = user.getLimitReadNum();
 					user.setReadNum(readNum);
 					user.setReadTime(new Date());
 					this.updateBySelect(user);
 					logger.error("dftt-{}:阅读新闻金币失败，错误原因:今天已达到上限", user.getUsername());
-					return;
+					return readedNum;
 				} else if (result.getString("msg").contains("sorry,you read too frequently")) {
 					logger.error("dftt-{}: 阅读新闻金币失败，错误原因:阅读太快", user.getUsername());
 					Thread.sleep(60000);
 				}
 			}
 		}
+		return readedNum;
 	}
 
-	public void readVideoCoin(DfToutiaoUser user, Date endTime) throws Exception {
+	public int readVideoCoin(DfToutiaoUser user) throws Exception {
 		DtffHttp df = DtffHttp.getInstance(user);
 		int readedNum = 0;
 		long readNum = user.getVReadNum();
 		int time = 30 * 1000;
-		while (readNum < user.getVLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while (readNum < user.getVLimitReadNum()) {
 			JSONObject json = df.videoList();
 			if (json == null) {
 				logger.error("dftt-{}:没有查到视频列表!", user.getUsername());
@@ -225,25 +221,23 @@ public class DfToutiaoUserWyService extends BaseService<DfToutiaoUser> {
 					user.setVReadTime(new Date());
 					this.updateBySelect(user);
 					time = result.getIntValue("next_timer_duration") * 1000 + new Random().nextInt(15000);
-					if (readedNum >= 10)
-						return;
-					if (readNum >= user.getVLimitReadNum())
-						return;
-					if (new Date().getTime() > endTime.getTime())
-						return;
+					if (readNum >= user.getVLimitReadNum()) {
+						return readedNum;
+					}
 				} else if ("read nums gt max limit!".equals(result.getString("msg"))) {
 					logger.error("dftt-{}:阅读视频金币失败，错误原因:今天已达到上限", user.getUsername());
 					readNum = user.getVLimitReadNum();
 					user.setVReadNum(readNum);
 					user.setVReadTime(new Date());
 					this.updateBySelect(user);
-					return;
+					return readedNum;
 				} else if (result.getString("msg").contains("sorry,you read too frequently")) {
 					logger.error("dftt-{}: 阅读视频金币失败，错误原因:阅读太快", user.getUsername());
 					Thread.sleep(60000);
 				}
 			}
 		}
+		return readedNum;
 	}
 
 	public void readPushNews() {

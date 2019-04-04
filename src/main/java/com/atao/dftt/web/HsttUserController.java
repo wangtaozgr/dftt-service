@@ -36,7 +36,8 @@ public class HsttUserController extends BaseController<HsttUser> {
 		HsttUser user = hsttUserWyService.queryById(7);
 		HsttHttp http = HsttHttp.getInstance(user);
 		Date endTime = new Date(new Date().getTime() + 5 * 60 * 1000l);
-		hsttUserWyService.readVideoCoin(user, endTime);
+		http.getAppUserByUidV2();
+		//hsttUserWyService.readNewsCoin(user);
 		return null;
 	}
 }

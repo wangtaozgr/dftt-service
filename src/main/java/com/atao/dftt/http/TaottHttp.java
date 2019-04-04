@@ -544,6 +544,35 @@ public class TaottHttp {
 		}
 		return null;
 	}
+	
+	/**
+	 * 
+	 * 支付宝绑定
+	 * account 手机号
+	 * realName 实名
+	 * 
+    */
+	public boolean bindAliAccount(String account, String realName) {
+		try {
+			String url = "https://newsearnmall.coohua.com/mall/api/user/saveAliAccount";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", "okhttp/3.10.0");
+			heads.put("Content-Type", "application/x-www-form-urlencoded");
+
+			String postData = "userId=" + user.getUserId() + "&account=" + account + "&ticket=" + user.getTicket()+ "&realName=" + CommonUtils.encode(realName);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getBooleanValue("result")) {
+				logger.info("taott-{}:支付宝绑定成功.content={}", user.getUsername(), content);
+				return true;
+			}
+			logger.error("taott-{}:支付宝绑定失败,msg={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("taott-{}:支付宝绑定异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return false;
+	}
 
 	public boolean cointx(int productId) {
 		try {
@@ -616,13 +645,13 @@ public class TaottHttp {
 
 	public JSONObject adJs() {
 		try {
-			String url = "https://www.coohua.com/share/xwz_article/js/advData.js?v=1.0.1";
+			String url = "https://www.coohua.com/share/xwz_article/js/advData.js?v=1.2.6";
 			Map<String, String> heads = new HashMap<String, String>();
 			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
 
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 			content = content.replace("\r\n", "").replace("\r", "").replace("\t", "");
-			int end = content.indexOf("var nowUrlAdvData");
+			int end = content.indexOf("var arr");
 			int start = content.indexOf("var advJson = ") + 14;
 			content = content.substring(start, end);
 			JSONObject object = JSONObject.parseObject(content);

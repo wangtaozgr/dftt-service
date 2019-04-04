@@ -8,7 +8,6 @@ import java.util.Random;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -78,7 +77,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		return super.queryOne(p, null);
 	}
 
-	public void readNewsCoin(MayittUser user, Date endTime) throws Exception {
+	public int readNewsCoin(MayittUser user) throws Exception {
 		MayittHttp http = MayittHttp.getInstance(user);
 		String today = DateUtils.formatDate(new Date(), "yyyyMMdd");
 		if (user.getQdTime() == null || !today.equals(DateUtils.formatDate(user.getQdTime(), "yyyyMMdd"))) {
@@ -107,7 +106,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		int readedNum = 0;
 		long readNum = user.getReadNum();
 		int time = 30 * 1000 + new Random().nextInt(15000);
-		while (readNum < user.getLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while (readNum < user.getLimitReadNum()) {
 			JSONObject indexFresh = MayittUtils.AppClick(user,
 					"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
 					"com.weishang.wxrd.activity.MainActivity######", "tv_home_tab", "刷新", "TextView");
@@ -120,7 +119,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 			JSONArray newsList = http.newsList();
 			if (newsList.size() < 1) {
 				logger.info(user.getUsername() + ":没有查到新闻列表!");
-				continue;
+				return readedNum;
 			}
 			for (int i = 0; i < newsList.size(); i++) {
 				JSONObject news = newsList.getJSONObject(i);
@@ -136,8 +135,9 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 					http.sendData();
 					time = new Random().nextInt(2000);
 					JSONObject result = http.readNews(newsId);
-					if (result == null)
-						return;
+					if (result == null) {
+						return readedNum;
+					}
 					if (result.getBooleanValue("success")) {
 						readNum++;
 						readedNum++;
@@ -145,12 +145,9 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 						user.setReadNum(readNum);
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
-						if (readNum >= user.getLimitReadNum())
-							break;
-						if (readedNum >= 10)
-							break;
-						if (new Date().getTime() > endTime.getTime())
-							break;
+						if (readNum >= user.getLimitReadNum()) {
+							return readedNum;
+						}
 					} else if (result.getIntValue("error_code") == 200001) {
 						continue;
 					} else if (result.getIntValue("error_code") == 10017) {
@@ -161,14 +158,15 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
 						logger.error("mayitt-{}:阅读新闻金币报错或已达到上限", user.getUsername());
-						break;
+						return readedNum;
 					}
 				}
 			}
 		}
+		return readedNum;
 	}
 
-	public void readVideoCoin(MayittUser user, Date endTime) throws Exception {
+	public int readVideoCoin(MayittUser user) throws Exception {
 		MayittHttp http = MayittHttp.getInstance(user);
 		int readedNum = 0;
 		long readNum = user.getVReadNum();
@@ -185,11 +183,11 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 				"com.weishang.wxrd.activity.MainActivity######");
 		http.eventList.add(appViewScreen01);
 
-		while (readNum < user.getVLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while (readNum < user.getVLimitReadNum()) {
 			JSONArray newsList = http.videoList();
 			if (newsList.size() < 1) {
 				logger.info(user.getUsername() + ":没有查到视频列表!");
-				continue;
+				return readedNum;
 			}
 			for (int i = 0; i < newsList.size(); i++) {
 				JSONObject news = newsList.getJSONObject(i);
@@ -206,8 +204,9 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 					http.sendData();
 					time = new Random().nextInt(2000);
 					JSONObject result = http.readVideo(newsId);
-					if (result == null)
-						return;
+					if (result == null) {
+						return readedNum;
+					}
 					if (result.getBooleanValue("success")) {
 						readNum++;
 						readedNum++;
@@ -215,12 +214,9 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 						user.setVReadNum(readNum);
 						user.setVReadTime(new Date());
 						this.updateBySelect(user);
-						if (readNum >= user.getVLimitReadNum())
-							break;
-						if (readedNum >= 10)
-							break;
-						if (new Date().getTime() > endTime.getTime())
-							break;
+						if (readNum >= user.getVLimitReadNum()) {
+							return readedNum;
+						}
 					} else if (result.getIntValue("error_code") == 200001) {
 						continue;
 					} else if (result.getIntValue("error_code") == 10017) {
@@ -231,11 +227,12 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 						user.setVReadTime(new Date());
 						this.updateBySelect(user);
 						logger.error("mayitt-{}:阅读视频金币报错或已达到上限", user.getUsername());
-						break;
+						return readedNum;
 					}
 				}
 			}
 		}
+		return readedNum;
 	}
 
 	/**
@@ -245,7 +242,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 	 * @param endTime
 	 * @throws Exception
 	 */
-	public void readAdTask(MayittUser user) throws Exception {
+	public int readAdTask(MayittUser user) throws Exception {
 		MayittHttp http = MayittHttp.getInstance(user);
 		JSONObject taskAppClick = MayittUtils.AppClick(user,
 				"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
@@ -277,7 +274,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		}
 		if (ad == null) {
 			logger.error("mayitt-{}:没有找到广告任务的id", user.getUsername());
-			return;
+			return 0;
 		}
 		String ad_id = ad.getString("id");
 		int readedNum = ad.getIntValue("task_ad_num");
@@ -287,7 +284,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 			Thread.sleep(time);
 			if (http.adTaskData == null) {
 				logger.error("mayitt-{}:{}", user.getUsername(), "没有查到广告数据，放弃广告任务");
-				return;
+				return readedNum;
 			}
 			http.startAdTask();
 			JSONArray readAdTask = MayittUtils.readAdTask(user, http.adTaskData);
@@ -301,9 +298,10 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 				logger.info("mayitt-{}:阅读广告任务金币成功  已读次数={}", user.getUsername(), readedNum);
 			} else {
 				logger.error("mayitt-{}:阅读广告任务金币报错", user.getUsername());
-				break;
+				return readedNum;
 			}
 		}
+		return readedNum;
 	}
 
 	/**
@@ -312,7 +310,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 	 * @param user
 	 * @throws Exception
 	 */
-	public void readRwTask(MayittUser user) throws Exception {
+	public int readRwTask(MayittUser user) throws Exception {
 		MayittHttp http = MayittHttp.getInstance(user);
 		JSONObject taskAppClick = MayittUtils.AppClick(user,
 				"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
@@ -344,7 +342,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		}
 		if (rw == null) {
 			logger.error("mayitt-{}:没有找到看热文任务的id", user.getUsername());
-			return;
+			return 0;
 		}
 		String ad_id = rw.getString("id");
 		int readedNum = rw.getIntValue("task_ad_num");
@@ -358,7 +356,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 			http.eventList.add(appViewScreen04);
 			JSONObject result = http.taskAdStatus(ad_id, "1");
 			if (result == null)
-				return;
+				return readedNum;
 			if (result.getBooleanValue("success")) {
 				JSONObject kkTasks = result.getJSONObject("items");
 				int read_num = kkTasks.getIntValue("read_num");
@@ -377,7 +375,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 						logger.info("mayitt-{}:阅读看热文第{}次成功", user.getUsername(), read_num);
 					} else {
 						logger.error("mayitt-{}:阅读看热文第{}次失败 ,跳出", user.getUsername(), read_num);
-						break;
+						return readedNum;
 					}
 				}
 				JSONObject finishTask = http.readRwCoin(ad_id);
@@ -386,13 +384,14 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 					logger.info("mayitt-{}:阅读看热文金币成功  已读次数={}", user.getUsername(), readedNum);
 				} else {
 					logger.error("mayitt-{}:阅读看热文金币报错", user.getUsername());
-					break;
+					return readedNum;
 				}
 			} else {
 				logger.error("mayitt-{}:阅读看热文金币报错", user.getUsername());
-				break;
+				return readedNum;
 			}
 		}
+		return readedNum;
 	}
 
 	/**
@@ -401,7 +400,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 	 * @param user
 	 * @throws Exception
 	 */
-	public void readMoreTask(MayittUser user) throws Exception {
+	public int readMoreTask(MayittUser user) throws Exception {
 		MayittHttp http = MayittHttp.getInstance(user);
 		JSONObject taskAppClick = MayittUtils.AppClick(user,
 				"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
@@ -463,7 +462,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 								logger.info("mayitt-{}:阅读其它任务第{}次成功", user.getUsername(), read_num);
 							} else {
 								logger.error("mayitt-{}:阅读其它任务第{}次失败 ,跳出", user.getUsername(), read_num);
-								return;
+								return 0;
 							}
 						}
 						JSONObject adlickend = http.adlickend(task_id);
@@ -474,10 +473,10 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 				}
 			}
 		}
+		return 1;
 	}
-	
-	
-	public void readHongbao(MayittUser user) throws Exception {
+
+	public int readHongbao(MayittUser user) throws Exception {
 		MayittHttp http = MayittHttp.getInstance(user);
 		JSONObject taskAppClick = MayittUtils.AppClick(user,
 				"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
@@ -539,7 +538,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 								logger.info("mayitt-{}:阅读红包任务第{}次成功", user.getUsername(), read_num);
 							} else {
 								logger.error("mayitt-{}:阅读红包任务第{}次失败 ,跳出", user.getUsername(), read_num);
-								return;
+								return 0;
 							}
 						}
 						JSONObject adlickend = http.adlickend(task_id);
@@ -550,6 +549,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 				}
 			}
 		}
+		return 1;
 	}
 
 	public void daka(MayittUser user) {
@@ -566,6 +566,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 	public JSONObject cointx(MayittUser user) {
 		JSONObject result = new JSONObject(true);
 		MayittHttp http = MayittHttp.getInstance(user);
+		mayittCoinRecordWyService.updateCoin(user);
 		MayittCoinRecord mayittCoinRecord = mayittCoinRecordWyService.queryTodayMyCoin(user.getUsername());
 		if ("wx".equals(user.getTxType())) {
 			JSONArray txList = http.cointxList("wxpay");

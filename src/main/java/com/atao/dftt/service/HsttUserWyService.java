@@ -15,6 +15,8 @@ import com.atao.base.mapper.BaseMapper;
 import com.atao.base.service.BaseService;
 import com.atao.dftt.http.HsttHttp;
 import com.atao.dftt.mapper.HsttUserMapper;
+import com.atao.dftt.model.CoinTxRecord;
+import com.atao.dftt.model.HsttCoinRecord;
 import com.atao.dftt.model.HsttUser;
 import com.atao.dftt.model.JkdttCoinRecord;
 import com.atao.dftt.util.HsttUtils;
@@ -35,6 +37,9 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 	private HsttUserMapper hsttUserMapper;
 	@Resource
 	private HsttCoinRecordWyService hsttCoinRecordWyService;
+	@Resource
+	private CoinTxRecordWyService coinTxRecordWyService;
+
 	private static int readMaxNum = 20;
 
 	@Override
@@ -75,7 +80,7 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 		return super.queryOne(p, null);
 	}
 
-	public void readNewsCoin(HsttUser user, Date endTime) throws Exception {
+	public int readNewsCoin(HsttUser user) throws Exception {
 		HsttHttp http = HsttHttp.getInstance(user);
 		http.getApp();
 		String today = DateUtils.formatDate(new Date(), "yyyyMMdd");
@@ -109,7 +114,7 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 		int readedNum = 0;
 		long readNum = user.getReadNum();
 		int time = 30 * 1000 + new Random().nextInt(15000);
-		while (readNum < user.getLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < readMaxNum) {
+		while (readNum < user.getLimitReadNum()) {
 			http.userBehavior("", "article_channel");
 			http.slide("drop_down_refresh");
 			http.adsV3();
@@ -119,7 +124,7 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 			http.newsList("2");
 			if (newsList.size() < 1) {
 				logger.info(user.getUsername() + ":没有查到新闻列表!");
-				return;
+				return 0;
 			}
 			// 上报无线网日志
 			logDatas = HsttUtils.wifiScan();
@@ -137,19 +142,12 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 				JSONObject timer = http.timercount(http.times);
 				http.times = timer.getIntValue("times");
 				// logger.info("hstt-{}:进入新闻的阅读时间times={}", user.getUsername(), http.times);
-				for (int t = 0; t < 5; t++) {
-					time = 5 * 1000 + new Random().nextInt(2000);
-					Thread.sleep(time);
-					String sensor = HsttUtils.getSensor();
-					http.userBehavior(sensor, "article_stop_in");
-				}
-				if (new Date().getTime() >= endTime.getTime()) {
-					long appEndTime = System.currentTimeMillis();
-					long appTime = (appEndTime - appStartTime) / 1000;
-					m = HsttUtils.getMobExtM(user, appTime);
-					http.moblog4(m);
-					return;
-				}
+				time = 15 * 1000 + new Random().nextInt(2000);
+				Thread.sleep(time);
+				String sensor = HsttUtils.getSensor();
+				http.userBehavior(sensor, "article_stop_in");
+				time = 15 * 1000 + new Random().nextInt(2000);
+				Thread.sleep(time);
 				JSONObject result = http.readNews(newsId);
 				http.userBehavior("", "reading_30_seconds");
 				if (result.getIntValue("status") == 100) {
@@ -181,13 +179,12 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 						}
 					}
 					// logger.info("hstt-{}:离开新闻的阅读时间times={}", user.getUsername(), http.times);
-					if (readNum >= user.getLimitReadNum() || readedNum >= readMaxNum
-							|| new Date().getTime() > endTime.getTime()) {
+					if (readNum >= user.getLimitReadNum()) {
 						long appEndTime = System.currentTimeMillis();
 						long appTime = (appEndTime - appStartTime) / 1000;
 						m = HsttUtils.getMobExtM(user, appTime);
 						http.moblog4(m);
-						return;
+						return readedNum;
 					}
 				} else {
 					logger.error("hstt-{}:阅读新闻金币失败  result={}", user.getUsername(), result);
@@ -195,11 +192,12 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 					long appTime = (appEndTime - appStartTime) / 1000;
 					m = HsttUtils.getMobExtM(user, appTime);
 					http.moblog4(m);
-					return;
+					return readedNum;
 				}
 
 			}
 		}
+		return readedNum;
 	}
 
 	public void readVideoCoin(HsttUser user, Date endTime) throws Exception {
@@ -247,7 +245,7 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 				http.timeswatch = timer.getIntValue("times");
 				logger.info("hstt-{}:进入视频的阅读时间times={}", user.getUsername(), http.timeswatch);
 				time = 30 * 1000;
-				Thread.sleep(time-http.timeswatch*3);
+				Thread.sleep(time - http.timeswatch * 3);
 				if (new Date().getTime() >= endTime.getTime()) {
 					long appEndTime = System.currentTimeMillis();
 					long appTime = (appEndTime - appStartTime) / 1000;
@@ -294,17 +292,22 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 		}
 	}
 
-	public void readHotWord(HsttUser user) throws Exception {
+	public int readHotWord(HsttUser user) throws Exception {
 		int time = 2 * 1000;
 		HsttHttp http = HsttHttp.getInstance(user);
 		http.getApp();
+		http.userBehavior("", "article_type");
+		http.userBehavior("", "article_type");
+		http.slide("sliding_channel");
+		http.adsV3();
 		http.userBehavior("", "task_center");
 		Thread.sleep(time);
 		http.userBehavior("", "task_center_task");
 		JSONObject hotwords = http.hotwordV2();
 		if (hotwords == null)
-			return;
-		while (http.readHotWordNum < 30) {
+			return 0;
+		int num = 0;
+		while (http.readHotWordNum < 50 && num < 50) {
 			JSONArray keywords = hotwords.getJSONArray("keywords");
 			if (keywords != null && keywords.size() > 0) {
 				http.userBehavior("", "red_search");
@@ -312,15 +315,28 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 				Thread.sleep(time);
 				JSONObject search = http.searchV2();
 				if (search.getIntValue("status") == 100) {
+					num++;
 					http.readHotWordNum = search.getIntValue("search_count");
 					logger.info("hstt-{}:阅读热门单词金币成功  已读次数={}", user.getUsername(), http.readHotWordNum);
 				}
 			}
+			if (http.readHotWordNum == 5) {
+				searchreward(user);
+			} else if (http.readHotWordNum == 10) {
+				searchreward(user);
+			} else if (http.readHotWordNum == 30) {
+				searchreward(user);
+			} else if (http.readHotWordNum == 30) {
+				searchreward(user);
+			} else if (http.readHotWordNum == 50) {
+				searchreward(user);
+			}
 		}
+		return 1;
 
 	}
 
-	public void searchreward(HsttUser user) throws Exception {
+	public int searchreward(HsttUser user) throws Exception {
 		HsttHttp http = HsttHttp.getInstance(user);
 		http.searchrewardV3(1);
 		http.userBehavior("", "search_reward");
@@ -332,6 +348,7 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 		Thread.sleep(time);
 		http.searchrewardV3(3);
 		http.userBehavior("", "search_reward");
+		return 1;
 	}
 
 	public void daka(HsttUser user) {
@@ -350,13 +367,21 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 	public JSONObject cointx(HsttUser user) {
 		JSONObject result = new JSONObject(true);
 		HsttHttp http = HsttHttp.getInstance(user);
+		hsttCoinRecordWyService.updateCoin(user);
+		HsttCoinRecord coinRecord = hsttCoinRecordWyService.queryTodayMyCoin(user.getUsername());
 		if ("wx".equals(user.getTxType())) {
-			String coinDay = DateUtils.formatDate(new Date(), "yyyyMMdd");
-			hsttCoinRecordWyService.updateCoin(user);
-			JkdttCoinRecord t = new JkdttCoinRecord();
-			t.setCoinDay(coinDay);
-			t.setUsername(user.getUsername());
-
+			double money = 5;
+			if (coinRecord.getBalance().doubleValue() >= money) {
+				boolean success = http.cointx(Double.valueOf(money).intValue());
+				if (success) {
+					CoinTxRecord record = new CoinTxRecord("hstt", user.getUsername(), money, user.getTxType(),
+							user.getTxUser(), new Date());
+					coinTxRecordWyService.insert(record);
+					result.put("status", true);
+					result.put("msg", money + "元提现成功.");
+					return result;
+				}
+			}
 		}
 		result.put("status", false);
 		result.put("msg", "没有可以提现的金额.");

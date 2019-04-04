@@ -1,19 +1,14 @@
 package com.atao.dftt.web;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.atao.base.controller.BaseController;
 import com.atao.base.service.BaseService;
 import com.atao.dftt.http.JkdttHttp;
 import com.atao.dftt.model.JkdttUser;
 import com.atao.dftt.service.JkdttUserWyService;
-import com.atao.dftt.thread.JkdttReadCoinThread;
 
 /**
  *
@@ -34,9 +29,9 @@ public class JkdttUserController extends BaseController<JkdttUser> {
 
 	@RequestMapping("/test")
 	public String test(String result, String device, String imei) throws Exception {
-		JkdttUser user = jkdttUserWyService.queryById(4);
+		JkdttUser user = jkdttUserWyService.queryById(11);
 		JkdttHttp http = JkdttHttp.getInstance(user);
-		http.login();
+		jkdttUserWyService.readNewsCoin(user);
 		return null;
 	}
 }

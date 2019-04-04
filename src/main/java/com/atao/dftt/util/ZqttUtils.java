@@ -17,8 +17,8 @@ import com.atao.dftt.util.mayitt.PubKeySignature;
 import com.atao.util.StringUtils;
 
 public class ZqttUtils {
-	public static String app_version = "1.3.8";
-	public static String version_code = "24";
+	public static String app_version = "1.4.5";
+	public static String version_code = "27";
 	public static String lib_version = "2.1.2";
 	public static String subv = "1.2.2";
 	public static Random random = new Random();

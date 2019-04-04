@@ -10,12 +10,12 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\WlttWyService
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\JkdttUtils.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\quartz\ZqttReadJob.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\util\DateUtils.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\WlttReadCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\ZqttCoinRecordMapper.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\WlttCoinRecordWyService.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\quartz\MayittReadJob.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\MayittUtils.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\util\BeanMapUtils.java
+D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\WlttUtilsold.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\MayittUserMapper.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\support\DBQuery.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\CommonUtils.java
@@ -26,8 +26,6 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\mayitt\PubKeySig
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\jkdtt\b.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\mapper\BaseMapper.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\HsttUserVo.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\DfttReadCoinThread.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\DfttReadVideoCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\Md5Util.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\http\WlttHttp.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\ZqttUtils.java
@@ -37,11 +35,9 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\WlttCoinRecordCon
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\http\JkdttHttp.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\model\HsttUser.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\JkdttCoinRecordWyService.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\MayittReadCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\mayitt\RandomValidateCode.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\model\ZqttUser.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\hstt\AES.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\HsttReadCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\JkdttCoinRecordMapper.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\HsttCoinRecordWyService.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\WlttCoinRecordMapper.java
@@ -53,7 +49,6 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\FileUtils.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\http\ZqttHttp.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\CoinRecordVo.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\model\WlttCoinRecord.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\JkdttReadCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\HsttCoinRecordController.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\JkdttCoinRecordController.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\BaseApiApplication.java
@@ -70,7 +65,6 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\WlttZipUtil.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\MayittUserVo.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\quartz\TaottReadJob.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\ZqttUserController.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\TaottReadCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\WlttMessageDigest.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\zqtt\RandomValidateCode.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\ZqttCoinRecordVo.java
@@ -97,13 +91,11 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\MayittUserWyS
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\util\StringUtils.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\MyCoinVo.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\MayittCoinRecordWyService.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\WlttReadVideoThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\DfToutiaoUserWyService.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\http\DtffHttp.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\JdmsThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\model\BaseEntity.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\WlttController.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\ZqttReadCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\MayittUserController.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\hstt\MobUtils.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\ZqttUserWyService.java
@@ -116,6 +108,7 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\base\util\BeanUtils.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\ZqttUserMapper.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\service\BaseService.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\HsttUserMapper.java
+D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\service\AsynService.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\model\TaottCoinRecord.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\JkdttUserController.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\hstt\Data.java
@@ -129,9 +122,9 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\TaoToutiaoUser
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\WlttVo.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\mapper\DfToutiaoUserMapper.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\model\TaoToutiaoUser.java
+D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\wltt\AES.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\WlttCipher.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\web\CoinController.java
-D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\thread\MayittReadTaskCoinThread.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\DataVo.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\model\CoinTxRecord.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\Jiami.java
@@ -146,6 +139,8 @@ D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\TaottCoinRecor
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\config\ThreadAsyncConfigurer.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\api\vo\DfToutiaoUserVo.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\base\vo\BaseVo.java
+D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\config\MyAsyncExceptionHandler.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\ManifestDigest.java
+D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\wltt\Hex.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\http\MayittHttp.java
 D:\work\workspace\dftt-service\src\main\java\com\atao\dftt\util\HsttUtils.java

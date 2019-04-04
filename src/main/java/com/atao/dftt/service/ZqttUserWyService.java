@@ -8,6 +8,7 @@ import java.util.Random;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,10 +16,13 @@ import com.atao.base.mapper.BaseMapper;
 import com.atao.base.service.BaseService;
 import com.atao.base.util.StringUtils;
 import com.atao.dftt.http.ZqttHttp;
+import com.atao.dftt.http.ZqttHttp;
 import com.atao.dftt.mapper.ZqttUserMapper;
 import com.atao.dftt.model.CoinTxRecord;
+import com.atao.dftt.model.ZqttUser;
 import com.atao.dftt.model.ZqttCoinRecord;
 import com.atao.dftt.model.ZqttUser;
+import com.atao.dftt.util.ZqttUtils;
 import com.atao.dftt.util.ZqttUtils;
 import com.atao.util.DateUtils;
 
@@ -77,11 +81,15 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 		return super.queryOne(p, null);
 	}
 
-	public void readNewsCoin(ZqttUser user, Date endTime) throws Exception {
+	public int readNewsCoin(ZqttUser user) throws Exception {
 		ZqttHttp http = ZqttHttp.getInstance(user);
 		http.start();
-		http.signature();
-		super.save(http.user);
+		JSONObject object = http.signature();
+		if (object.getBooleanValue("success")) {
+			user.setZqkey(object.getString("zqkey"));
+			user.setZqkeyId(object.getString("zqkey_id"));
+			http = http.refreshUser(user);
+		}
 		String today = DateUtils.formatDate(new Date(), "yyyyMMdd");
 		JSONArray appStart = ZqttUtils.AppStart(user);
 		http.eventList.addAll(appStart);
@@ -120,7 +128,7 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 		int readedNum = 0;
 		long readNum = user.getReadNum();
 		int time = 30 * 1000 + new Random().nextInt(15000);
-		while (readNum < user.getLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while (readNum < user.getLimitReadNum()) {
 			JSONObject indexFresh = ZqttUtils.AppClick(user,
 					"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
 					"com.weishang.wxrd.activity.MainActivity######", "tv_home_tab", "刷新", "TextView");
@@ -131,7 +139,7 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 			JSONArray newsList = http.newsList();
 			if (newsList.size() < 1) {
 				logger.info(user.getUsername() + ":没有查到新闻列表!");
-				continue;
+				return readedNum;
 			}
 			for (int i = 0; i < newsList.size(); i++) {
 				JSONObject news = newsList.getJSONObject(i);
@@ -153,11 +161,6 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 					http.eventList.addAll(readNews);
 					http.sendData();
 					time = new Random().nextInt(2000);
-					if (new Date().getTime() >= endTime.getTime()) {
-						JSONObject appEnd = ZqttUtils.appEnd(user);
-						http.eventList.add(appEnd);
-						return;
-					}
 					JSONObject result = http.readNews(newsId);
 					if (result.getBooleanValue("success")) {
 						readNum++;
@@ -173,97 +176,199 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 							if (i % 2 == 0)
 								http.user_readtime(60 + new Random().nextInt(5));
 						}
-						if (readNum >= user.getLimitReadNum() || readedNum >= 10
-								|| new Date().getTime() > endTime.getTime()) {
+						if (readNum >= user.getLimitReadNum()) {
 							JSONObject appEnd = ZqttUtils.appEnd(user);
 							http.eventList.add(appEnd);
-							return;
+							return readedNum;
 						}
-					} else if (result.getIntValue("error_code") == 200001) {
-						continue;
-					} else if (result.getIntValue("error_code") == 10017) {
-						continue;
+					} else if (result.getIntValue("error_code") == 10011) {
+						readNum = user.getLimitReadNum();
+						user.setReadNum(readNum);
+						user.setReadTime(new Date());
+						this.updateBySelect(user);
+						logger.error("zqtt-{}:帐号异常了,result={}", user.getUsername(), result);
+						JSONObject appEnd = ZqttUtils.appEnd(user);
+						http.eventList.add(appEnd);
+						return readedNum;
+					}else if (result.getIntValue("error_code") == 10007) {
+						readNum = user.getLimitReadNum();
+						user.setReadNum(readNum);
+						user.setReadTime(new Date());
+						this.updateBySelect(user);
+						logger.error("zqtt-{}:阅读新闻金币报错或已达到上限,result={}", user.getUsername(), result);
+						JSONObject appEnd = ZqttUtils.appEnd(user);
+						http.eventList.add(appEnd);
+						return readedNum;
 					} else {
 						readNum = user.getLimitReadNum();
 						user.setReadNum(readNum);
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
-						logger.error("zqtt-{}:阅读新闻金币报错或已达到上限", user.getUsername());
+						logger.error("zqtt-{}:阅读新闻金币报错或已达到上限,result={}", user.getUsername(), result);
 						JSONObject appEnd = ZqttUtils.appEnd(user);
 						http.eventList.add(appEnd);
-						return;
+						return readedNum;
 					}
 				}
 			}
 		}
+		return readedNum;
 	}
 
-	public void readVideoCoin(ZqttUser user, Date endTime) throws Exception {
+	/**
+	 * 搜索任务
+	 * 
+	 * @param user
+	 * @throws Exception
+	 */
+	public int searchTask(ZqttUser user) throws Exception {
 		ZqttHttp http = ZqttHttp.getInstance(user);
-		int readedNum = 0;
-		long readNum = user.getVReadNum();
-		int time = 30 * 1000 + new Random().nextInt(15000);
-		JSONObject videoAppClick = ZqttUtils.AppClick(user,
-				"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.MainFragment",
-				"com.weishang.wxrd.activity.MainActivity######", "tv_find_tab", "视频", "TextView");
-		http.eventList.add(videoAppClick);
-		JSONObject enterTab = ZqttUtils.enterTab(user,
-				"com.sensorsdata.analytics.android.sdk.SensorsDataAPI$10##run##SensorsDataAPI.java##2098", "视频");
-		http.eventList.add(enterTab);
-		JSONObject appViewScreen01 = ZqttUtils.AppViewScreen(user,
-				"com.weishang.wxrd.activity.MainActivity|com.weishang.wxrd.ui.HomeFragment",
-				"com.weishang.wxrd.activity.MainActivity######");
-		http.eventList.add(appViewScreen01);
+		http.start();
+		http.signature();
+		super.save(http.user);
+		JSONArray appStart = ZqttUtils.AppStart(user);
+		http.eventList.addAll(appStart);
+		Thread.sleep(new Random().nextInt(1000 + new Random().nextInt(1000)));
+		JSONObject myClick = ZqttUtils.AppClick(user, "com.weishang.wxrd.activity.MainActivity",
+				"com.weishang.wxrd.activity.MainActivity######", null, "我的", "android.widget.RelativeLayout");
+		http.eventList.add(myClick);
+		JSONObject my = ZqttUtils.enterTab(user,
+				"com.sensorsdata.analytics.android.sdk.SensorsDataAPI$10##run##SensorsDataAPI.java##2098", "我的");
+		http.eventList.add(my);
+		Thread.sleep(new Random().nextInt(2000));
+		JSONObject taskClick = ZqttUtils.AppClick(user, "com.weishang.wxrd.activity.MainActivity",
+				"com.weishang.wxrd.activity.MainActivity######", "ll_container", "任务中心-签到、做任务领青豆",
+				"com.weishang.wxrd.widget.DivideRelativeLayout");
+		http.eventList.add(taskClick);
+		JSONObject task = ZqttUtils.AppViewScreen(user, "com.weishang.wxrd.activity.MoreActivity",
+				"com.weishang.wxrd.activity.MoreActivity######");
+		http.eventList.add(task);
+		http.sendData();
 
-		while (readNum < user.getVLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
-			JSONArray newsList = http.videoList();
-			if (newsList.size() < 1) {
-				logger.info(user.getUsername() + ":没有查到视频列表!");
-				continue;
-			}
-			for (int i = 0; i < newsList.size(); i++) {
-				JSONObject news = newsList.getJSONObject(i);
-				if (news.getIntValue("article_type") == 0) {
-					time = 30 * 1000 + new Random().nextInt(5000);
+		int time = 30 * 1000;
+		JSONObject apiData = http.dayWelfareInfo();
+		int readedNum = apiData.getJSONObject("data").getJSONObject("1").getIntValue("sougou_reward_num");
+		int taskCount = apiData.getJSONObject("data").getJSONObject("1").getIntValue("taskCount");
+		String task_id = apiData.getJSONObject("data").getJSONObject("1").getString("souid");
+		while (readedNum < taskCount) {
+			Thread.sleep(1000);
+			long startTime = System.currentTimeMillis();
+			JSONObject start = http.adlickstart(task_id);
+			JSONArray rule = start.getJSONObject("items").getJSONArray("rule");
+			int read_num = start.getJSONObject("items").getIntValue("read_num");
+			int see_num = start.getJSONObject("items").getIntValue("see_num");
+			if (rule == null) {
+				time = 60 * 1000 + new Random().nextInt(10000);
+				Thread.sleep(time);
+				JSONObject adlickend = http.adlickend(task_id);
+				if (adlickend.getBooleanValue("success")) {
+					logger.info("zqtt-{}:阅读搜索金币成功 task_id={}", user.getUsername(), task_id);
+				}
+			} else if (see_num > 0) {
+				while (read_num < see_num) {
+					time = 10 * 1000 + new Random().nextInt(3000);
 					Thread.sleep(time);
-					String newsId = news.getString("id");
-					String title = news.getString("title");
-					String account_name = news.getString("account_name");
-					String video_time = news.getString("video_time");
-					String read_num = news.getString("read_num");
-					http.sendData();
-					time = new Random().nextInt(2000);
-					JSONObject result = http.readVideo(newsId);
-					if (result == null)
-						return;
-					if (result.getBooleanValue("success")) {
-						readNum++;
-						readedNum++;
-						logger.info("zqtt-{}:阅读视频金币成功  已读次数={}", user.getUsername(), readNum);
-						user.setVReadNum(readNum);
-						user.setVReadTime(new Date());
-						this.updateBySelect(user);
-						if (readNum >= user.getVLimitReadNum())
-							break;
-						if (readedNum >= 10)
-							break;
-						if (new Date().getTime() > endTime.getTime())
-							break;
-					} else if (result.getIntValue("error_code") == 200001) {
-						continue;
-					} else if (result.getIntValue("error_code") == 10017) {
-						continue;
+					JSONObject bannerstatus = http.bannerstatus(task_id);
+					if (bannerstatus.getBooleanValue("success")) {
+						read_num++;
+						logger.info("zqtt-{}:阅读搜索第{}次成功", user.getUsername(), read_num);
 					} else {
-						readNum = user.getVLimitReadNum();
-						user.setVReadNum(readNum);
-						user.setVReadTime(new Date());
-						this.updateBySelect(user);
-						logger.error("zqtt-{}:阅读视频金币报错或已达到上限", user.getUsername());
-						break;
+						logger.error("zqtt-{}:阅读搜索任务第{}次失败 ,跳出", user.getUsername(), read_num);
+						return 0;
+					}
+				}
+				JSONObject adlickend = http.adlickend(task_id);
+				if (adlickend.getBooleanValue("success")) {
+					int second = (int) ((System.currentTimeMillis()-startTime)/1000);
+					logger.info("zqtt-{}:second={}", user.getUsername(), second);
+					http.appStay(second);
+					logger.info("zqtt-{}:阅读搜索金币成功 task_id={}", user.getUsername(), task_id);
+				}
+			}
+			apiData = http.dayWelfareInfo();
+			readedNum = apiData.getJSONObject("data").getJSONObject("chest").getIntValue("sougou_reward_num");
+		}
+		return readedNum;
+	}
+
+	/**
+	 * 看看赚任务
+	 * 
+	 * @param user
+	 * @throws Exception
+	 */
+	public int readMoreTask(ZqttUser user) throws Exception {
+		ZqttHttp http = ZqttHttp.getInstance(user);
+		http.start();
+		http.signature();
+		super.save(http.user);
+		JSONArray appStart = ZqttUtils.AppStart(user);
+		http.eventList.addAll(appStart);
+		Thread.sleep(new Random().nextInt(1000 + new Random().nextInt(1000)));
+		JSONObject myClick = ZqttUtils.AppClick(user, "com.weishang.wxrd.activity.MainActivity",
+				"com.weishang.wxrd.activity.MainActivity######", null, "我的", "android.widget.RelativeLayout");
+		http.eventList.add(myClick);
+		JSONObject my = ZqttUtils.enterTab(user,
+				"com.sensorsdata.analytics.android.sdk.SensorsDataAPI$10##run##SensorsDataAPI.java##2098", "我的");
+		http.eventList.add(my);
+		Thread.sleep(new Random().nextInt(2000));
+		JSONObject taskClick = ZqttUtils.AppClick(user, "com.weishang.wxrd.activity.MainActivity",
+				"com.weishang.wxrd.activity.MainActivity######", "ll_container", "任务中心-签到、做任务领青豆",
+				"com.weishang.wxrd.widget.DivideRelativeLayout");
+		http.eventList.add(taskClick);
+		JSONObject task = ZqttUtils.AppViewScreen(user, "com.weishang.wxrd.activity.MoreActivity",
+				"com.weishang.wxrd.activity.MoreActivity######");
+		http.eventList.add(task);
+		http.sendData();
+
+		int time = 30 * 1000;
+		JSONObject taskApiData = http.taskApi();
+		JSONArray info = taskApiData.getJSONArray("info");
+		JSONObject more = null;
+		for (int i = 0; i < info.size(); i++) {
+			if (info.getJSONObject(i).getIntValue("status") != 2
+					&& info.getJSONObject(i).getString("name").startsWith("task_browse_")) {
+				more = info.getJSONObject(i);
+				String task_id = more.getString("name").replace("task_browse_", "");
+				logger.info("zqtt-{}:开始阅读其它任务 task_id={}", user.getUsername(), task_id);
+				JSONObject start = http.adlickstart(task_id);
+				if (start.getBooleanValue("success")) {
+					JSONObject appViewScreen05 = ZqttUtils.AppViewScreen(user,
+							"com.weishang.wxrd.activity.MoreActivity", "com.weishang.wxrd.activity.MoreActivity######");
+					http.eventList.add(appViewScreen05);
+					http.sendData();
+					JSONArray rule = start.getJSONObject("items").getJSONArray("rule");
+					int read_num = start.getJSONObject("items").getIntValue("read_num");
+					int see_num = start.getJSONObject("items").getIntValue("see_num");
+					if (rule == null) {
+						time = 60 * 1000 + new Random().nextInt(10000);
+						Thread.sleep(time);
+						JSONObject adlickend = http.adlickend(task_id);
+						if (adlickend.getBooleanValue("success")) {
+							logger.info("zqtt-{}:阅读其它任务金币成功 task_id={}", user.getUsername(), task_id);
+						}
+					} else if (see_num > 0) {
+						while (read_num < see_num) {
+							time = 10 * 1000 + new Random().nextInt(3000);
+							Thread.sleep(time);
+							JSONObject bannerstatus = http.bannerstatus(task_id);
+							if (bannerstatus.getBooleanValue("success")) {
+								read_num++;
+								logger.info("zqtt-{}:阅读其它任务第{}次成功", user.getUsername(), read_num);
+							} else {
+								logger.error("zqtt-{}:阅读其它任务第{}次失败 ,跳出", user.getUsername(), read_num);
+								return 0;
+							}
+						}
+						JSONObject adlickend = http.adlickend(task_id);
+						if (adlickend.getBooleanValue("success")) {
+							logger.info("zqtt-{}:阅读其它任务金币成功 task_id={}", user.getUsername(), task_id);
+						}
 					}
 				}
 			}
 		}
+		return 1;
 	}
 
 	public void daka(ZqttUser user) {
@@ -280,6 +385,7 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 	public JSONObject cointx(ZqttUser user) {
 		JSONObject result = new JSONObject(true);
 		ZqttHttp http = ZqttHttp.getInstance(user);
+		zqttCoinRecordWyService.updateCoin(user);
 		ZqttCoinRecord mayittCoinRecord = zqttCoinRecordWyService.queryTodayMyCoin(user.getUsername());
 		if ("wx".equals(user.getTxType())) {
 			JSONArray txList = http.cointxList("wxpay");

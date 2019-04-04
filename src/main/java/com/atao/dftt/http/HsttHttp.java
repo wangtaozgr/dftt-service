@@ -462,6 +462,7 @@ public class HsttHttp {
 					JSONObject ad = ads.getJSONObject(i);
 					reportAd(ad);
 				}
+				if(ads.size()>0)
 				readAd(ads.getJSONObject(0));
 			}
 		} catch (Exception e) {
@@ -791,10 +792,90 @@ public class HsttHttp {
 		}
 		return null;
 	}
-
-	public boolean cointx(int productId) {
+	
+	public JSONObject getAppUserByUidV2() {
 		try {
+			String url = "http://api.zizhengjiankang.com/kk-api-v112/user/getAppUserByUidV2?tel_num="+user.getUsername();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", "okhttp/3.8.1");
+			heads.put("Content-Type", "application/x-www-form-urlencoded");
+			String token = HsttUtils.getToken(user.getUsername() + "|#getAppUserByUidV2");
+			heads.put("token", token);
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			content = HsttUtils.decode(content);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 100) {
+				return object;
+			}
+			logger.error("hstt-{}:查询用户信息异常,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("hstt-{}:查询用户信息异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+	
+	public boolean cashWithdrawalPreposition() {
+		try {
+			String url = "http://api.zizhengjiankang.com/kk-api-v112/paymentRecord/cashWithdrawalPreposition";
+			JSONObject data = new JSONObject(true);
+			JSONObject app = new JSONObject(true);
+			app.fluentPut("appId", "9eb8ef4a").fluentPut("appPackage", "com.xcm.huasheng")
+					.fluentPut("appVersion", HsttUtils.appversion).fluentPut("appName", "com.xcm.huasheng");
+			JSONObject device = new JSONObject(true);
+			device.fluentPut("imei", user.getImei()).fluentPut("mac", user.getMac())
+					.fluentPut("androidId", user.getAndroidId()).fluentPut("model", user.getModel())
+					.fluentPut("vendor", user.getVendor()).fluentPut("screenWidth", 1080)
+					.fluentPut("screenHeight", 1920).fluentPut("osType", 1).fluentPut("osVersion", user.getOsVersion())
+					.fluentPut("deviceType", 1).fluentPut("ua", user.getUserAgent()).fluentPut("ppi", 480)
+					.fluentPut("screenOrientation", 1).fluentPut("brand", user.getBrand())
+					.fluentPut("imsi", user.getImsi());
+			JSONObject network = new JSONObject(true);
+			network.fluentPut("ip", "192.168.1.100").fluentPut("connectionType", 100).fluentPut("operatorType", 99)
+					.fluentPut("cellular_id", 0).fluentPut("lat", 0).fluentPut("lon", 0);
+			JSONObject slot = new JSONObject(true);
+			slot.fluentPut("slotId", "5831418").fluentPut("slotheight", "720").fluentPut("slotwidth", "1280");
+			data.fluentPut("requestId", user.getRequestId() + "_" + System.currentTimeMillis() + "_0001")
+					.fluentPut("protocolType", 1).fluentPut("app", app).fluentPut("device", device)
+					.fluentPut("network", network).fluentPut("slot", slot).fluentPut("tel_num", user.getUsername())
+					.fluentPut(user.getBrand(), user.getBrand()).fluentPut("tag", "1").fluentPut("canalId", "update")
+					.fluentPut("macID", user.getImei() + "_" + user.getImsi() + "_" + user.getMac());
+			String postData = data.toJSONString();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", "okhttp/3.8.1");
+			heads.put("Content-Type", "application/json; charset=utf-8");
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			content = HsttUtils.decode(content);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 100) {
+				return true;
+			}
+		} catch (Exception e) {
+			logger.error("hstt-{}:微信提现金币cashWithdrawalPreposition异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return false;
+	}
 
+	public boolean cointx(int money) {
+		cashWithdrawalPreposition();
+		JSONObject userinfo = getAppUserByUidV2();
+		String openId = userinfo.getJSONObject("appUser").getString("weixin_num");
+		try {
+			String url = "http://api.zizhengjiankang.com/kk-api-v112/paymentRecord/wxAppPayTransfersYunV3?";
+			String postData = "totalAmount="+money+"&openId="+openId+"&tel_num="+user.getUsername();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", "okhttp/3.8.1");
+			heads.put("Content-Type", "application/x-www-form-urlencoded");
+			String token = HsttUtils.getToken(user.getUsername()+ openId + money + "|#wxAppPayTransfersYunV3");
+			heads.put("token", token);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			content = HsttUtils.decode(content);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status") == 100) {
+				return true;
+			}
 		} catch (Exception e) {
 			logger.error("hstt-{}:微信提现金币异常,msg={}", user.getUsername(), e.getMessage());
 		}
@@ -810,7 +891,7 @@ public class HsttHttp {
 		user.setMac("D8:63:75:92:20:E2");
 		HsttHttp http = HsttHttp.getInstance(user);
 		// http.login();
-		String token = HsttUtils.getToken(user.getUsername() + "|#extraReward");
+		String token = HsttUtils.getToken(user.getUsername() + "oqlyW05FKaBV4cHfBSYHT0efKMoY10|#wxAppPayTransfersYunV3");
 		System.out.println(token);
 		// {"code":"888888","num_new":1000,"num":500,"status":201}
 

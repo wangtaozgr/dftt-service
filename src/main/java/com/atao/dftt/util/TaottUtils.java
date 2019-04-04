@@ -43,7 +43,7 @@ public class TaottUtils {
 			'C', 'D', 'E', 'F' };
 	public static String lib_version = "1.8.18";
 	public static String js_lib_version = "1.7.14";
-	public static String app_version = "3.3.2.2";
+	public static String app_version = "3.3.8.5";
 	// public static String rwUrl =
 	// "https://a.dazhongapp.com/share/xwz_article/new_article/article_newby5_dazhongapp_long.html";
 	public static void main(String[] args) throws IOException {

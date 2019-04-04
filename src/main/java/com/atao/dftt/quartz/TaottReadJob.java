@@ -1,7 +1,8 @@
 package com.atao.dftt.quartz;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
@@ -11,9 +12,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.atao.dftt.model.TaoToutiaoUser;
+import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.TaoToutiaoUserWyService;
 import com.atao.dftt.service.TaottCoinRecordWyService;
-import com.atao.dftt.thread.TaottReadCoinThread;
 
 @Component
 public class TaottReadJob {
@@ -23,20 +24,22 @@ public class TaottReadJob {
 	private TaoToutiaoUserWyService taoToutiaoUserWyService;
 	@Resource
 	private TaottCoinRecordWyService taottCoinRecordWyService;
+	@Resource
+	private AsynService asynService;
 
 	@Scheduled(cron = "0 14,25,36,47,58 6-8,11-23 * * ?")
-	public void readDfttNews() {
+	public void readTaottNews() throws Exception {
+		logger.info("taott:开始阅读新闻金币任务");
 		List<TaoToutiaoUser> users = taoToutiaoUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (TaoToutiaoUser user : users) {
-			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
-			TaottReadCoinThread thread = new TaottReadCoinThread(endTime, user, taoToutiaoUserWyService);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Future<Integer> future = asynService.readTaottNews(user);
+			futures.add(future);
 		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("taott:结束阅读新闻金币任务");
 	}
 
 	/**

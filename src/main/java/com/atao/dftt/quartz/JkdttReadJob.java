@@ -1,35 +1,42 @@
 package com.atao.dftt.quartz;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.atao.dftt.model.JkdttUser;
+import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.JkdttUserWyService;
-import com.atao.dftt.thread.JkdttReadCoinThread;
 
 @Component
 public class JkdttReadJob {
+	private static Logger logger = LoggerFactory.getLogger(JkdttReadJob.class);
+
 	@Resource
 	private JkdttUserWyService jkdttUserWyService;
+	@Resource
+	private AsynService asynService;
 
-	@Scheduled(cron = "0 12,23,34,45,56 8,11-23 * * ?")
-	public void readNews() {
+	@Scheduled(cron = "0 3/13 6-9,11-23 * * ?")
+	public void readJkdttNews() throws Exception {
+		logger.info("jkdtt:开始阅读新闻金币任务");
 		List<JkdttUser> users = jkdttUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (JkdttUser user : users) {
-			Date endTime = new Date(new Date().getTime() + 5 * 60 * 1000l);
-			JkdttReadCoinThread thread = new JkdttReadCoinThread(endTime, user, jkdttUserWyService);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Future<Integer> future = asynService.readJkdttNews(user);
+			futures.add(future);
 		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("jkdtt:结束阅读新闻金币任务");
 	}
 
 	/**

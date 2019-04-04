@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.atao.base.mapper.BaseMapper;
 import com.atao.base.model.BaseEntity;
@@ -100,14 +101,17 @@ public abstract class BaseService<T extends BaseEntity> {
 	 * @param t
 	 * @return
 	 */
+	@Transactional
 	public int updateBySelect(T t) {
 		return this.getMapper().updateByPrimaryKeySelective(t);
 	}
 
+	@Transactional
 	public int insert(T t) {
 		return getMapper().insertSelective(t);
 	}
 
+	@Transactional
 	public int save(T t) {
 		int r = this.getMapper().updateByPrimaryKeySelective(t);
 		if (r == 0) {
@@ -121,11 +125,12 @@ public abstract class BaseService<T extends BaseEntity> {
 	 * KeyFactory.getKeyGenerator(entityTable.getSchema() +
 	 * entityTable.getName()).genNextKey(); }
 	 */
-
+	@Transactional
 	public int delete(T t) {
 		return getMapper().delete(t);
 	}
-
+	
+	@Transactional
 	public int deleteById(Object id) {
 		return getMapper().deleteByPrimaryKey(id);
 

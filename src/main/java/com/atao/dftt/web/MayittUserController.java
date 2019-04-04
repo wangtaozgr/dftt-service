@@ -1,8 +1,5 @@
 package com.atao.dftt.web;
 
-import java.util.Date;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,7 +9,6 @@ import com.atao.base.service.BaseService;
 import com.atao.dftt.http.MayittHttp;
 import com.atao.dftt.model.MayittUser;
 import com.atao.dftt.service.MayittUserWyService;
-import com.atao.dftt.thread.MayittReadCoinThread;
 
 /**
  *
@@ -33,11 +29,12 @@ public class MayittUserController extends BaseController<MayittUser> {
 
 	@RequestMapping("/test")
 	public String test() throws Exception {
-		MayittUser user = mayittUserWyService.queryById(2);
+		MayittUser user = mayittUserWyService.queryById(1);
 		MayittHttp http = MayittHttp.getInstance(user);
 		/*Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
 		mayittUserWyService.readVideoCoin(user, endTime);*/
-		mayittUserWyService.readAdTask(user);
+		//mayittUserWyService.readNewsCoin(user);
+		mayittUserWyService.daka(user);
 		return null;
 	}
 }

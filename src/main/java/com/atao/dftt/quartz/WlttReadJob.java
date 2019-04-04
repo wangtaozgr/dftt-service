@@ -1,42 +1,62 @@
 package com.atao.dftt.quartz;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.atao.dftt.model.Wltt;
+import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.WlttCoinRecordWyService;
 import com.atao.dftt.service.WlttWyService;
-import com.atao.dftt.thread.WlttReadCoinThread;
-import com.atao.dftt.thread.WlttReadVideoThread;
 
 @Component
 public class WlttReadJob {
+	private static Logger logger = LoggerFactory.getLogger(WlttReadJob.class);
 	@Resource
 	private WlttWyService wlttWyService;
 	@Resource
 	private WlttCoinRecordWyService wlttCoinRecordWyService;
+	@Resource
+	private AsynService asynService;
 
-	@Scheduled(cron = "0 06,12,18,24,30,36,42,48,54 6-8,11-23 * * ?")
-	public void readNews() {
+	@Scheduled(cron = "0 1/2 6-8,11-23 * * ?")
+	public void readWlttNews() throws Exception {
+		logger.info("wltt:开始阅读新闻金币任务");
 		List<Wltt> users = wlttWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (Wltt user : users) {
-			Date endTime = new Date(new Date().getTime() + 5 * 60 * 1000l);
-			WlttReadCoinThread thread = new WlttReadCoinThread(endTime, user, wlttWyService);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Future<Integer> future = asynService.readWlttNews(user);
+			futures.add(future);
 		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("wltt:结束阅读新闻金币任务");
+	}
+	
+	@Scheduled(cron = "0 10,20,30,40,50 13,15,18,21,23 * * ?")
+	public void searchTask() throws Exception {
+		logger.info("wltt:开始搜索任务");
+		List<Wltt> users = wlttWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
+		for (Wltt user : users) {
+			Future<Integer> future = asynService.searchTask(user);
+			futures.add(future);
+		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("wltt:结束搜索任务");
 	}
 
-	public void readVideo() {
+	/*public void readVideo() {
 		List<Wltt> users = wlttWyService.getUsedUser();
 		for (Wltt user : users) {
 			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
@@ -48,7 +68,7 @@ public class WlttReadJob {
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 
 	/**
 	 * 每小时打一次卡

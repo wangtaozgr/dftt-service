@@ -194,21 +194,21 @@ public class WlttHttp {
 
 	public JSONArray newsList() {
 		try {
-			String url = "https://pc.weilitoutiao.net/lizhi/api/zhwnl/v4/headline?&";
+			String url = "https://pc.weilitoutiao.net/peacock/api/zhwnl/v4/headline?&";
 			Map<String, String> map = WlttUtils.init(wltt);
 			map.put("local_svc_version", WlttUtils.verCode);
 			String app_sign = WlttUtils.sign(map);
 			map.put("app_sign", app_sign);
 			String params = WlttUtils.getStr(map);
 			url = url + params;
-			String postData = "{\"c_click\":0,\"c_pv\":5,\"is_all_tab\":0,\"is_cus_tag\":1,\"page_size\":12,\"page\":1,\"tab_id\":1,\"text\":\"\",\"city_key\":\""
+			String postData = "{\"c_click\":0,\"c_pv\":3,\"is_all_tab\":0,\"is_cus_tag\":1,\"page_size\":12,\"page\":1,\"tab_id\":1,\"text\":\"\",\"city_key\":\""
 					+ wltt.getCityKey() + "\",\"app\":{\"bundle\":\"cn.weli.story\",\"version\":\"" + WlttUtils.verName
 					+ "\"},\"geo\":{\"lat\":\"" + wltt.getLat() + "\",\"lon\":\"" + wltt.getLon()
 					+ "\"},\"device\":{\"android_advertising_id\":\"\",\"android_id\":\"" + wltt.getAndroidid()
 					+ "\",\"carrier\":\"CHINA_TELECOM\",\"density\":\"3.0\",\"orientation\":\"VERTICAL\",\"language\":\"zh-CN\",\"os\":\""
 					+ wltt.getOs()
 					+ "\",\"open_udid\":\"\",\"duid\":\"\",\"idfa\":\"\",\"ssid\":\"\",\"root\":0,\"user_agent\":\""
-					+ wltt.getUserAgent() + "\",\"ip\":\"\",\"imei\":\"" + wltt.getImei() + "\",\"imsi\":\""
+					+ wltt.getUserAgent() + "\",\"ip\":\"192.168.1.100\",\"imei\":\"" + wltt.getImei() + "\",\"imsi\":\""
 					+ wltt.getImsi() + "\",\"mac\":\"" + wltt.getMac() + "\",\"model\":\"" + wltt.getModel()
 					+ "\",\"network\":\"WIFI\",\"os_version\":\"" + wltt.getOsVersion() + "\",\"vendor\":\""
 					+ wltt.getVendor() + "\",\"resolution\":{\"height\":1920,\"width\":1080}}}";
@@ -319,10 +319,9 @@ public class WlttHttp {
 
 	public JSONArray getRelatedRead(String item_id, String post_id) {
 		try {
-			String url = "https://pc.weilitoutiao.net/lizhi/api/zhwnl/v3/getRelatedRead?";
+			String url = "https://pc.weilitoutiao.net/peacock/api/zhwnl/v3/getRelatedRead?";
 			Map<String, String> map = WlttUtils.init(wltt);
 			map.put("local_svc_version", WlttUtils.verCode);
-			map.put("vercode", WlttUtils.verCode);
 			map.put("item_id", item_id);
 			map.put("post_id", post_id);
 			map.put("locale", "zh_CN");
@@ -352,6 +351,7 @@ public class WlttHttp {
 	 */
 	public JSONObject readGift(String giftId) {
 		try {
+			//https://wltask.weilitoutiao.net/wltask/api/coin/auth/gift/receive
 			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/auth/gift/receive";
 			Map<String, String> map = WlttUtils.init(wltt);
 			map.put("gift_id", giftId);
@@ -503,18 +503,64 @@ public class WlttHttp {
 		return null;
 	}
 
-	public void search() {
+	public JSONObject keywords() {
 		try {
-			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/auth/search/confirm?";
+			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/search/task/v2?";
 			Map<String, String> map = WlttUtils.init(wltt);
-			String ts = String.valueOf(System.currentTimeMillis());
-			map.put("app_ts", ts);
-			map.put("channel", wltt.getChannel());
 			String app_sign = WlttUtils.sign(map);
 			map.put("app_sign", app_sign);
 			String params = WlttUtils.getStr(map);
 			url = url + params;
-			String postData = "{\"keyword\":\"化妆刷\",\"location\":1}";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			logger.info("wltt-{}:查询搜索热词结果|result={}", wltt.getUsername(), content);
+			JSONObject object = JSONObject.parseObject(content);
+			if(object.getIntValue("status")==1000) {
+				return object;
+				//{"data":{"today_search_num":10,"search_task_rewards":[{"search_num":10,"reward_coin":400,"had_receive":false,"can_receive":true},{"search_num":20,"reward_coin":500,"had_receive":false,"can_receive":false},{"search_num":30,"reward_coin":600,"had_receive":false,"can_receive":false}],"hot_keywords":[{"id":0,"keyword":"东南镇"},{"id":0,"keyword":"东南隅街道"},{"id":0,"keyword":"东博寮海峡"},{"id":0,"keyword":"东卜乡"},{"id":0,"keyword":"东卜子村"},{"id":0,"keyword":"东卡林场"},{"id":0,"keyword":"凝结水箱"},{"id":0,"keyword":"谜底"},{"id":0,"keyword":"旱地农业"},{"id":0,"keyword":"去我家"}]},"desc":"","status":1000}
+			}
+		} catch (Exception e) {
+			logger.error("wltt-{}:查询搜索热词发生异常!{}", wltt.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+	
+	public boolean searchStart(String keyword, String keyword_id) {
+		try {
+			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/search/v2?";
+			Map<String, String> map = WlttUtils.init(wltt);
+			String app_sign = WlttUtils.sign(map);
+			map.put("app_sign", app_sign);
+			String params = WlttUtils.getStr(map);
+			url = url + params;
+			String postData = "{\"keyword\":\""+keyword+"\",\"keyword_id\":\""+keyword_id+"\",\"location\":1}";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
+			heads.put("Content-Type", "application/json; charset=utf-8");
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			logger.info("wltt-{}:搜索开始结果|result={}", wltt.getUsername(), content);
+			JSONObject object = JSONObject.parseObject(content);
+			if(object.getIntValue("status")==1000) {
+				return true;
+			}
+		} catch (Exception e) {
+			logger.error("wltt-{}:搜索开始时发生异常!{}", wltt.getUsername(), e.getMessage());
+		}
+		return false;
+	}
+	
+	public boolean searchEnd(String keyword, String keyword_id) {
+		try {
+			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/auth/search/confirm?";
+			Map<String, String> map = WlttUtils.init(wltt);
+			String app_sign = WlttUtils.sign(map);
+			map.put("app_sign", app_sign);
+			String params = WlttUtils.getStr(map);
+			url = url + params;
+			String postData = "{\"keyword\":\""+keyword+"\",\"keyword_id\":\""+keyword_id+"\",\"location\":1}";
 			Map<String, String> heads = new HashMap<String, String>();
 			heads.put("Accept-Encoding", "gzip");
 			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
@@ -522,10 +568,38 @@ public class WlttHttp {
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
 			logger.info("wltt-{}:搜索结果|result={}", wltt.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
+			if(object.getIntValue("status")==1000) {
+				return true;
+			}
 		} catch (Exception e) {
 			logger.error("wltt-{}:搜索时发生异常!{}", wltt.getUsername(), e.getMessage());
 		}
-
+		return false;
+	}
+	
+	public boolean finishSearchTask(int num) {
+		try {
+			String url = "https://wltask.weilitoutiao.net/wltask/api/coin/auth/search/task/receive_reward?";
+			Map<String, String> map = WlttUtils.init(wltt);
+			String app_sign = WlttUtils.sign(map);
+			map.put("app_sign", app_sign);
+			String params = WlttUtils.getStr(map);
+			url = url + params;
+			String postData = "{\"search_num\":"+num+"}";
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
+			heads.put("Content-Type", "application/json; charset=utf-8");
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			logger.info("wltt-{}:完成搜索{}次任务结果|result={}", wltt.getUsername(), num, content);
+			JSONObject object = JSONObject.parseObject(content);
+			if(object.getIntValue("status")==1000) {
+				return true;
+			}
+		} catch (Exception e) {
+			logger.error("wltt-{}:完成搜索任务发生异常!{}", wltt.getUsername(), e.getMessage());
+		}
+		return false;
 	}
 
 	public void ad() {
@@ -543,18 +617,20 @@ public class WlttHttp {
 					+ "\",\"lan\":\"zh\",\"ssid\":\"\",\"root\":0,\"zone\":\"+008\",\"nation\":\"CN\"},\"geo\":{\"lat\":\""
 					+ wltt.getLat() + "\",\"lon\":\"" + wltt.getLon() + "\"}}";
 			Map<String, String> heads = new HashMap<String, String>();
-			heads.put("Accept", "application/json, text/plain, */*");
 			heads.put("Accept-Encoding", "gzip");
 			heads.put("User-Agent", wltt.getUserAgent() + userAgentEnd);
-			heads.put("Content-Type", "application/json");
+			heads.put("Content-Type", "application/json; charset=utf-8");
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
 			logger.info("wltt-{}:发送广告|result={}", wltt.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getIntValue("status") == 1000) {
-				JSONArray list = object.getJSONArray("data").getJSONObject(0).getJSONArray("view_track_urls");
-				for (int i = 0; i < list.size(); i++) {
-					String adUrl = list.getString(i);
-					adView(adUrl);
+				JSONArray data = object.getJSONArray("data");
+				if(data!=null&&data.size()>0) {
+					JSONArray list = object.getJSONArray("data").getJSONObject(0).getJSONArray("view_track_urls");
+					for (int i = 0; i < list.size(); i++) {
+						String adUrl = list.getString(i);
+						adView(adUrl);
+					}
 				}
 			}
 		} catch (Exception e) {

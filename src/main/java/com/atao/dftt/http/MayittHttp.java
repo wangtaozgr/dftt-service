@@ -164,6 +164,7 @@ public class MayittHttp {
 			String p = PubKeySignature.a(data);
 			map = new HashMap<String, String>();
 			map.put("p", p);
+			map.put("application_id", "com.ldzs.zhangxin");
 			String postData = MayittUtils.getMultipartStr(map, boundary);
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
@@ -511,23 +512,45 @@ public class MayittHttp {
 			Elements taskEl = doc.getElementsByClass("Earns-kankan");
 			Elements hongbaoEl = doc.getElementsByClass("Earns-hongbao");
 			JSONObject object = new JSONObject();
-			if (taskEl != null) {
+			if (taskEl != null&&taskEl.size()>0) {
 				String c = taskEl.get(0).attr("onclick");
 				int start = c.indexOf("openWindows('") + 13;
 				int end = c.indexOf("'", start);
 				String kankanUrl = c.substring(start, end);
 				logger.info("mayitt-{}: 解析任务中心的看看赚地址成功 url={}", user.getUsername(), kankanUrl);
 				object.put("kankanUrl", kankanUrl);
+			}else {
+				taskEl = doc.getElementsByClass("EarnsU");
+				String c = taskEl.get(0).attr("onclick");
+				int start = c.indexOf("openWindows('") + 13;
+				int end = c.indexOf("'", start);
+				String kankanUrl = c.substring(start, end);
+				logger.info("mayitt-{}: 解析任务中心的看看赚地址成功 url={}", user.getUsername(), kankanUrl);
+				object.put("kankanUrl", kankanUrl);
+
 			}
-			if (hongbaoEl != null) {
+			if (hongbaoEl != null&&hongbaoEl.size()>0) {
+				hongbaoEl = doc.getElementsByClass("Earns-hongbao");
 				String c = hongbaoEl.get(0).attr("onclick");
 				int start = c.indexOf("openWindows('") + 13;
 				int end = c.indexOf("'", start);
 				String hongbaoUrl = c.substring(start, end);
 				logger.info("mayitt-{}: 解析任务中心的红包赚地址成功 url={}", user.getUsername(), hongbaoUrl);
 				object.put("hongbaoUrl", hongbaoUrl);
+			}else {
+				hongbaoEl = doc.getElementsByTag("li");
+				for(Element hb : hongbaoEl) {
+					if("红包赚".equals(hb.text())) {
+						String c = hb.attr("onclick");
+						int start = c.indexOf("openWindows('") + 13;
+						int end = c.indexOf("'", start);
+						String hongbaoUrl = c.substring(start, end);
+						logger.info("mayitt-{}: 解析任务中心的红包赚地址成功 url={}", user.getUsername(), hongbaoUrl);
+						object.put("hongbaoUrl", hongbaoUrl);
+					}
+				}
+				
 			}
-			logger.error("mayitt-{}:查询kkUrl页面异常,content={}", user.getUsername(), content);
 			return object;
 		} catch (Exception e) {
 			logger.error("mayitt-{}:查询kkUrl页面异常,msg={}", user.getUsername(), content);
@@ -590,7 +613,7 @@ public class MayittHttp {
 					content.indexOf("'", content.indexOf("/TaskCenter/task_browse?")));
 			hongbaoApiUrl = "https://ktt.woyaoq.com" + hongbaoApiUrl;
 			object.put("hongbaoApiUrl", hongbaoApiUrl);
-			logger.info("mayitt-{}:查询adTaskUrl页面异常,msg={}", user.getUsername(), object);
+			logger.info("mayitt-{}:查询adTaskUrl,object={}", user.getUsername(), object);
 			return object;
 		} catch (Exception e) {
 			logger.error("mayitt-{}:查询adTaskUrl页面异常,msg={}", user.getUsername(), e.getMessage());
@@ -649,7 +672,7 @@ public class MayittHttp {
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 			content = content.replace("\r\n", "").replace("\r", "").replace("\t", "");
 			int start = content.indexOf("var e=") + 6;
-			int end = content.indexOf("}]};", start) + 3;
+			int end = content.indexOf("};", start) + 1;
 			content = content.substring(start, end);
 			JSONObject object = JSONObject.parseObject(content);
 			adTaskData = object;

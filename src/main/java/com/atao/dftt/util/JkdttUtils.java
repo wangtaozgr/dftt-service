@@ -23,8 +23,8 @@ import com.atao.dftt.util.jkdtt.b;
 public class JkdttUtils {
 	public static Random random = new Random();
 
-	public static int appversioncode = 597;
-	public static String appversion = "5.9.7";
+	public static int appversioncode = 610;
+	public static String appversion = "6.1.0";
 	public static String appversiontoken = "32";
 	public static String apptoken = "xzwltoken070704";
 	public static String appid = "xzwl";

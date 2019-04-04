@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.atao.base.util.StringUtils;
 import com.atao.dftt.model.ZqttUser;
 import com.atao.dftt.util.CommonUtils;
+import com.atao.dftt.util.ZqttUtils;
 import com.atao.dftt.util.MobileHttpUrlConnectUtils;
 import com.atao.dftt.util.TaottUtils;
 import com.atao.dftt.util.ZqttUtils;
@@ -183,11 +185,12 @@ public class ZqttHttp {
 					+ ZqttUtils.app_version + "&channel=" + user.getChannel();
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
-			if (object.getIntValue("status") == 1) {
+			if ((object.getIntValue("status") == 1) || (object.getIntValue("status") == 4)) {
 				logger.info("zqtt-{}:签到成功", user.getUsername());
 				return true;
 			}
 			logger.error("zqtt-{}:签到失败, result={}", user.getUsername(), object.toJSONString());
+			return true;
 		} catch (Exception e) {
 			logger.error("zqtt-{}:打卡异常,msg={}", user.getUsername(), e.getMessage());
 		}
@@ -278,7 +281,6 @@ public class ZqttHttp {
 			heads.put("Accept-Encoding", "gzip");
 			heads.put("User-Agent", "okhttp/3.3.0");
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			logger.info(content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return true;
@@ -301,7 +303,6 @@ public class ZqttHttp {
 			heads.put("Accept-Encoding", "gzip");
 			heads.put("User-Agent", "okhttp/3.3.0");
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			logger.info(content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return true;
@@ -325,7 +326,6 @@ public class ZqttHttp {
 			heads.put("Accept-Encoding", "gzip");
 			heads.put("User-Agent", "okhttp/3.3.0");
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-			logger.info(content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return true;
@@ -407,7 +407,7 @@ public class ZqttHttp {
 			String p = PubKeySignature.a(data);
 			url = url + "p=" + p;
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-			logger.error("zqtt-{}:进入新闻,content={}", user.getUsername(), content);
+			// logger.info("zqtt-{}:进入新闻,content={}", user.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return object;
@@ -434,7 +434,7 @@ public class ZqttHttp {
 			map.put("sign", sign);
 			String postData = ZqttUtils.getMultipartStr(map, boundary);
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			logger.info("zqtt-{}:离开新闻,content={}", user.getUsername(), content);
+			// logger.info("zqtt-{}:离开新闻,content={}", user.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return object;
@@ -477,7 +477,7 @@ public class ZqttHttp {
 			map.put("sign", sign);
 			String postData = ZqttUtils.getMultipartStr(map, boundary);
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			logger.info("zqtt-{}:文章列表统计,content={}", user.getUsername(), content);
+			// logger.info("zqtt-{}:文章列表统计,content={}", user.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return object;
@@ -488,8 +488,8 @@ public class ZqttHttp {
 		}
 		return null;
 	}
-	
-	//用户阅读时长
+
+	// 用户阅读时长
 	public JSONObject user_readtime(int second) {
 		try {
 			String url = "https://kandian.youth.cn/v5/user/stay.json?";
@@ -497,7 +497,7 @@ public class ZqttHttp {
 			String boundary = UUID.randomUUID().toString();
 			heads.put("Content-Type", "multipart/form-data; boundary=" + boundary);
 			Map<String, String> map = new HashMap<String, String>();
-			map.put("second", second+"");
+			map.put("second", second + "");
 			map.put("sm_device_id", user.getSmDeviceId());
 			map.put("zqkey_id", user.getZqkeyId());
 			map.put("zqkey", user.getZqkey());
@@ -519,7 +519,7 @@ public class ZqttHttp {
 			map.put("p", p);
 			String postData = ZqttUtils.getMultipartStr(map, boundary);
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			logger.info("zqtt-{}:用户阅读时长,content={}", user.getUsername(), content);
+			// logger.info("zqtt-{}:用户阅读时长,content={}", user.getUsername(), content);
 			JSONObject object = JSONObject.parseObject(content);
 			if (object.getBooleanValue("success")) {
 				return object;
@@ -609,6 +609,302 @@ public class ZqttHttp {
 		return null;
 	}
 
+	//////////////////////////////////// 看看赚///////////////////////////////////
+	/**
+	 * 看看赚任务列表
+	 * 
+	 * @return
+	 */
+	public JSONObject taskApi() {
+		String url = "https://kd.youth.cn/Nameless/task_browse?";
+		try {
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "*/*");
+			heads.put("Accept-Encoding", "gzip, deflate");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("X-Requested-With", "XMLHttpRequest");
+			heads.put("Origin", "https://kd.youth.cn");
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("access", "WIFI");
+			map.put("app-version", ZqttUtils.app_version);
+			map.put("carrier", CommonUtils.encode(user.getCarrier()));
+			map.put("channel", user.getChannel());
+			map.put("cookie", user.getZqkey());
+			map.put("cookie_id", user.getZqkeyId());
+			map.put("device_brand", user.getBrand());
+			map.put("device_id", user.getDeviceId());
+			map.put("device_model", CommonUtils.encode(user.getModel()));
+			map.put("device_type", "android");
+			map.put("mc", user.getMac());
+			map.put("openudid", user.getOpenudid());
+			map.put("os_api", user.getOsApi());
+			map.put("os_version", user.getOsVersion());
+			String request_time = System.currentTimeMillis() / 1000 + "";
+			map.put("request_time", request_time);
+			map.put("resolution", "1080.0x1920.0");
+			map.put("sim", "1");
+			map.put("sm_device_id", user.getSmDeviceId());
+			map.put("subv", ZqttUtils.subv);
+			map.put("uid", user.getUserId());
+			map.put("version_code", ZqttUtils.version_code);
+			map.put("zqkey", user.getZqkey());
+			map.put("zqkey_id", user.getZqkeyId());
+			String postData = ZqttUtils.getStr(map);
+			url = url + postData;
+			String content = MobileHttpUrlConnectUtils.httpPost(url, null, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			logger.info("zqtt-{}: taskApi数据={}", user.getUsername(), object.toJSONString());
+			return object;
+		} catch (Exception e) {
+			logger.error("zqtt-{}:查询taskApi异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * 看看赚任务开始
+	 * 
+	 * @param task_id
+	 * @return
+	 */
+	public JSONObject adlickstart(String task_id) {
+		try {
+			String url = "http://kandian.youth.cn/v5/nameless/adlickstart.json?";
+			//http://140.249.247.238/zzapp/qqshop/stat/qqshp_client_log_wl_conf.json?mType=VIP_shop_assit_cfg
+			Map<String, String> heads = ZqttUtils.initHeader(user);
+			String boundary = UUID.randomUUID().toString();
+			heads.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("task_id", task_id);
+			map.put("sm_device_id", user.getSmDeviceId());
+			map.put("zqkey_id", user.getZqkeyId());
+			map.put("zqkey", user.getZqkey());
+			map.put("channel", user.getChannel());
+			map.put("device_id", user.getDeviceId());
+			map.put("app-version", ZqttUtils.app_version);
+			map.put("version_code", ZqttUtils.version_code);
+			String request_time = System.currentTimeMillis() / 1000 + "";
+			map.put("request_time", request_time);
+			map.put("uid", user.getUserId());
+			String sign = ZqttUtils.sign(map);
+			String data = "task_id=" + task_id + "&sm_device_id=" + user.getSmDeviceId() + "&zqkey_id="
+					+ user.getZqkeyId() + "&zqkey=" + user.getZqkey() + "&channel=" + user.getChannel() + "&device_id="
+					+ user.getDeviceId() + "&app_version=" + ZqttUtils.app_version + "&version_code="
+					+ ZqttUtils.version_code + "&request_time=" + request_time + "&uid=" + user.getUserId() + "&sign="
+					+ sign;
+			String p = PubKeySignature.a(data);
+			map = new HashMap<String, String>();
+			map.put("p", p);
+			String postData = ZqttUtils.getMultipartStr(map, boundary);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getBooleanValue("success")||object.getString("error_code").equals("000000")) {
+				logger.info("zqtt-{}:adlickstart,content={}", user.getUsername(), content);
+				return object;
+			}
+			logger.error("zqtt-{}:读取其它任务失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("zqtt-{}:读取其它任务异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * 看看赚任务进度完成
+	 * 
+	 * @param task_id
+	 * @return
+	 */
+	public JSONObject bannerstatus(String task_id) {
+		try {
+			String url = "https://kandian.youth.cn/v5/nameless/bannerstatus.json?";
+			Map<String, String> heads = ZqttUtils.initHeader(user);
+			String boundary = UUID.randomUUID().toString();
+			heads.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("task_id", task_id);
+			map.put("sm_device_id", user.getSmDeviceId());
+			map.put("zqkey_id", user.getZqkeyId());
+			map.put("zqkey", user.getZqkey());
+			map.put("channel", user.getChannel());
+			map.put("device_id", user.getDeviceId());
+			map.put("app-version", ZqttUtils.app_version);
+			map.put("version_code", ZqttUtils.version_code);
+			String request_time = System.currentTimeMillis() / 1000 + "";
+			map.put("request_time", request_time);
+			map.put("uid", user.getUserId());
+			String sign = ZqttUtils.sign(map);
+			String data = "task_id=" + task_id + "&sm_device_id=" + user.getSmDeviceId() + "&zqkey_id="
+					+ user.getZqkeyId() + "&zqkey=" + user.getZqkey() + "&channel=" + user.getChannel() + "&device_id="
+					+ user.getDeviceId() + "&app_version=" + ZqttUtils.app_version + "&version_code="
+					+ ZqttUtils.version_code + "&request_time=" + request_time + "&uid=" + user.getUserId() + "&sign="
+					+ sign;
+			String p = PubKeySignature.a(data);
+			map = new HashMap<String, String>();
+			map.put("p", p);
+			String postData = ZqttUtils.getMultipartStr(map, boundary);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getBooleanValue("success")) {
+				return object;
+			}
+			logger.error("zqtt-{}:读取其它任务失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("zqtt-{}:读取其它任务异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * 看看赚任务完成
+	 * 
+	 * @param task_id
+	 * @return
+	 */
+	public JSONObject adlickend(String task_id) {
+		try {
+			String url = "https://kandian.youth.cn/v5/nameless/adlickend.json?";
+						//https://kandian.youth.cn/v5/Sousuo/adlickend.json?
+			Map<String, String> heads = ZqttUtils.initHeader(user);
+			String boundary = UUID.randomUUID().toString();
+			heads.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("task_id", task_id);
+			map.put("sm_device_id", user.getSmDeviceId());
+			map.put("zqkey_id", user.getZqkeyId());
+			map.put("zqkey", user.getZqkey());
+			map.put("channel", user.getChannel());
+			map.put("device_id", user.getDeviceId());
+			map.put("app-version", ZqttUtils.app_version);
+			map.put("version_code", ZqttUtils.version_code);
+			String request_time = System.currentTimeMillis() / 1000 + "";
+			map.put("request_time", request_time);
+			map.put("uid", user.getUserId());
+			String sign = ZqttUtils.sign(map);
+			String data = "task_id=" + task_id + "&sm_device_id=" + user.getSmDeviceId() + "&zqkey_id="
+					+ user.getZqkeyId() + "&zqkey=" + user.getZqkey() + "&channel=" + user.getChannel() + "&device_id="
+					+ user.getDeviceId() + "&app_version=" + ZqttUtils.app_version + "&version_code="
+					+ ZqttUtils.version_code + "&request_time=" + request_time + "&uid=" + user.getUserId() + "&sign="
+					+ sign;
+			String p = PubKeySignature.a(data);
+			map = new HashMap<String, String>();
+			map.put("p", p);
+			String postData = ZqttUtils.getMultipartStr(map, boundary);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getBooleanValue("success")) {
+				logger.info("zqtt-{}:adlickend,content={}", user.getUsername(), content);
+				return object;
+			}
+			logger.error("zqtt-{}:读取其它任务失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("zqtt-{}:读取其它任务异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+	
+	public JSONObject appStay(int second) {
+		try {
+			String url = "http://kandian.youth.cn/v5/user/app_stay.json?";
+			Map<String, String> heads = ZqttUtils.initHeader(user);
+			String boundary = UUID.randomUUID().toString();
+			heads.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("second", second+"");
+			map.put("sm_device_id", user.getSmDeviceId());
+			map.put("zqkey_id", user.getZqkeyId());
+			map.put("zqkey", user.getZqkey());
+			map.put("channel", user.getChannel());
+			map.put("device_id", user.getDeviceId());
+			map.put("app-version", ZqttUtils.app_version);
+			map.put("version_code", ZqttUtils.version_code);
+			String request_time = System.currentTimeMillis() / 1000 + "";
+			map.put("request_time", request_time);
+			map.put("uid", user.getUserId());
+			String sign = ZqttUtils.sign(map);
+			String data = "second=" + second + "&sm_device_id=" + user.getSmDeviceId() + "&zqkey_id="
+					+ user.getZqkeyId() + "&zqkey=" + user.getZqkey() + "&channel=" + user.getChannel() + "&device_id="
+					+ user.getDeviceId() + "&app_version=" + ZqttUtils.app_version + "&version_code="
+					+ ZqttUtils.version_code + "&request_time=" + request_time + "&uid=" + user.getUserId() + "&sign="
+					+ sign;
+			String p = PubKeySignature.a(data);
+			map = new HashMap<String, String>();
+			map.put("p", p);
+			String postData = ZqttUtils.getMultipartStr(map, boundary);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getBooleanValue("success")) {
+				logger.info("zqtt-{}:appStay,content={}", user.getUsername(), content);
+				return object;
+			}
+			logger.error("zqtt-{}:搜索任务页面停留计时失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("zqtt-{}:搜索任务页面停留计时异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+	
+	//////////////////////////////////搜索任务//////////////////////////////////
+	/**
+	 * 搜索任务信息
+	 * 
+	 * @param task_id
+	 * @return
+	 */
+	public JSONObject dayWelfareInfo() {
+		try {
+			String url = "https://kd.youth.cn/WebApi/Sousuo/dayWelfareInfo?_="+new Date().getTime();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept", "application/json");
+			heads.put("X-Requested-With", "XMLHttpRequest");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Accept-Encoding", "gzip, deflate");
+			heads.put("Content-Type", "application/x-www-form-urlencoded");
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("access", "WIFI");
+			map.put("app-version", ZqttUtils.app_version);
+			map.put("carrier", CommonUtils.encode(user.getCarrier()));
+			map.put("channel", user.getChannel());
+			map.put("cookie", user.getZqkey());
+			map.put("cookie_id", user.getZqkeyId());
+			map.put("device_brand", user.getBrand());
+			map.put("device_id", user.getDeviceId());
+			map.put("device_model", CommonUtils.encode(user.getModel()));
+			map.put("device_type", "android");
+			map.put("mc", user.getMac());
+			map.put("openudid", user.getOpenudid());
+			map.put("os_api", user.getOsApi());
+			map.put("os_version", user.getOsVersion());
+			String request_time = System.currentTimeMillis() / 1000 + "";
+			map.put("request_time", request_time);
+			map.put("resolution", "1080.0x1920.0");
+			map.put("sim", "1");
+			map.put("sm_device_id", user.getSmDeviceId());
+			map.put("subv", ZqttUtils.subv);
+			map.put("uid", user.getUserId());
+			map.put("version_code", ZqttUtils.version_code);
+			String params = ZqttUtils.getStr(map);
+			String referer = "https://kandian.youth.cn/html/dayWelfare/index1.html?"+params;
+			heads.put("Referer", referer);
+			String postData = "tab=1";
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
+			JSONObject object = JSONObject.parseObject(content);
+			if (object.getIntValue("status")==1) {
+				return object;
+			}
+			logger.error("zqtt-{}:读取搜索任务信息失败,content={}", user.getUsername(), content);
+		} catch (Exception e) {
+			logger.error("zqtt-{}:读取搜索任务信息异常,msg={}", user.getUsername(), e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * 提现所有列表
+	 * 
+	 * @param type
+	 * @return
+	 */
 	public JSONArray cointxList(String type) {
 		try {
 			String url = "https://kandian.youth.cn/v6/withdraw/payMethodList.json?";
@@ -743,7 +1039,8 @@ public class ZqttHttp {
 				JSONObject event = eventList.getJSONObject(i);
 				event.put("_flush_time", System.currentTimeMillis());
 			}
-			logger.info("zqtt-{}:发送日志data={}", user.getUsername(), eventList.toJSONString());
+			// logger.info("zqtt-{}:发送日志data={}", user.getUsername(),
+			// eventList.toJSONString());
 			String x = TaottUtils.encodeData(eventList.toJSONString());
 			int crc = x.hashCode();
 			String url = "https://sc.baertt.com:8106/sa?project=production";
@@ -754,7 +1051,7 @@ public class ZqttHttp {
 					"Dalvik/2.1.0 (Linux; U; Android " + user.getLogOsVersion() + "; " + user.getModel() + ")");
 			heads.put("Content-Type", "application/x-www-form-urlencoded");
 			int code = MobileHttpUrlConnectUtils.httpPostStatusCode(url, postData, heads, null);
-			logger.info("zqtt-{}:发送日志结果|code={}", user.getUsername(), code);
+			// logger.info("zqtt-{}:发送日志结果|code={}", user.getUsername(), code);
 			if (code == 200)
 				return true;
 		} catch (Exception e) {
@@ -768,6 +1065,7 @@ public class ZqttHttp {
 		user.setUsername("17755117870");
 		user.setUserId("39781740");
 		ZqttHttp http = ZqttHttp.getInstance(user);
+		http.dayWelfareInfo();
 	}
 
 }

@@ -1,7 +1,8 @@
 package com.atao.dftt.quartz;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
@@ -11,9 +12,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.atao.dftt.model.ZqttUser;
+import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.ZqttCoinRecordWyService;
 import com.atao.dftt.service.ZqttUserWyService;
-import com.atao.dftt.thread.ZqttReadCoinThread;
 
 @Component
 public class ZqttReadJob {
@@ -23,37 +24,54 @@ public class ZqttReadJob {
 	private ZqttUserWyService zqttUserWyService;
 	@Resource
 	private ZqttCoinRecordWyService zqttCoinRecordWyService;
-
-	@Scheduled(cron = "0 11,22,33,44,55 6-9,11-23 * * ?")
-	public void readZqttNews() {
+	@Resource
+	private AsynService asynService;
+	
+	@Scheduled(cron = "0 2/13 6-9,11-23 * * ?")
+	public void readZqttNews() throws Exception {
+		logger.info("zqtt:开始阅读新闻金币任务");
 		List<ZqttUser> users = zqttUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (ZqttUser user : users) {
-			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
-			ZqttReadCoinThread thread = new ZqttReadCoinThread(endTime, user, zqttUserWyService, 0);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Future<Integer> future = asynService.readZqttNews(user);
+			futures.add(future);
 		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("zqtt:结束阅读新闻金币任务");
 	}
-
-	//@Scheduled(cron = "0 11,22,33,44,55 10-23 * * ?")
-	public void readZqttVideo() {
+	
+	@Scheduled(cron = "0 0,10,20,30,40,50 13,17 * * ?")
+	public void readZqttKkzTask() throws Exception {
+		logger.info("zqtt:开始阅读看看赚金币任务");
 		List<ZqttUser> users = zqttUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (ZqttUser user : users) {
-			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
-			ZqttReadCoinThread thread = new ZqttReadCoinThread(endTime, user, zqttUserWyService, 1);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Future<Integer> future = asynService.readZqttKkzTask(user);
+			futures.add(future);
 		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("zqtt:结束阅读看看赚金币任务");
 	}
-
+	
+	//@Scheduled(cron = "0 0,10,20,30,40,50 15,20 * * ?")
+	public void searchTask() throws Exception {
+		logger.info("zqtt:开始阅读搜索任务金币任务");
+		List<ZqttUser> users = zqttUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
+		for (ZqttUser user : users) {
+			Future<Integer> future = asynService.searchTask(user);
+			futures.add(future);
+		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("zqtt:结束阅读搜索任务金币任务");
+	}
+	
 	/**
 	 * 每小时打一次卡
 	 */
@@ -63,13 +81,12 @@ public class ZqttReadJob {
 		for (ZqttUser user : users) {
 			zqttUserWyService.daka(user);
 		}
-
 	}
 
 	/**
 	 * 查询我的金币
 	 */
-	@Scheduled(cron = "0 0 12,18 * * ?")
+	@Scheduled(cron = "0 0 8,12,18 * * ?")
 	public void queryMyCoin() {
 		zqttCoinRecordWyService.updateAllCoin();
 	}

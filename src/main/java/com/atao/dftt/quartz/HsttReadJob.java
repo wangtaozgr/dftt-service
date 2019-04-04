@@ -1,7 +1,9 @@
 package com.atao.dftt.quartz;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
@@ -11,9 +13,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.atao.dftt.model.HsttUser;
+import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.HsttCoinRecordWyService;
 import com.atao.dftt.service.HsttUserWyService;
-import com.atao.dftt.thread.HsttReadCoinThread;
 
 @Component
 public class HsttReadJob {
@@ -23,8 +25,10 @@ public class HsttReadJob {
 	private HsttUserWyService hsttUserWyService;
 	@Resource
 	private HsttCoinRecordWyService hsttCoinRecordWyService;
+	@Resource
+	private AsynService asynService;
 
-	@Scheduled(cron = "0 11,22,33,44,55 6-9,11-23 * * ?")
+	/*@Scheduled(cron = "0 11,22,33,44,55 6-9,11-23 * * ?")
 	public void readHsttNews() {
 		List<HsttUser> users = hsttUserWyService.getUsedUser();
 		for (HsttUser user : users) {
@@ -37,10 +41,25 @@ public class HsttReadJob {
 				e.printStackTrace();
 			}
 		}
+	}*/
+	
+	@Scheduled(cron = "0 1/11 6-9,11-23 * * ?")
+	public void readMayittNews() throws Exception {
+		logger.info("hstt:开始阅读新闻金币任务");
+		List<HsttUser> users = hsttUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
+		for (HsttUser user : users) {
+			Future<Integer> future = asynService.readHsttNews(user);
+			futures.add(future);
+		}
+		for (Future<Integer> future : futures) {
+			future.get();
+		}
+		logger.info("hstt:结束阅读新闻金币任务");
 	}
 
 	//@Scheduled(cron = "0 11,22,33,44,55 10-23 * * ?")
-	public void readHsttVideo() {
+	/*public void readHsttVideo() {
 		List<HsttUser> users = hsttUserWyService.getUsedUser();
 		for (HsttUser user : users) {
 			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
@@ -52,29 +71,21 @@ public class HsttReadJob {
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 
-	@Scheduled(cron = "0 0 12,15,18 * * ?")
-	public void readHotword() {
+	@Scheduled(cron = "0 0/20 12,15,18 * * ?")
+	public void readHsttHotWord() throws Exception {
+		logger.info("hstt:开始搜索任务");
 		List<HsttUser> users = hsttUserWyService.getUsedUser();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (HsttUser user : users) {
-			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
-			HsttReadCoinThread thread = new HsttReadCoinThread(endTime, user, hsttUserWyService, 2);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Future<Integer> future = asynService.searchTask(user);
+			futures.add(future);
 		}
-	}
-
-	@Scheduled(cron = "0 0 19 * * ?")
-	public void searchreward() throws Exception {
-		List<HsttUser> users = hsttUserWyService.getUsedUser();
-		for (HsttUser user : users) {
-			hsttUserWyService.searchreward(user);
+		for (Future<Integer> future : futures) {
+			future.get();
 		}
+		logger.info("hstt:结束搜索任务");
 	}
 
 	/**
@@ -97,7 +108,7 @@ public class HsttReadJob {
 		hsttCoinRecordWyService.updateAllCoin();
 	}
 
-	@Scheduled(cron = "0 10 9 * * ?")
+	@Scheduled(cron = "0 06 9 * * ?")
 	public void cointx() {
 		List<HsttUser> users = hsttUserWyService.getUsedUser();
 		for (HsttUser user : users) {

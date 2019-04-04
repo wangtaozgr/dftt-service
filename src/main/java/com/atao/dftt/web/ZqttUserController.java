@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
 import com.atao.base.controller.BaseController;
 import com.atao.base.service.BaseService;
 import com.atao.dftt.http.ZqttHttp;
 import com.atao.dftt.model.ZqttUser;
 import com.atao.dftt.service.ZqttUserWyService;
-import com.atao.dftt.thread.ZqttReadCoinThread;
 
 /**
  *
@@ -34,7 +32,15 @@ public class ZqttUserController extends BaseController<ZqttUser> {
 
 	@RequestMapping("/test")
 	public String test() throws Exception {
-		//ZqttUser user = zqttUserWyService.queryById(1);
+		ZqttUser user = zqttUserWyService.queryById(2);
+		ZqttHttp http = ZqttHttp.getInstance(user);
+		zqttUserWyService.searchTask(user);
+		//zqttUserWyService.readNewsCoin(user);
+		//http.newsList();
+		//http.article_collect("13984387");
+		//zqttUserWyService.readNewsCoin(user);
+		//zqttUserWyService.readNewsCoin(user);
+		//zqttUserWyService.readNewsCoin(user);
 		//ZqttHttp http = ZqttHttp.getInstance(user);
 		/*
 		 * Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
@@ -48,17 +54,7 @@ public class ZqttUserController extends BaseController<ZqttUser> {
 		 */
 		// http.cointxWx(1);
 
-		List<ZqttUser> users = zqttUserWyService.getUsedUser();
-		for (ZqttUser user : users) {
-			Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
-			ZqttReadCoinThread thread = new ZqttReadCoinThread(endTime, user, zqttUserWyService, 0);
-			thread.start();
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		
 		return null;
 	}
 }

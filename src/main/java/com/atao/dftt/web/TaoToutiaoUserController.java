@@ -35,9 +35,9 @@ public class TaoToutiaoUserController extends BaseController<TaoToutiaoUser> {
 
 	@RequestMapping("/test")
 	public String test() throws Exception {
-		TaoToutiaoUser user = taoToutiaoUserWyService.queryById(1);
+		TaoToutiaoUser user = taoToutiaoUserWyService.queryById(2);
 		TaottHttp http = TaottHttp.getInstance(user);
-		taoToutiaoUserWyService.cointx(user);
+		taoToutiaoUserWyService.readNewsCoin(user);
 		/*JSONObject result = http.readNews("10920889");
 		 if (result.getIntValue("code") == 20012) {// 用户登陆过期
 				JSONObject loginInfo = http.login();

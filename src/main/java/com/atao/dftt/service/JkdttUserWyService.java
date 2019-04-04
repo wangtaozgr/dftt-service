@@ -78,7 +78,7 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 		return super.queryOne(p, null);
 	}
 
-	public void readNewsCoin(JkdttUser user, Date endTime) throws Exception {
+	public int readNewsCoin(JkdttUser user) throws Exception {
 		JkdttHttp http = JkdttHttp.getInstance(user);
 		String today = DateUtils.formatDate(new Date(), "yyyyMMdd");
 
@@ -102,19 +102,19 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 		long readNum = user.getReadNum();
 		long vReadNum = user.getVReadNum();
 		int time = 30 * 1000 + new Random().nextInt(15000);
-		while ((readNum < user.getLimitReadNum() || vReadNum < user.getVLimitReadNum())
-				&& new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while ((readNum < user.getLimitReadNum() || vReadNum < user.getVLimitReadNum())) {
 			JSONArray newsList = http.newsList();
 			if (newsList.size() < 1) {
 				logger.info(user.getUsername() + ":没有查到新闻列表!");
-				continue;
+				return readedNum;
 			}
 			for (int i = 0; i < newsList.size(); i++) {
 				time = 30 * 1000 + new Random().nextInt(15000);
 				JSONObject news = newsList.getJSONObject(i);
 				if ("article".equals(news.getString("item_type"))) {
-					if (readNum >= user.getLimitReadNum())
+					if (readNum >= user.getLimitReadNum()) {
 						continue;
+					}
 					String newsId = news.getString("art_id");
 					String open_url = news.getString("open_url");
 					http.newsDetail(open_url);
@@ -129,8 +129,6 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 					http.reportAd("bd_jssdk", "JSSDK", "", "百度", http.bdjssdkId, "", "", "webview", "");
 					Thread.sleep(time);
 					JSONObject result = http.readNews(newsId);
-					if (result == null)
-						return;
 					if ("ok".equals(result.getString("ret"))) {
 						JSONObject readNewsCount = http.readNewsLog(newsId);
 						if ("ok".equals(readNewsCount.getString("ret"))) {
@@ -143,12 +141,9 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 						user.setVReadNum(vReadNum);
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
-						if (readNum >= user.getLimitReadNum())
-							break;
-						if (readedNum >= 10)
-							break;
-						if (new Date().getTime() > endTime.getTime())
-							break;
+						if (readNum >= user.getLimitReadNum()) {
+							return readedNum;
+						}
 					} else if ("R-ART-1004".equals(result.getString("rtn_code"))) {
 						logger.error("jkdtt-{}:读取新闻异常 content={}", user.getUsername(), "验证失败,请重启APP");
 						JSONObject loginInfo = http.login();
@@ -159,7 +154,7 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 								logger.error("jkdtt-{}:用户帐号异常，可能被封了", user.getUsername());
 								user.setUsed(false);
 								super.updateBySelect(user);
-								return;
+								return readedNum;
 							}
 							http.bdjssdkId = bdjssdkId;
 							String spRequestTokenKey = JkdttUtils.getSpRequestTokenKey(skey, user.getOpenId());
@@ -167,13 +162,13 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 								logger.error("jkdtt-{}:用户帐号异常，可能被封了", user.getUsername());
 								user.setUsed(false);
 								super.updateBySelect(user);
-								return;
+								return readedNum;
 							}
 							user.setX(spRequestTokenKey);
 							super.updateBySelect(user);
 							http = http.refreshUser(user);
 						}
-						return;
+						continue;
 					} else if ("R-ART-1000".equals(result.getString("rtn_code"))) {
 						logger.error("jkdtt-{}:新闻异常 content={}", user.getUsername(), result);
 						continue;
@@ -183,7 +178,7 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
 						logger.error("jkdtt-{}:阅读新闻金币报错或已达到上限", user.getUsername());
-						break;
+						return readedNum;
 					}
 				} else if ("advert".equals(news.getString("item_type"))) {
 					http.reportAd(news);
@@ -201,8 +196,6 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 					Thread.sleep(time);
 					JSONObject artinfo = videoDetail.getJSONObject("artinfo");
 					JSONObject result = http.readVideo(newsId, artinfo.getString("securitykey"));
-					if (result == null)
-						return;
 					if ("ok".equals(result.getString("ret"))) {
 						JSONObject readNewsCount = http.readNewsLog(newsId);
 						if ("ok".equals(readNewsCount.getString("ret"))) {
@@ -215,17 +208,15 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 						user.setVReadNum(vReadNum);
 						user.setVReadTime(new Date());
 						this.updateBySelect(user);
-						if (vReadNum >= user.getVLimitReadNum())
-							break;
-						if (readedNum >= 10)
-							break;
-						if (new Date().getTime() > endTime.getTime())
-							break;
+						if (vReadNum >= user.getVLimitReadNum()) {
+							return readedNum;
+						}
 					}
 				}
 
 			}
 		}
+		return readedNum;
 	}
 
 	public void daka(JkdttUser user) {

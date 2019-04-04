@@ -74,7 +74,7 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 		return super.queryOne(p, null);
 	}
 
-	public void readNewsCoin(TaoToutiaoUser user, Date endTime) throws Exception {
+	public int readNewsCoin(TaoToutiaoUser user) throws Exception {
 		TaottHttp http = TaottHttp.getInstance(user);
 		String today = DateUtils.formatDate(new Date(), "yyyyMMdd");
 		if (user.getQdTime() == null || !today.equals(DateUtils.formatDate(user.getQdTime(), "yyyyMMdd"))) {
@@ -82,8 +82,9 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 			JSONObject task = TaottUtils.AppClick(user, "首页", "任务大厅");
 			Thread.sleep(new Random().nextInt(1000 + new Random().nextInt(1000)));
 			boolean common = http.commonV3();
-			if (!common)
-				return;
+			if (!common) {
+				return 0;
+			}
 			// 开始签到
 			boolean suc = http.qiandao();
 			if (suc) {
@@ -110,13 +111,13 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 		int readedNum = 0;
 		long readNum = user.getReadNum();
 		int time = 30 * 1000 + new Random().nextInt(15000);
-		while (readNum < user.getLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 10) {
+		while (readNum < user.getLimitReadNum()) {
 			JSONObject rwObsain = TaottUtils.AppNewsObtain(user, "下拉", "热文");
 			http.eventList.add(rwObsain);
 			JSONArray newsList = http.newsList();
 			if (newsList.size() < 1) {
 				logger.info(user.getUsername() + ":没有查到新闻列表!");
-				continue;
+				return readedNum;
 			}
 			for (int i = 0; i < newsList.size(); i++) {
 				time = 20 * 1000 + new Random().nextInt(15000);
@@ -129,8 +130,9 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 				// 发送请求
 				http.sendData();
 				JSONObject result = http.readNews(newsId);
-				if (result == null)
-					return;
+				if (result == null) {
+					return readedNum;
+				}
 				if (result.getIntValue("code") == 0) {
 					readNum = result.getJSONObject("result").getIntValue("totalTimesGot");
 					readedNum++;
@@ -138,12 +140,9 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 					user.setReadNum(readNum);
 					user.setReadTime(new Date());
 					this.updateBySelect(user);
-					if (readNum >= user.getLimitReadNum())
-						return;
-					if (readedNum >= 10)
-						return;
-					if (new Date().getTime() > endTime.getTime())
-						return;
+					if (readNum >= user.getLimitReadNum()) {
+						return readedNum;
+					}
 				} else if (result.getIntValue("code") == 20012) {// 用户登陆过期
 					JSONObject loginInfo = http.login();
 					if (loginInfo.getIntValue("code") == 0) {
@@ -165,10 +164,11 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 					user.setReadTime(new Date());
 					this.updateBySelect(user);
 					logger.error("taott-{}:阅读新闻金币报错或已达到上限", user.getUsername());
-					return;
+					return readedNum;
 				}
 			}
 		}
+		return readedNum;
 	}
 
 	public void daka(TaoToutiaoUser user) {

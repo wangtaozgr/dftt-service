@@ -21,6 +21,7 @@ import org.springframework.core.io.Resource;
 
 import com.alibaba.fastjson.JSONObject;
 import com.atao.dftt.model.Wltt;
+import com.atao.dftt.util.wltt.AES;
 
 public class WlttUtils {
 	private static char[] a = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
@@ -32,16 +33,16 @@ public class WlttUtils {
 			-1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 			10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30,
 			31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1 };
-	public static String verCode = "793";
-	public static String verName = "1.2.5";
-
+	public static String verCode = "803";
+	public static String verName = "1.3.1";
+	public static String appKey = "91988061";
 	public static Map<String, String> init(Wltt wltt) {// 13个初始化参数
 		Map<String, String> map = new HashMap<String, String>();
 		if (map != null) {
 			if (!map.containsKey("app_key")) {
 				map.put("app_key", wltt.getAppKey());
 			}
-
+					
 			if (!map.containsKey("app_ts")) {
 				map.put("app_ts", System.currentTimeMillis() + "");
 			}
@@ -88,6 +89,14 @@ public class WlttUtils {
 
 			if (!map.containsKey("device")) {
 				map.put("device", wltt.getDevice());
+			}
+			
+			if (!map.containsKey("lon")) {
+				map.put("lon", wltt.getLon());
+			}
+			
+			if (!map.containsKey("lat")) {
+				map.put("lat", wltt.getLat());
 			}
 		}
 		return map;
@@ -212,6 +221,18 @@ public class WlttUtils {
 		}
 		return "";
 	}
+	
+	public static String decode(String s) {
+		try {
+			s = WlttZipUtil.decode(s);
+			WlttCipher c = new WlttCipher();
+			s = c.decode(s);
+			return s;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 
 	public static String qiandaoEncode(String t) {
 		String code = "POST&/wltask/api/coin/h5/checkin&" + t;
@@ -279,7 +300,78 @@ public class WlttUtils {
 
 		return v1.toString();
 	}
+	
+	public static String getAdIv() {
+		return AES.genHexIv();
+	}
 
+	public static String getAdData(Wltt wltt, String arg11) {
+	        String v0;
+	        try {
+	            JSONObject v1_1 = new JSONObject(true);
+	            v1_1.put("pid", wltt.getPid());
+	            v1_1.put("ts", System.currentTimeMillis());
+	            v1_1.put("debug", 0);
+	            v1_1.put("version", "1.0.0");
+	            v1_1.put("city_key", wltt.getCityKey());
+	            JSONObject v6 = new JSONObject(true);
+	            v6.put("app_key", WlttUtils.appKey);
+	            v6.put("app_version", WlttUtils.verName);
+	            v6.put("app_version_code", WlttUtils.verCode);
+	            
+	            String postData = "{\"pid\":\"" + wltt.getPid() + "\",\"debug\":0,\"ts\":" + System.currentTimeMillis()
+				+ ",\"version\":\"1.0.0\",\"city_key\":\"" + wltt.getCityKey()
+				+ "\",\"app\":{\"bundle\":\"cn.weli.story\",\"app_key\":\"" + wltt.getAppKey() + "\",\"channel\":\""
+				+ wltt.getChannel() + "\",\"app_version\":\"" + WlttUtils.verName + "\",\"app_version_code\":"
+				+ WlttUtils.verCode + "},\"device\":{\"os\":\"" + wltt.getOs() + "\",\"osv\":\"" + wltt.getOsv()
+				+ "\",\"carrier\":3,\"network\":2,\"resolution\":\"1080*1920\",\"density\":\"3.0\",\"open_udid\":\"\",\"aid\":\""
+				+ wltt.getAndroidid() + "\",\"imei\":\"" + wltt.getImei() + "\",\"idfa\":\"\",\"mac\":\""
+				+ wltt.getMac() + "\",\"aaid\":\"\",\"duid\":\"\",\"orientation\":0,\"vendor\":\""
+				+ wltt.getVendor() + "\",\"model\":\"" + wltt.getModel()
+				+ "\",\"lan\":\"zh\",\"ssid\":\"\",\"root\":0,\"zone\":\"+008\",\"nation\":\"CN\"},\"geo\":{\"lat\":\""
+				+ wltt.getLat() + "\",\"lon\":\"" + wltt.getLon() + "\"}}";
+	            v6.put("bundle", "cn.weli.story");
+	            v6.put("channel", wltt.getChannel());
+	            v1_1.put("app", v6);
+	            JSONObject v5_1 = new JSONObject();
+	            v5_1.put("os", "Android");
+	            v5_1.put("osv", wltt.getOsv());
+	            v5_1.put("carrier", 3);
+	            v5_1.put("network", 2);
+	            v5_1.put("resolution", "1080*1920");
+	            v5_1.put("density", "3.0");
+	            v5_1.put("open_udid", "");
+	            v5_1.put("aid", wltt.getAndroidid());
+	            v5_1.put("imei", wltt.getImei());
+	            v5_1.put("imsi", wltt.getImsi());
+	            v5_1.put("idfa", "");
+	            v5_1.put("idfv", "");
+	            v5_1.put("mac", wltt.getMac());
+	            v5_1.put("aaid", "");
+	            v5_1.put("duid", "");
+	            v5_1.put("orientation", 0);
+	            v5_1.put("vendor", wltt.getVendor());
+	            v5_1.put("model", wltt.getModel());
+	            v5_1.put("lan", "zh");
+	            v5_1.put("ssid", "");
+	            v5_1.put("root", 0);
+	            v5_1.put("zone", "+008");
+	            v5_1.put("nation", "CN");
+	            //v5_1.put("sim_count", this.e());
+	            //v5_1.put("dev_debug", this.f());
+	            v1_1.put("device", v5_1);
+	            JSONObject v2_1 = new JSONObject();
+	            v2_1.put("lat", wltt.getLat());
+	            v2_1.put("lon", wltt.getLon());
+	            v1_1.put("geo", v2_1);
+	            //v0 = EcalendarLib.getInstance().doTheAESEncrypt(v1_1.toString(), arg11, 2);
+	        }
+	        catch(Exception v1) {
+	            v1.printStackTrace();
+	        }
+	        return "";
+	    }
+	 
 	public static void main(String[] args) throws Exception {
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -308,8 +400,8 @@ public class WlttUtils {
 		//4f9d9de73c0119e9d225ab28e5af8ac3
 		//map.put("product_id", "7");
 
-		String app_sign = WlttUtils.sign(map);
-		System.out.println(app_sign);
+		//String app_sign = WlttUtils.sign(map);
+		System.out.println(getAdIv());
 
 		// 7abe8fc69e6f07ad44c5e1e912bbbaae
 
@@ -324,7 +416,9 @@ public class WlttUtils {
 		v2.put("up", "ANDROID");
 		v2.put("device", "CUN-TL00863199031688357");
 
-		System.out.println(signAuthToken(v2.toJSONString().getBytes()));
+		System.out.println(decode(""));
 	}
+	
+	
 
 }

@@ -74,6 +74,14 @@ public class HsttCoinRecordWyService extends BaseService<HsttCoinRecord> {
 		params.put("sorts", "updateTime=1");
 		return super.queryPage(t, params);
 	}
+	
+	public HsttCoinRecord queryTodayMyCoin(String username) {
+		HsttCoinRecord t = new HsttCoinRecord();
+		t.setUsername(username);
+		String coinDay = DateUtils.formatDate(new Date(), "yyyyMMdd");
+		t.setCoinDay(coinDay);
+		return super.queryOne(t, null);
+	}
 
 	@Override
 	public Weekend<HsttCoinRecord> genSqlExample(HsttCoinRecord t) {

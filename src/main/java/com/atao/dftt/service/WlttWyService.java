@@ -4,9 +4,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import com.atao.dftt.http.WlttHttp;
 import com.atao.dftt.mapper.WlttMapper;
 import com.atao.dftt.model.CoinTxRecord;
 import com.atao.dftt.model.Wltt;
+import com.atao.dftt.util.JkdttUtils;
 import com.atao.dftt.util.WlttUtils;
 import com.atao.util.DateUtils;
 
@@ -40,6 +44,32 @@ public class WlttWyService extends BaseService<Wltt> {
 	@Override
 	public BaseMapper<Wltt> getMapper() {
 		return wlttMapper;
+	}
+
+	@Async
+	public void executeAsyncTask(Integer n) {
+		System.out.println(Thread.currentThread().getName() + "异步任务执行：" + n);
+		try {
+			Thread.sleep(5000);
+			throw new IllegalArgumentException("eeeee" + n);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(Thread.currentThread().getName() + "异步任务执行 end：" + n);
+	}
+
+	@Async
+	public Future<String> returnAsyn(Integer n) {
+		System.out.println(Thread.currentThread().getName() + "异步任务执行：" + n);
+		try {
+			Thread.sleep((3 - n) * 10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(Thread.currentThread().getName() + "异步任务执行 end：" + n);
+		return new AsyncResult<>(String.format("这个是第{%s}个异步调用的证书", n));
 	}
 
 	public List<Wltt> queryUsedUsers() {
@@ -84,7 +114,8 @@ public class WlttWyService extends BaseService<Wltt> {
 	public void daka(Wltt wltt) {
 		WlttHttp wlttHttp = WlttHttp.getInstance(wltt);
 		JSONObject dk = wlttHttp.daka();
-		if(dk==null) return;
+		if (dk == null)
+			return;
 		if (dk.getIntValue("status") == 1004) {
 			JSONObject userInfo = wlttHttp.login();
 			String authToken = WlttUtils.getAuthToken(wltt.getDevice(), userInfo.getString("acctk"));
@@ -103,7 +134,7 @@ public class WlttWyService extends BaseService<Wltt> {
 			for (int i = txList.size(); i > 0; i--) {
 				JSONObject coin = txList.getJSONObject(i - 1);
 				double price = coin.getDoubleValue("face_price") / 100;
-				if (coin.getBooleanValue("can_buy") && price > 1) {//微信只提1元以上的，每次都要手动提取，麻烦
+				if (coin.getBooleanValue("can_buy") && price > 1) {// 微信只提1元以上的，每次都要手动提取，麻烦
 					int productId = coin.getIntValue("id");
 					boolean success = http.cointx(productId);
 					if (success) {
@@ -198,7 +229,7 @@ public class WlttWyService extends BaseService<Wltt> {
 		return 0;
 	}
 
-	public void readNewsCoin(Wltt user, Date endTime) throws Exception {
+	public int readNewsCoin(Wltt user) throws Exception {
 		WlttHttp wlttHttp = WlttHttp.getInstance(user);
 		String today = DateUtils.formatDate(new Date(), "yyyyMMdd");
 		if (user.getQdTime() == null || !today.equals(DateUtils.formatDate(user.getQdTime(), "yyyyMMdd"))) {
@@ -212,11 +243,11 @@ public class WlttWyService extends BaseService<Wltt> {
 		int readedNum = 0;
 		long readNum = user.getReadNum();
 		int time = 30 * 1000 + new Random().nextInt(15000);
-		while (readNum < user.getLimitReadNum() && new Date().getTime() < endTime.getTime() && readedNum < 3) {
+		while (readNum < user.getLimitReadNum() && readedNum < 3) {
 			JSONArray newsList = wlttHttp.newsList();
 			if (newsList.size() < 1) {
 				logger.error("wltt-{}:没有查到新闻列表!", user.getUsername());
-				continue;
+				return readedNum;
 			}
 			JSONArray event_list = new JSONArray();
 			JSONObject click = wlttHttp.createEvent("click", "-601", "", "", 28, 11);
@@ -243,7 +274,6 @@ public class WlttWyService extends BaseService<Wltt> {
 
 			for (int i = 0; i < newsList.size(); i++) {
 				Thread.sleep(2000);
-				// wlttHttp.ad();// 发送广告
 				event_list = new JSONArray();
 				event_list.add(wlttHttp.retriveEventFromList(newsList, i + 3));
 				event_list.add(wlttHttp.retriveEventFromList(newsList, i + 4));
@@ -253,15 +283,19 @@ public class WlttWyService extends BaseService<Wltt> {
 				if ("post".equals(news.getString("action_type"))) {
 					String itemId = news.getLongValue("item_id") + "";
 					String postId = news.getLongValue("post_id") + "";
-					JSONArray relatedReadNewsList = wlttHttp.getRelatedRead(itemId, postId);
 					wlttHttp.upTask(itemId);
+					JSONArray relatedReadNewsList = wlttHttp.getRelatedRead(itemId, postId);
+					if (relatedReadNewsList.size() < 1) {
+						logger.error("wltt-{}:没有找到新闻详细页面相关阅读，无法发送日志 itemId={}", user.getUsername(), itemId);
+						continue;
+					}
 					Thread.sleep(2000);
 					// wlttHttp.ad();// 发送广告
-					event_list = wlttHttp.getNewsDetailEventList(relatedReadNewsList, i);
 					if (relatedReadNewsList.size() > 0) {
+						event_list = wlttHttp.getNewsDetailEventList(relatedReadNewsList, i);
 						event_list.add(wlttHttp.convertNesToEvent(relatedReadNewsList.getJSONObject(0), "1.1.1"));
+						wlttHttp.collectEventLog(event_list);// 发送新闻详细页面日志
 					}
-					wlttHttp.collectEventLog(event_list);// 发送新闻详细页面日志
 					time = 20 * 1000 + new Random().nextInt(15000);
 					Thread.sleep(time);
 					int suc = readOneNews(user, itemId, postId);
@@ -272,29 +306,27 @@ public class WlttWyService extends BaseService<Wltt> {
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
 						logger.info("wltt-{}:阅读新闻金币成功  已读次数={}", user.getUsername(), readNum);
-						if (readedNum >= 3)
-							break;
-						if (readNum > user.getLimitReadNum())
-							break;
-						if (new Date().getTime() > endTime.getTime())
-							break;
+						if (readNum > user.getLimitReadNum() || readedNum >= 3) {
+							return readedNum;
+						}
 					} else if (suc == 3) {
 						readNum = user.getLimitReadNum();
 						user.setReadNum(readNum);
 						user.setReadTime(new Date());
 						this.updateBySelect(user);
 						logger.error("wltt-{}:阅读新闻金币报错或已达到上限", user.getUsername());
-						break;
+						return readedNum;
 					} else if (suc == 0) {
 						logger.info("wltt-{}:第一次获取任务id", user.getUsername());
 					}
 					Thread.sleep(2000);
-					event_list = wlttHttp.getBackNewsListEventList(relatedReadNewsList, i);
+					event_list = wlttHttp.getBackNewsListEventList(newsList, i);
 					wlttHttp.collectEventLog(event_list);// 发送新闻详细页面日志
 					Thread.sleep(2000);
 				}
 			}
 		}
+		return readedNum;
 	}
 
 	public int readOneVideo(Wltt wltt, String videoId) {
@@ -365,6 +397,135 @@ public class WlttWyService extends BaseService<Wltt> {
 			}
 		}
 	}
+
+	public int searchTask(Wltt user) throws Exception {
+		WlttHttp http = WlttHttp.getInstance(user);
+		JSONArray event_list = new JSONArray();
+		JSONObject click = http.createEvent("click", "-601", "", "", 28, 11);
+		event_list.add(click);
+		int time = 30 * 1000 + new Random().nextInt(15000);
+		JSONObject keywordsJson = http.keywords();
+		JSONArray search_task_rewards = keywordsJson.getJSONObject("data").getJSONArray("search_task_rewards");
+		JSONArray hot_keywords = keywordsJson.getJSONObject("data").getJSONArray("hot_keywords");
+		int totalSearchNum = 0;
+		for (int i = 0; i < search_task_rewards.size(); i++) {
+			if (search_task_rewards.getJSONObject(i).getIntValue("search_num") > totalSearchNum)
+				totalSearchNum = search_task_rewards.getJSONObject(i).getIntValue("search_num");
+		}
+		int readedNum = keywordsJson.getJSONObject("data").getIntValue("today_search_num");
+		if (keywordsJson != null) {
+			readedNum = keywordsJson.getJSONObject("data").getIntValue("today_search_num");
+			while (readedNum < totalSearchNum) {
+				JSONObject page_view = http.createEvent("page_view", "-3", "", "", 28, 2);
+				event_list.add(page_view);
+				time = 2 * 1000 + new Random().nextInt(1000);
+				Thread.sleep(time);
+				JSONObject exit = http.createEvent("exit", "-3", "", "", 28, "{\"use_time_ms\":" + time + "}", 2);
+				event_list.add(exit);
+				Thread.sleep(new Random().nextInt(500));
+				page_view = http.createEvent("page_view", "-31", "", "", 28, "{\"source\":1,\"t_s\":0}", 2);
+				event_list.add(page_view);
+				String[] keywords = JkdttUtils.adtitles;
+				String keyword = keywords[new Random().nextInt(keywords.length)];
+				String keyword_id = "";
+				boolean suc = http.searchStart(keyword, keyword_id);
+				if (suc) {
+					time = 10 * 1000 + new Random().nextInt(5000);
+					Thread.sleep(time);
+					suc = http.searchEnd(keyword, keyword_id);
+					Thread.sleep(2000);
+					keywordsJson = http.keywords();
+					readedNum = keywordsJson.getJSONObject("data").getIntValue("today_search_num");
+					logger.info("wltt-{}:搜索结果|suc={},readedNum={}", user.getUsername(), suc, readedNum);
+					search_task_rewards = keywordsJson.getJSONObject("data").getJSONArray("search_task_rewards");
+					for (int i = 0; i < search_task_rewards.size(); i++) {
+						if (search_task_rewards.getJSONObject(i).getBooleanValue("can_receive")) {
+							int search_num = search_task_rewards.getJSONObject(i).getIntValue("search_num");
+							http.finishSearchTask(search_num);
+						}
+					}
+					exit = http.createEvent("exit", "-31", "", "", 28, "{\"use_time_ms\":" + time + "}", 2);
+					event_list.add(exit);
+					http.collectEventLog(event_list);
+				} else {
+					return readedNum;
+				}
+			}
+		}
+		return readedNum;
+	}
+	
+	/*public int searchTask(Wltt user) throws Exception {
+		WlttHttp http = WlttHttp.getInstance(user);
+		JSONArray event_list = new JSONArray();
+		JSONObject click = http.createEvent("click", "-601", "", "", 28, 11);
+		event_list.add(click);
+		int time = 30 * 1000 + new Random().nextInt(15000);
+		JSONObject keywordsJson = http.keywords();
+		JSONArray search_task_rewards = keywordsJson.getJSONObject("data").getJSONArray("search_task_rewards");
+		JSONArray hot_keywords = keywordsJson.getJSONObject("data").getJSONArray("hot_keywords");
+		int totalSearchNum = 0;
+		for (int i = 0; i < search_task_rewards.size(); i++) {
+			if (search_task_rewards.getJSONObject(i).getIntValue("search_num") > totalSearchNum)
+				totalSearchNum = search_task_rewards.getJSONObject(i).getIntValue("search_num");
+		}
+		int readedNum = keywordsJson.getIntValue("today_search_num");
+		int num = 0;
+		if (keywordsJson != null) {
+			readedNum = keywordsJson.getJSONObject("data").getIntValue("today_search_num");
+			while (readedNum < totalSearchNum) {
+				JSONObject page_view = http.createEvent("page_view", "-3", "", "", 28, 2);
+				event_list.add(page_view);
+				time = 2 * 1000 + new Random().nextInt(1000);
+				Thread.sleep(time);
+				JSONObject exit = http.createEvent("exit", "-3", "", "", 28, "{\"use_time_ms\":" + time + "}", 2);
+				event_list.add(exit);
+				Thread.sleep(new Random().nextInt(500));
+				page_view = http.createEvent("page_view", "-31", "", "", 28, "{\"source\":1,\"t_s\":0}", 2);
+				event_list.add(page_view);
+				if (hot_keywords != null && hot_keywords.size() > 0) {
+					if (num < hot_keywords.size()) {
+						String keyword = hot_keywords.getJSONObject(num).getString("keyword");
+						String keyword_id = hot_keywords.getJSONObject(num).getString("id");
+						boolean suc = http.searchStart(keyword, keyword_id);
+						num++;
+						if (suc) {
+							time = 10 * 1000 + new Random().nextInt(5000);
+							Thread.sleep(time);
+							suc = http.searchEnd(keyword, keyword_id);
+							Thread.sleep(2000);
+							readedNum++;
+							logger.info("wltt-{}:搜索结果|suc={},readedNum={}", user.getUsername(), suc, readedNum);
+							exit = http.createEvent("exit", "-31", "", "", 28, "{\"use_time_ms\":" + time + "}", 2);
+							event_list.add(exit);
+							http.collectEventLog(event_list);
+						} else {
+							return readedNum;
+						}
+					} else {
+						keywordsJson = http.keywords();
+						hot_keywords = keywordsJson.getJSONObject("data").getJSONArray("hot_keywords");
+						num = 0;
+						if (hot_keywords == null || hot_keywords.size() == 0) {
+							return readedNum;
+						}
+					}
+				} else {
+					return readedNum;
+				}
+			}
+			keywordsJson = http.keywords();
+			search_task_rewards = keywordsJson.getJSONObject("data").getJSONArray("search_task_rewards");
+			for (int i = 0; i < search_task_rewards.size(); i++) {
+				if (search_task_rewards.getJSONObject(i).getBooleanValue("can_receive")) {
+					int search_num = search_task_rewards.getJSONObject(0).getIntValue("search_num");
+					http.finishSearchTask(search_num);
+				}
+			}
+
+		}
+		return readedNum;
+	}*/
 
 	@Override
 	public Weekend<Wltt> genSqlExample(Wltt t) {

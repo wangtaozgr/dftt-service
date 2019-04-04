@@ -19,8 +19,8 @@ import com.atao.dftt.util.mayitt.PubKeySignature;
 import com.atao.util.StringUtils;
 
 public class MayittUtils {
-	public static String app_version = "5.3.5";
-	public static String version_code = "535";
+	public static String app_version = "5.3.6.2";
+	public static String version_code = "536";
 	public static String lib_version = "2.1.0";
 	public static Random random = new Random();
 	public static String[] adtitles = new String[] { "百鬼夜行抄", "终于可以在手机上玩这游戏了", "无限制自由刷本", "各种道具靠打", "近视做激光手术",
@@ -527,10 +527,12 @@ public class MayittUtils {
 					"adApiShow", ad_position.getString("positionId"));
 			readAdTask.add(apiAdState02);
 		}
-		JSONObject dialogAd = dialogAdPosition.getJSONObject(random.nextInt(dialogAdPosition.size()));
-		JSONObject apiAdState03 = MayittUtils.ApiAdState(user, true, "1", dialogAd.getString("channel"), "adApiRequest",
-				dialogAd.getString("positionId"));
-		readAdTask.add(apiAdState03);
+		if(dialogAdPosition!=null&&dialogAdPosition.size()>0) {
+			JSONObject dialogAd = dialogAdPosition.getJSONObject(random.nextInt(dialogAdPosition.size()));
+			JSONObject apiAdState03 = MayittUtils.ApiAdState(user, true, "1", dialogAd.getString("channel"), "adApiRequest",
+					dialogAd.getString("positionId"));
+			readAdTask.add(apiAdState03);
+		}
 		return readAdTask;
 	}
 	
