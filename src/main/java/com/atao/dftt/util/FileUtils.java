@@ -6,13 +6,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
 
+import gui.ava.html.Html2Image;
+import gui.ava.html.renderer.ImageRenderer;
+import net.coobird.thumbnailator.Thumbnails;
 import sun.misc.BASE64Encoder;
 
 public class FileUtils {
-
+	
 	public static String getBase64Code(String imgUrl) throws IOException {
 		URL url = new URL(imgUrl);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -27,6 +31,28 @@ public class FileUtils {
 		BASE64Encoder encoder = new BASE64Encoder();
 		return encoder.encode(data);// 返回Base64编码过的字节数组字符串
 	}
+	
+	/**
+	 * 压缩后生成basecode
+	 * @param imgUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getBase64CodeByCommpass(String imgUrl, int width, int height, float quality) throws IOException {
+		URL url = new URL(imgUrl);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		// 设置超时间为3秒
+		conn.setConnectTimeout(3 * 1000);
+		// 防止屏蔽程序抓取而返回403错误
+		conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+		// 得到输入流
+		InputStream inputStream = conn.getInputStream();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+		Thumbnails.of(inputStream).size(width, height).outputQuality(quality).outputFormat("jpg").toOutputStream(out);
+		BASE64Encoder encoder = new BASE64Encoder();
+		return encoder.encode(out.toByteArray());// 返回Base64编码过的字节数组字符串
+	}
+
 	
 	public static byte[] getByte(String imgUrl) throws IOException{
 		URL url = new URL(imgUrl);
@@ -119,5 +145,41 @@ public class FileUtils {
 	 */
 	public static String generateFileName(String prefix, String ext) {
 		return prefix + System.currentTimeMillis() + new Random().nextInt(1000) + "." + ext;
+	}
+	
+	/**
+	 * html 转换成图片文件
+	 * @param html
+	 * @param savePath
+	 * @throws MalformedURLException
+	 * @throws InterruptedException 
+	 */
+	public static void htmlToImage(String html, int width, String savePath) throws MalformedURLException, InterruptedException {
+		Html2Image tool = Html2Image.fromHtml(html);
+		ImageRenderer imaeRender = tool.getImageRenderer();
+		imaeRender.setWidth(width);
+		imaeRender.saveImage(savePath);
+	}
+	
+	/**
+	 * html 转换成图片字节
+	 * @param html
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws InterruptedException 
+	 */
+	public static byte[] htmlToImageOut(String html, int width) throws MalformedURLException {
+		Html2Image tool = Html2Image.fromFile(new File(html));
+		ImageRenderer imaeRender = tool.getImageRenderer();
+		imaeRender.setWidth(width);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		imaeRender.saveImage(outputStream, false);
+		return outputStream.toByteArray();
+	}
+	
+	public static void main(String[] args) throws MalformedURLException, InterruptedException {
+		htmlToImage("D:\\work\\workspace\\dftt-service\\src\\main\\resources\\public\\pdd\\pj.html", 768, "D:\\004.png");
+		//htmlToImageOut("D:\\work\\webstormworkspace\\helloword\\pj.html");
+
 	}
 }

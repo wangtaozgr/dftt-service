@@ -82,10 +82,10 @@
 	</appender>
 
 	<!-- 普通代码 -->
-	<logger name="com.atao" level="INFO"></logger>
+	<logger name="com.atao" level="DEBUG"></logger>
 	
 	<!-- 以最低的日志级别为准 -->
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT" /> 
 		<appender-ref ref="ALL_LOG" />
 		<appender-ref ref="CUST_LOG" />
