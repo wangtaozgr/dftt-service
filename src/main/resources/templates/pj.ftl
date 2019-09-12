@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="width:768px;">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>我的评价</title>
 </head>
-
 <body  style="background: #f4f4f4;color: #666;font-size: .12rem;line-height: 1.5;margin: auto;max-width: 768px;font-family: PingFangSC-Regular,Helvetica,STHeiti STXihei,Microsoft YaHei,Microsoft JhengHei,Arial;">
-
 <div id="main">
     <div class="comments-content">
         <div>
@@ -19,7 +17,7 @@
                             </div>
                             <div class="comment-customer-desc" style="display: inline-block;width:400px;">
                                 <div class="comment-customer-name" style="font-size:30px;color: #151516;margin-top: 4px;margin-bottom: 12px;overflow: hidden;">177****7870</div>
-                                <div class="comment-customer-time" style="font-size:25px;color: #9c9c9c;">2019.08.27</div>
+                                <div class="comment-customer-time" style="font-size:25px;color: #9c9c9c;">${pjTime}</div>
                             </div>
                             <div class="comment-customer-operator"></div>
                         </div>
@@ -29,10 +27,19 @@
                                     <img class="goods-img" style="border: 0;max-width: 100%;width: 150px;height: 150px;vertical-align: top;" src="${goodsImg}">
                                 </div>
                                 <div class="goods-desc" style="width: 512px;display: inline-block;margin-left: 20px;">
-                                    <p class="goods-name" style="width: 512px;height: 78px;font-size: 27px;color: #151516;margin: 0px 0px 33px 0px;padding-top: 6px;line-height: 40px;overflow: hidden;text-overflow: ellipsis;display: inline-block;line-clamp: 2;box-orient: vertical;">话费快充—全国移动联通电信10手机话费充值</p>
-                                    <div class="price-box" style="overflow: hidden;text-overflow: ellipsis;line-clamp: 2;box-orient: vertical;line-height: 29px;height: 55px;">
-                                        <span class="price" style="color: #151516;font-size: 26px;">￥9.97</span><span class="sku" style="color: #9c9c9c;margin-left: 25px;font-size: 26px;"><span>运营商:电信</span><span>地区:安徽</span></span>
+                                    <div class="goods-name" style="width: 512px;height: 38px;font-size: 27px;color: #151516;line-height: 38px;overflow: hidden;<#if goodsName02 ??><#else>margin: 0px 0px 33px;</#if>">${goodsName01}</div>
+                                    <#if goodsName02 ??>
+                                    <div class="goods-name" style="width: 512px;height: 38px;font-size: 27px;color: #151516;line-height: 38px;margin: 0px 0px 33px 0px;overflow: hidden;">${goodsName02}</div>
+                                    </#if>
+                                    <div class="price-box" style="overflow: hidden;text-overflow: ellipsis;line-clamp: 2;box-orient: vertical;line-height: 30px;height: 30px;">
+                                        <span class="price" style="color: #151516;font-size: 26px;">￥${orderAmount}</span><span class="sku" style="color: #9c9c9c;margin-left: 25px;font-size: 26px;"><span>${spec01}</span></span>
                                     </div>
+                                    <#if spec02 ??>
+                                    <div class="price-box" style="overflow: hidden;text-overflow: ellipsis;line-clamp: 2;box-orient: vertical;line-height: 30px;height: 30px;">
+                                        <span class="sku" style="color: #9c9c9c;font-size: 26px;"><span>${spec02}</span></span>
+                                    </div>
+                                    </#if>
+                                    
                                 </div>
                             </div>
                             <div class="score" style="width: 100%;height: 120px;padding-top: 10px;">
@@ -40,12 +47,19 @@
                             </div>
                         </div>
                         <div class="comment-text-box">
-                             <div class="comment-text" style="line-height: 45px;font-size: 30px;color: #151516;max-height: 131px;overflow-y: hidden;">可以啊可以啊可以啊可以啊可以啊！！！</div>
+                             <div class="comment-text" style="line-height: 45px;font-size: 30px;color: #151516;height: 45px;overflow: hidden;">${comment01}</div>
+                             <#if comment02 ??>
+                             <div class="comment-text" style="line-height: 45px;font-size: 30px;color: #151516;height: 45px;overflow: hidden;">${comment02}</div>
+                             </#if>
+                             <#if comment03 ??>
+                             	<div class="comment-text" style="line-height: 45px;font-size: 30px;color: #151516;height: 45px;overflow: hidden;">${comment03}</div>
+                             </#if>
+                             
                          </div>
                          <div class="comment-imgs" style="margin-top: 14px;display: flex;box-pack: start;justify-content: flex-start;box-align: center;align-items: center;box-orient: horizontal;box-direction: normal;flex-direction: row;width: 100%;overflow-x: scroll;overflow-y: hidden;">
                              <#list pjImgs! as pjImage> 
-							    <div style="width: 235px;height: 235px;flex-shrink: 0;margin-right: 6px;display: inline-block;" >
-	                                 <img style="width: 235px;height: 235px;" src="${pjImage}">
+							    <div style="width: 230px;height: 230px;flex-shrink: 0;margin-right: 6px;display: inline-block;" >
+	                                 <img style="width: 230px;height: 230px;" src="${pjImage}">
 	                             </div>
 							</#list>
                          </div>
@@ -58,7 +72,5 @@
         </div>
     </div>
 </div>
-
-
 </body>
 </html>

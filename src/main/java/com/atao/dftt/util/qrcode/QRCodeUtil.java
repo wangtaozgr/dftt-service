@@ -165,6 +165,8 @@ public class QRCodeUtil {
 			Result result;
 			Hashtable hints = new Hashtable();
 			hints.put(DecodeHintType.CHARACTER_SET, CHARSET);
+			hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+			hints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
 			result = new MultiFormatReader().decode(bitmap, hints);
 			String resultStr = result.getText();
 			return resultStr;
@@ -175,7 +177,7 @@ public class QRCodeUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String s = decode("http://906818.oss-cn-qingdao.aliyuncs.com/Ewm/760bbdbc-8488-490f-a062-d71cccd17487.jpg");
+		String s = decode("http://906818.oss-cn-qingdao.aliyuncs.com/Ewm/e3a4d743-689e-4305-9a5f-1c03a6df15d2.jpg");
 		System.out.println(s);
 	}
 }

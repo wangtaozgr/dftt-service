@@ -40,9 +40,21 @@ public class FreemarkerUtils {
 		pjImageUrls.add("https://t22img.yangkeduo.com/review3/review/2019-08-27/1fd6c38e1047e01652e3da472e1bc23f.jpeg");
 		dataMap.put("pjImgs", pjImageUrls);
 		dataMap.put("goodsImg", "https://t00img.yangkeduo.com/goods/images/2019-02-01/47a29f7c-b7ed-4f9c-a8f7-793c340837ca.jpg");
+		dataMap.put("goodsName01", "商品名称商品名称商品名称商品名称商品名");//19
+		//dataMap.put("goodsName02", "商品名称商品名称商品名称商品名称商品名");
+
+		dataMap.put("spec01", "说明说明说明说明说明说明参数参");//15
+		dataMap.put("spec02", "第二行的说明第二行的说明第二行明第二行");
+
+		dataMap.put("orderAmount", 2.34f);
+		dataMap.put("comment01", "评论评论评论评论评论评论评论论评论评论评评论评论");//24
+		dataMap.put("comment02", "评论评论评论评论评论评论评论论评论评论评评论评");
+		dataMap.put("comment03", "评论评论评论评论评论评论评论论评论评论评评论评");
+
 		String html = loadTemplate("pj.ftl", dataMap);
 		//html = html.replace("\r\n", "").replace("\n", "").replace("\r", "");
-		//System.out.println(html);
-		FileUtils.htmlToImage(html, 900, "D:\\1234.png");
+		System.out.println(html);
+		FileUtils.htmlToImage(html, 900, "D:\\123456.png");
+		//FileUtils.htmlToImage("D:\\work\\workspace\\dftt-service\\src\\main\\resources\\public\\pdd\\pj2.html", "D:\\1212.png");
 	}
 }

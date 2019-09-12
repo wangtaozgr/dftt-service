@@ -113,7 +113,7 @@ public class DdhpTaskWyService extends BaseService<DdhpTask> {
 		t.setPddOrderStatus(DdhpTaskVo.STATUS_WAITPAY);
 		List<DdhpTask> tasks = super.queryList(t, null);
 		for(DdhpTask task : tasks) {
-			DataVo order = pddUserWyService.createOrder(task.getUsername(), "", Float.valueOf(task.getTaskPrice()));
+			DataVo order = pddUserWyService.createOrder(task.getUsername(), "", Float.valueOf(task.getTaskPrice()), true);
 			if(order.getStatus()==1) {
 				JSONObject json = (JSONObject) order.getData();
 				String pddOrderNo = json.getString("orderno");

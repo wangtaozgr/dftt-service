@@ -10,6 +10,18 @@ import java.util.Date;
  */
 public class TaodanTaskVo extends BaseVo {
 
+	public static String STATUS_WAITPAY = "0";//刷手已接单
+	public static String STATUS_WAITSEND = "1";//刷手已付款
+	public static String STATUS_WAITRECIVE = "2";//商家已发货
+	public static String STATUS_WAITFINISH = "3";//刷手已收货
+	public static String STATUS_FINISHED = "4";//已完成
+	
+	public static String PDD_STATUS_WAITPAY = "0";//待支付--待支付 待收货 待评价
+	public static String PDD_STATUS_WAITSEND = "1";//待发货
+	public static String PDD_STATUS_WAITRECIVE = "2";//待收货
+	public static String PDD_STATUS_WAITFINISH = "3";//待评价
+	public static String PDD_STATUS_FINISHED = "4";//已完成
+	
     /**
     * 
     */
@@ -30,23 +42,39 @@ public class TaodanTaskVo extends BaseVo {
     /**
      * 任务号
      */
-    private String taskNo;
+    private String taskSn;
     /**
      * 任务金额
      */
     private String taskPrice;
     /**
-     * 搜索;二维码;类目
+     * 二维码,搜索
      */
-    private String taskBuyType;
+    private String taskSearchType;
+    /**
+     * 二维码地址或搜索内容
+     */
+    private String taskSearchContent;
     /**
      * 立即;三天;按物流信息
      */
     private String taskRecType;
     /**
-     * 单买;参团;开团;有团开团,无团再开
+     * 1:参团购买 2:开新团购买 3:有团参团，无团开团
      */
     private String taskOrderType;
+    /**
+     * 3:字图评价 2：指定评价 1：自由评价
+     */
+    private String taskEvaluateType;
+    /**
+     * 评价内容
+     */
+    private String taskEvaluateContent;
+    /**
+     * 评价图片
+     */
+    private String taskEvaluateImg;
     /**
      * 任务佣金
      */
@@ -56,7 +84,7 @@ public class TaodanTaskVo extends BaseVo {
      */
     private String taskStatus;
     /**
-     * 
+     * 购买商品图片
      */
     private String taskBuyerImg;
     /**
@@ -120,12 +148,12 @@ public class TaodanTaskVo extends BaseVo {
     public void setTaskId(String taskId) {
         this.taskId = taskId;
     }
-    public String getTaskNo() {
-        return taskNo;
+    public String getTaskSn() {
+        return taskSn;
     }
 
-    public void setTaskNo(String taskNo) {
-        this.taskNo = taskNo;
+    public void setTaskSn(String taskSn) {
+        this.taskSn = taskSn;
     }
     public String getTaskPrice() {
         return taskPrice;
@@ -134,12 +162,19 @@ public class TaodanTaskVo extends BaseVo {
     public void setTaskPrice(String taskPrice) {
         this.taskPrice = taskPrice;
     }
-    public String getTaskBuyType() {
-        return taskBuyType;
+    public String getTaskSearchType() {
+        return taskSearchType;
     }
 
-    public void setTaskBuyType(String taskBuyType) {
-        this.taskBuyType = taskBuyType;
+    public void setTaskSearchType(String taskSearchType) {
+        this.taskSearchType = taskSearchType;
+    }
+    public String getTaskSearchContent() {
+        return taskSearchContent;
+    }
+
+    public void setTaskSearchContent(String taskSearchContent) {
+        this.taskSearchContent = taskSearchContent;
     }
     public String getTaskRecType() {
         return taskRecType;
@@ -154,6 +189,27 @@ public class TaodanTaskVo extends BaseVo {
 
     public void setTaskOrderType(String taskOrderType) {
         this.taskOrderType = taskOrderType;
+    }
+    public String getTaskEvaluateType() {
+        return taskEvaluateType;
+    }
+
+    public void setTaskEvaluateType(String taskEvaluateType) {
+        this.taskEvaluateType = taskEvaluateType;
+    }
+    public String getTaskEvaluateContent() {
+        return taskEvaluateContent;
+    }
+
+    public void setTaskEvaluateContent(String taskEvaluateContent) {
+        this.taskEvaluateContent = taskEvaluateContent;
+    }
+    public String getTaskEvaluateImg() {
+        return taskEvaluateImg;
+    }
+
+    public void setTaskEvaluateImg(String taskEvaluateImg) {
+        this.taskEvaluateImg = taskEvaluateImg;
     }
     public String getTaskGold() {
         return taskGold;
@@ -238,14 +294,18 @@ public class TaodanTaskVo extends BaseVo {
         public static String username = "username";  // 
         public static String userId = "userId";  // 
         public static String taskId = "taskId";  // 任务id
-        public static String taskNo = "taskNo";  // 任务号
+        public static String taskSn = "taskSn";  // 任务号
         public static String taskPrice = "taskPrice";  // 任务金额
-        public static String taskBuyType = "taskBuyType";  // 搜索;二维码;类目
+        public static String taskSearchType = "taskSearchType";  // 二维码,搜索
+        public static String taskSearchContent = "taskSearchContent";  // 二维码地址或搜索内容
         public static String taskRecType = "taskRecType";  // 立即;三天;按物流信息
-        public static String taskOrderType = "taskOrderType";  // 单买;参团;开团;有团开团,无团再开
+        public static String taskOrderType = "taskOrderType";  // 1:参团购买 2:开新团购买 3:有团参团，无团开团
+        public static String taskEvaluateType = "taskEvaluateType";  // 3:字图评价 2：指定评价 1：自由评价
+        public static String taskEvaluateContent = "taskEvaluateContent";  // 评价内容
+        public static String taskEvaluateImg = "taskEvaluateImg";  // 评价图片
         public static String taskGold = "taskGold";  // 任务佣金
         public static String taskStatus = "taskStatus";  // 任务状态
-        public static String taskBuyerImg = "taskBuyerImg";  // 
+        public static String taskBuyerImg = "taskBuyerImg";  // 购买商品图片
         public static String taskBuyerUrl = "taskBuyerUrl";  // 任务地址
         public static String taskBuyerDesc = "taskBuyerDesc";  // 任务留言
         public static String pddUserId = "pddUserId";  // 

@@ -20,6 +20,10 @@ public class TaodanUserVo extends BaseVo {
      */
     private String username;
     /**
+     * 
+     */
+    private String name;
+    /**
      * 密码
      */
     private String pwd;
@@ -49,6 +53,13 @@ public class TaodanUserVo extends BaseVo {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     public String getPwd() {
         return pwd;
@@ -82,6 +93,7 @@ public class TaodanUserVo extends BaseVo {
     public static class TF {
         public static String id = "id";  // 
         public static String username = "username";  // 用户名
+        public static String name = "name";  // 
         public static String pwd = "pwd";  // 密码
         public static String pddUsername = "pddUsername";  // 
         public static String createTime = "createTime";  // 

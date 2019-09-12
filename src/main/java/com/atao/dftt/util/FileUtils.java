@@ -154,10 +154,17 @@ public class FileUtils {
 	 * @throws MalformedURLException
 	 * @throws InterruptedException 
 	 */
-	public static void htmlToImage(String html, int width, String savePath) throws MalformedURLException, InterruptedException {
+	public static void htmlToImage(String html, int width, String savePath) {
 		Html2Image tool = Html2Image.fromHtml(html);
 		ImageRenderer imaeRender = tool.getImageRenderer();
 		imaeRender.setWidth(width);
+		imaeRender.saveImage(savePath);
+	}
+	
+	public static void htmlToImage(String fileName, String savePath) {
+		Html2Image tool = Html2Image.fromFile(new File(fileName));
+		ImageRenderer imaeRender = tool.getImageRenderer();
+		imaeRender.setWidth(900);
 		imaeRender.saveImage(savePath);
 	}
 	
@@ -178,7 +185,8 @@ public class FileUtils {
 	}
 	
 	public static void main(String[] args) throws MalformedURLException, InterruptedException {
-		htmlToImage("D:\\work\\workspace\\dftt-service\\src\\main\\resources\\public\\pdd\\pj.html", 768, "D:\\004.png");
+		//htmlToImage("D:\\work\\workspace\\dftt-service\\src\\main\\resources\\public\\pdd\\pj.html", 768, "D:\\004.png");
+		htmlToImage("C:\\Users\\Administrator\\Desktop\\a.html",  "D:\\005.png");
 		//htmlToImageOut("D:\\work\\webstormworkspace\\helloword\\pj.html");
 
 	}
