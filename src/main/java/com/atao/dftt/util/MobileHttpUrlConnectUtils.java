@@ -60,9 +60,9 @@ public class MobileHttpUrlConnectUtils {
 			// 调用openConnection得到网络连接，网络连接处于就绪状态
 			connection = (HttpURLConnection) urL.openConnection();
 			// 设置网络连接超时时间5S
-			connection.setConnectTimeout(3 * 1000);
+			connection.setConnectTimeout(5 * 1000);
 			// 设置读取超时时间
-			connection.setReadTimeout(3 * 1000);
+			connection.setReadTimeout(30 * 1000);
 			if (heads != null) {
 				for (String key : heads.keySet()) {
 					connection.setRequestProperty(key, heads.get(key));
@@ -331,6 +331,10 @@ public class MobileHttpUrlConnectUtils {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
 		}
 		return null;
 	}

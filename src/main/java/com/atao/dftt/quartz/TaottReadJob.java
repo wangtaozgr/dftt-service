@@ -16,7 +16,7 @@ import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.TaoToutiaoUserWyService;
 import com.atao.dftt.service.TaottCoinRecordWyService;
 
-@Component
+//@Component
 public class TaottReadJob {
 	private static Logger logger = LoggerFactory.getLogger(TaottReadJob.class);
 

@@ -8,12 +8,14 @@ import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Hashtable;
 
 import javax.imageio.ImageIO;
 
+import com.atao.dftt.util.FileUtils;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -153,10 +155,33 @@ public class QRCodeUtil {
 		return resultStr;
 	}
 
-	public static String decode(String url) {
+	//废弃
+	public static String decodeFq(String url) {
 		try {
 			BufferedImage image;
 			image = ImageIO.read(new URL(url));
+			if (image == null) {
+				return null;
+			}
+			BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(image);
+			BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+			Result result;
+			Hashtable hints = new Hashtable();
+			hints.put(DecodeHintType.CHARACTER_SET, CHARSET);
+			hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+			hints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
+			result = new MultiFormatReader().decode(bitmap, hints);
+			String resultStr = result.getText();
+			return resultStr;
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
+	public static String decode(String url) {
+		try {
+			InputStream inputStream = FileUtils.getInputStream(url);
+			BufferedImage image = ImageIO.read(inputStream);
 			if (image == null) {
 				return null;
 			}
@@ -177,7 +202,7 @@ public class QRCodeUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String s = decode("http://906818.oss-cn-qingdao.aliyuncs.com/Ewm/e3a4d743-689e-4305-9a5f-1c03a6df15d2.jpg");
+		String s = decode("https://www.pinke66.com/uploads/qrcode/23036163/23036163566_8.png");
 		System.out.println(s);
 	}
 }

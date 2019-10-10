@@ -15,7 +15,7 @@ import com.atao.dftt.model.DfToutiaoUser;
 import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.DdhpTaskWyService;
 
-@Component
+//@Component
 public class DdhpJob {
 	private static Logger logger = LoggerFactory.getLogger(DdhpJob.class);
 

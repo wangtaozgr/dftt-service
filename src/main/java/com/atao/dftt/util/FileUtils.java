@@ -39,18 +39,23 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static String getBase64CodeByCommpass(String imgUrl, int width, int height, float quality) throws IOException {
-		URL url = new URL(imgUrl);
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		// 设置超时间为3秒
-		conn.setConnectTimeout(3 * 1000);
-		// 防止屏蔽程序抓取而返回403错误
-		conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-		// 得到输入流
-		InputStream inputStream = conn.getInputStream();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-		Thumbnails.of(inputStream).size(width, height).outputQuality(quality).outputFormat("jpg").toOutputStream(out);
-		BASE64Encoder encoder = new BASE64Encoder();
-		return encoder.encode(out.toByteArray());// 返回Base64编码过的字节数组字符串
+		try {
+			URL url = new URL(imgUrl);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			// 设置超时间为3秒
+			conn.setConnectTimeout(3 * 1000);
+			// 防止屏蔽程序抓取而返回403错误
+			conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+			// 得到输入流
+			InputStream inputStream = conn.getInputStream();
+	        ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Thumbnails.of(inputStream).size(width, height).outputQuality(quality).outputFormat("jpg").toOutputStream(out);
+			BASE64Encoder encoder = new BASE64Encoder();
+			return encoder.encode(out.toByteArray());// 返回Base64编码过的字节数组字符串
+		}catch (Exception e) {
+			return getBase64Code(imgUrl);
+		}
+		
 	}
 
 	
@@ -70,6 +75,18 @@ public class FileUtils {
 	public static byte[] getByte(InputStream inputStream) throws IOException{
 		byte[] data = readInputStream(inputStream);
 		return data;
+	}
+	
+	public static InputStream getInputStream(String imgUrl) throws IOException{
+		URL url = new URL(imgUrl);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		// 设置超时间为3秒
+		conn.setConnectTimeout(3 * 1000);
+		// 防止屏蔽程序抓取而返回403错误
+		conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+		// 得到输入流
+		InputStream inputStream = conn.getInputStream();
+		return inputStream;
 	}
 	
 	public static File downLoadFromInputStream(InputStream inputStream, String fileName, String savePath) throws IOException {

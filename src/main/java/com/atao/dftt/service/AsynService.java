@@ -35,6 +35,8 @@ public class AsynService {
 	private ZqttUserWyService zqttUserWyService;
 	@Resource
 	private HsttUserWyService hsttUserWyService;
+	@Resource
+	private TaodanTaskWyService taodanTaskWyService;
 
 	@Async
 	public Future<Integer> readDfttNews(DfToutiaoUser user) {
@@ -192,7 +194,7 @@ public class AsynService {
 		logger.info("hstt-{}:结束阅读新闻金币任务,本次共阅读成功次数={}", user.getUsername(), num);
 		return new AsyncResult<Integer>(num);
 	}
-	
+
 	@Async
 	public Future<Integer> searchTask(HsttUser user) {
 		logger.info("hstt-{}:开始搜索任务", user.getUsername());
@@ -204,7 +206,7 @@ public class AsynService {
 		logger.info("hstt-{}:结束搜索任务,本次共阅读成功次数={}", user.getUsername(), num);
 		return new AsyncResult<Integer>(num);
 	}
-	
+
 	////////////////////////// 中青看点/////////////////////////
 	@Async
 	public Future<Integer> readZqttNews(ZqttUser user) {
@@ -240,6 +242,46 @@ public class AsynService {
 		}
 		logger.info("zqtt-{}:结束阅读搜索任务金币任务,本次共阅读成功次数={}", user.getUsername(), num);
 		return new AsyncResult<Integer>(num);
+	}
+
+	@Async
+	public Future<Integer> updateConfirmOrderStatus(String username) {
+		logger.info("taodan-{}:开始确认收货任务", username);
+		Integer num = 0;
+		try {
+			taodanTaskWyService.update10000OrderStatus(username);
+			num = taodanTaskWyService.updateConfirmOrderStatus(username);
+		} catch (Exception e) {
+		}
+		logger.info("taodan-{}:结束确认收货任务", username);
+		return new AsyncResult<Integer>(num);
+	}
+
+	@Async
+	public Future<Integer> downloadAllCommentImage(String username) {
+		logger.info("taodan-{}:开始下载评价图片和上传淘单图片任务", username);
+		Integer num = 0;
+		try {
+			num = taodanTaskWyService.downloadAllCommentImage(username);
+			logger.info("taodan-{}:下载评价图片任务数量,count={}", username, num);
+			num = taodanTaskWyService.uploadTaodanImg(username);
+			logger.info("taodan-{}:上传淘单图片任务数量,count={}", username, num);
+		} catch (Exception e) {
+		}
+		logger.info("taodan-{}:结束下载评价图片和上传淘单图片任务", username);
+		return new AsyncResult<Integer>(num);
+	}
+
+	@Async
+	public Future<String> withdraw(String username) {
+		logger.info("taodan-{}:开始提现任务", username);
+		String msg = "";
+		try {
+			msg = taodanTaskWyService.withdraw(username);
+		} catch (Exception e) {
+		}
+		logger.info("taodan-{}:结束提现任务,msg={}", username, msg);
+		return new AsyncResult<String>(msg);
 	}
 
 }

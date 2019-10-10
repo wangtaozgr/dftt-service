@@ -16,7 +16,7 @@ import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.MayittCoinRecordWyService;
 import com.atao.dftt.service.MayittUserWyService;
 
-@Component
+//@Component
 public class MayittReadJob {
 	private static Logger logger = LoggerFactory.getLogger(MayittReadJob.class);
 
