@@ -1,16 +1,22 @@
 package com.atao.dftt.service;
 
 import com.atao.dftt.model.PddMallGoods;
+import com.atao.dftt.model.PddUser;
 import com.atao.dftt.model.PddMallGoods;
 import com.atao.util.StringUtils;
 
 import tk.mybatis.mapper.weekend.Weekend;
 import tk.mybatis.mapper.weekend.WeekendCriteria;
 
+import com.atao.dftt.http.PddHttp;
 import com.atao.dftt.mapper.PddMallGoodsMapper;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.atao.base.mapper.BaseMapper;
 import com.atao.base.service.BaseService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -23,6 +29,8 @@ public class PddMallGoodsWyService extends BaseService<PddMallGoods> {
 
 	@Resource
 	private PddMallGoodsMapper pddMallGoodsMapper;
+	@Resource
+	private PddUserWyService pddUserWyService;
 
 	@Override
 	public BaseMapper<PddMallGoods> getMapper() {
@@ -49,6 +57,23 @@ public class PddMallGoodsWyService extends BaseService<PddMallGoods> {
 		pddMallGoods.setLogoKey(logoKey);
 		super.save(pddMallGoods);
 	}
+	
+	public void updateGoodsName() {
+		PddUser mUser = pddUserWyService.queryUserByUsername(PddHttp.searchUsername);
+		PddHttp mHttp = new PddHttp(mUser);
+		PddMallGoods t = new PddMallGoods();
+		List<PddMallGoods>  list = super.queryList(t, null);	
+		PddUser pdd = pddUserWyService.queryUserByUsername("17755117870");
+		PddHttp http = PddHttp.getInstance(pdd);
+		for(PddMallGoods mallGoods : list) {
+			if(StringUtils.isBlank(mallGoods.getGoodsName())) {
+				JSONObject product = mHttp.productChromeDetail(mallGoods.getGoodsId());
+				JSONObject goods = product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject("goods");
+				mallGoods.setGoodsName(goods.getString("goodsName"));
+				super.save(mallGoods);
+			}
+		}
+	}
 
 	private String getImageName(String img) {
 		if (img.indexOf(".jp") > -1) {
@@ -61,6 +86,15 @@ public class PddMallGoodsWyService extends BaseService<PddMallGoods> {
 		img = img.substring(img.lastIndexOf("/") + 1, img.length());
 		return img;
 	}
+	
+	public List<PddMallGoods> queryNoGoodsIdList(){
+		List<PddMallGoods> list = pddMallGoodsMapper.queryNoGoodsIdList();
+		for(PddMallGoods obj : list) {
+			obj.setGoodsLogo(obj.getGoodsLogo().replace("\\", "/"));
+		}
+		return list;
+	}
+
 
 	@Override
 	public Weekend<PddMallGoods> genSqlExample(PddMallGoods t) {
@@ -78,7 +112,7 @@ public class PddMallGoodsWyService extends BaseService<PddMallGoods> {
 		if (StringUtils.isNotBlank(t.getLogoKey())) {
 			c.andEqualTo(PddMallGoods::getLogoKey, t.getLogoKey());
 		}
-		w.and(c);
+		
 		return w;
 	}
 }

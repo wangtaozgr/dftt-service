@@ -93,7 +93,6 @@ public class ZqttCoinRecordWyService extends BaseService<ZqttCoinRecord> {
 		if (StringUtils.isNotBlank(t.getCoinDay())) {
 			c.andEqualTo(ZqttCoinRecord::getCoinDay, t.getCoinDay());
 		}
-		w.and(c);
 		return w;
 	}
 }

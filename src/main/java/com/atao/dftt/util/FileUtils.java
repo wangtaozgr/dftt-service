@@ -1,5 +1,6 @@
 package com.atao.dftt.util;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import gui.ava.html.Html2Image;
 import gui.ava.html.renderer.ImageRenderer;
@@ -181,7 +184,8 @@ public class FileUtils {
 	public static void htmlToImage(String fileName, String savePath) {
 		Html2Image tool = Html2Image.fromFile(new File(fileName));
 		ImageRenderer imaeRender = tool.getImageRenderer();
-		imaeRender.setWidth(900);
+		imaeRender.setWidth(505);
+		imaeRender.setHeight(866);
 		imaeRender.saveImage(savePath);
 	}
 	
@@ -201,10 +205,26 @@ public class FileUtils {
 		return outputStream.toByteArray();
 	}
 	
-	public static void main(String[] args) throws MalformedURLException, InterruptedException {
+	public static void main(String[] args) throws InterruptedException, IOException {
 		//htmlToImage("D:\\work\\workspace\\dftt-service\\src\\main\\resources\\public\\pdd\\pj.html", 768, "D:\\004.png");
-		htmlToImage("C:\\Users\\Administrator\\Desktop\\a.html",  "D:\\005.png");
+		//htmlToImage("C:\\Users\\Administrator\\Desktop\\a.html",  "D:\\005.png");
 		//htmlToImageOut("D:\\work\\webstormworkspace\\helloword\\pj.html");
+		
+		//htmlToImage("D:\\work\\webstormworkspace\\helloword\\productlist.html",  "D:\\001.png");
+		//htmlToImage("D:\\work\\webstormworkspace\\helloword\\pj.html",  "D:\\002.png");
+		//htmlToImage("D:\\work\\webstormworkspace\\helloword\\mypj.html",  "D:\\003.png");
+		downLoadFromUrl("http://zk.gxrdwl.com/index.php/Main/TaskMem/QRcode?id=48151946334","111.jpg","D:\\pddImage");
+		
+		String file = "D:\\pddImage\\222.png";
+        try {
+            URL url = new URL("http://zk.gxrdwl.com/index.php/Main/TaskMem/QRcode?id=48151946334");
+            BufferedImage img = ImageIO.read(url);
+            ImageIO.write(img, "jpg", new File(file));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
+
+
 
 	}
 }

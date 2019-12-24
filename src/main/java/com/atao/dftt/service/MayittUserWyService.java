@@ -264,7 +264,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		http.eventList.add(appViewScreen03);
 		http.eventList.add(appViewScreen03);// 两次
 		int time = 30 * 1000;
-		JSONObject taskApiData = http.taskApi();
+		JSONObject taskApiData = http.taskApi(); 
 		JSONArray info = taskApiData.getJSONArray("info");
 		JSONObject ad = null;
 		for (int i = 0; i < info.size(); i++) {
@@ -498,7 +498,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		http.eventList.add(appViewScreen03);
 		int time = 30 * 1000;
 		http.sendData();
-		JSONObject taskApiData = http.hongbaoApi();
+		JSONObject taskApiData = http.taskApi();
 		JSONArray info = taskApiData.getJSONArray("info");
 		JSONObject more = null;
 		JSONObject appViewScreen04 = MayittUtils.AppViewScreen(user,
@@ -618,7 +618,7 @@ public class MayittUserWyService extends BaseService<MayittUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(MayittUser::getUsed, t.getUsed());
 		}
-		w.and(c);
+		
 		return w;
 	}
 }

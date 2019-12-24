@@ -537,7 +537,6 @@ public class WlttWyService extends BaseService<Wltt> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(Wltt::getUsed, t.getUsed());
 		}
-		w.and(c);
 		return w;
 	}
 }

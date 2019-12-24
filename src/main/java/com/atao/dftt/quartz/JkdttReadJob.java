@@ -15,7 +15,7 @@ import com.atao.dftt.model.JkdttUser;
 import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.JkdttUserWyService;
 
-@Component
+//@Component
 public class JkdttReadJob {
 	private static Logger logger = LoggerFactory.getLogger(JkdttReadJob.class);
 
@@ -24,7 +24,7 @@ public class JkdttReadJob {
 	@Resource
 	private AsynService asynService;
 
-	@Scheduled(cron = "0 3/13 6-9,11-23 * * ?")
+	@Scheduled(cron = "0 3/13 11-23 * * ?")
 	public void readJkdttNews() throws Exception {
 		logger.info("jkdtt:开始阅读新闻金币任务");
 		List<JkdttUser> users = jkdttUserWyService.getUsedUser();

@@ -55,7 +55,6 @@ public class TaodanUserWyService extends BaseService<TaodanUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(TaodanUser::getUsed, t.getUsed());
 		}
-		w.and(c);
 		return w;
 	}
 }

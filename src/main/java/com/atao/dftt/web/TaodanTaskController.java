@@ -36,15 +36,19 @@ public class TaodanTaskController extends BaseController<TaodanTask> {
 	}
 
 	@RequestMapping("/orderPageData")
-	public Object orderPageData(@RequestParam(required = false) String username, String pddOrderStatus,String pddOrderNo,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "50") int rows) throws Exception {
+	public Object orderPageData(@RequestParam(required = false) String username, String pddOrderStatus,
+			String pddOrderNo, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "50") int rows)
+			throws Exception {
 		TaodanTask t = new TaodanTask();
 		t.setPage(page);
 		t.setRows(rows);
-		if(StringUtils.isNotBlank(pddOrderStatus)) {
+		if (StringUtils.isNotBlank(username)) {
+			t.setUsername(username);
+		}
+		if (StringUtils.isNotBlank(pddOrderStatus)) {
 			t.setPddOrderStatus(pddOrderStatus);
 		}
-		if(StringUtils.isNotBlank(pddOrderNo)) {
+		if (StringUtils.isNotBlank(pddOrderNo)) {
 			t.setPddOrderNo(pddOrderNo);
 		}
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -69,28 +73,42 @@ public class TaodanTaskController extends BaseController<TaodanTask> {
 		return vo;
 	}
 
+	@RequestMapping("/createPddOrder")
+	public Object createPddOrder(String username, String taskId, String cookiestr) throws Exception {
+		TaodanHttp tdHttp = new TaodanHttp(username, cookiestr);
+		DataVo vo = taodanTaskWyService.createPddOrder(username, taskId, cookiestr);
+		return vo;
+	}
+
 	@RequestMapping("/orderstatus")
 	public Object orderstatus(String username, String taskSn, String cookiestr) throws Exception {
-		if(StringUtils.isNotBlank(cookiestr)) {
+		if (StringUtils.isNotBlank(cookiestr)) {
 			TaodanHttp tdHttp = new TaodanHttp(username, cookiestr);
 		}
 		DataVo vo = taodanTaskWyService.orderstatus(username, taskSn);
 		return vo;
 	}
-	
+
 	@RequestMapping("/updatePayedOrderStatus")
 	public Object updatePayedOrderStatus(String username, String cookiestr) throws Exception {
-		DataVo vo = taodanTaskWyService.updatePayedOrderStatus(username, cookiestr);
-		taodanTaskWyService.update10000OrderStatus(username);
+		// DataVo vo = taodanTaskWyService.updatePayedOrderStatus(username, cookiestr);
+		TaodanHttp tdHttp = new TaodanHttp(username, cookiestr);
+		DataVo vo = taodanTaskWyService.update10000OrderStatus(username);
 		int num = taodanTaskWyService.updateConfirmOrderStatus(username);
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		taodanTaskWyService.downloadAllCommentImage(username);
 		taodanTaskWyService.uploadTaodanImg(username);
 		vo.setData(num);
 		return vo;
 	}
-	
+
 	/**
 	 * 没有找到店铺时，放弃任务，重新查找一遍，插入店铺信息
+	 * 
 	 * @param username
 	 * @param cookiestr
 	 * @param taskId
@@ -101,5 +119,13 @@ public class TaodanTaskController extends BaseController<TaodanTask> {
 	public Object updateMall(String username, String cookiestr, String taskId) throws Exception {
 		DataVo vo = taodanTaskWyService.updateMall(username, cookiestr, taskId);
 		return vo;
+	}
+	
+	@RequestMapping("/pj")
+	public Object getContent(String username, String taskId) throws Exception {
+		TaodanHttp tdHttp = TaodanHttp.getInstance(username);
+		String pjcontentDiv = tdHttp.getPjContent(taskId);
+		logger.info("pjcontentDiv="+pjcontentDiv);
+		return pjcontentDiv;
 	}
 }

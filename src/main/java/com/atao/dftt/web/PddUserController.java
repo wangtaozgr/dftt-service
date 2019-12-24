@@ -29,10 +29,26 @@ public class PddUserController extends BaseController<PddUser> {
     }
     
     @RequestMapping("/productDetail")
-	public Object updateTask() throws Exception {
-    	PddUser user = pddUserWyService.queryUserByUsername("17755117870");
+	public Object productDetail(String goodsId, String username) throws Exception {
+    	PddUser user = pddUserWyService.queryUserByUsername(username);
 		PddHttp http = PddHttp.getInstance(user);
-		JSONObject obj = http.productChromeDetail("5239354092");
+		JSONObject obj = http.productChromeDetail(goodsId);
 		return obj;
 	}
+    
+    @RequestMapping("/downloadImg")
+	public Object download(String goodsId, String keyword) throws Exception {
+    	PddUser user = pddUserWyService.queryUserByUsername("m_17755117870");
+		PddHttp http = PddHttp.getInstance(user);
+		http.downloadProductSearchImage(goodsId, goodsId, keyword, "/share/code/test");
+		return null;
+	}
+    
+    @RequestMapping("/addorder")
+   	public Object addorder() throws Exception {
+       	PddUser user = pddUserWyService.queryUserByUsername("17755117870");
+   		PddHttp http = PddHttp.getInstance(user);
+   		pddUserWyService.createOrder("17755117870", "57504422295", 9.77f, false, false, 1, 0);
+   		return null;
+   	}
 }

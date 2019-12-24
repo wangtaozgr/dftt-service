@@ -37,6 +37,10 @@ public class AsynService {
 	private HsttUserWyService hsttUserWyService;
 	@Resource
 	private TaodanTaskWyService taodanTaskWyService;
+	@Resource
+	private PinkeduoTaskWyService pinkeduoTaskWyService;
+	@Resource
+	private ZhuankeTaskWyService zhuankeTaskWyService;
 
 	@Async
 	public Future<Integer> readDfttNews(DfToutiaoUser user) {
@@ -242,46 +246,6 @@ public class AsynService {
 		}
 		logger.info("zqtt-{}:结束阅读搜索任务金币任务,本次共阅读成功次数={}", user.getUsername(), num);
 		return new AsyncResult<Integer>(num);
-	}
-
-	@Async
-	public Future<Integer> updateConfirmOrderStatus(String username) {
-		logger.info("taodan-{}:开始确认收货任务", username);
-		Integer num = 0;
-		try {
-			taodanTaskWyService.update10000OrderStatus(username);
-			num = taodanTaskWyService.updateConfirmOrderStatus(username);
-		} catch (Exception e) {
-		}
-		logger.info("taodan-{}:结束确认收货任务", username);
-		return new AsyncResult<Integer>(num);
-	}
-
-	@Async
-	public Future<Integer> downloadAllCommentImage(String username) {
-		logger.info("taodan-{}:开始下载评价图片和上传淘单图片任务", username);
-		Integer num = 0;
-		try {
-			num = taodanTaskWyService.downloadAllCommentImage(username);
-			logger.info("taodan-{}:下载评价图片任务数量,count={}", username, num);
-			num = taodanTaskWyService.uploadTaodanImg(username);
-			logger.info("taodan-{}:上传淘单图片任务数量,count={}", username, num);
-		} catch (Exception e) {
-		}
-		logger.info("taodan-{}:结束下载评价图片和上传淘单图片任务", username);
-		return new AsyncResult<Integer>(num);
-	}
-
-	@Async
-	public Future<String> withdraw(String username) {
-		logger.info("taodan-{}:开始提现任务", username);
-		String msg = "";
-		try {
-			msg = taodanTaskWyService.withdraw(username);
-		} catch (Exception e) {
-		}
-		logger.info("taodan-{}:结束提现任务,msg={}", username, msg);
-		return new AsyncResult<String>(msg);
 	}
 
 }

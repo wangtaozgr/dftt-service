@@ -25,6 +25,10 @@ public class PddMallGoodsVo extends BaseVo {
     /**
      * 
      */
+    private String goodsName;
+    /**
+     * 
+     */
     private String goodsLogo;
     /**
      * 
@@ -52,6 +56,13 @@ public class PddMallGoodsVo extends BaseVo {
     public void setGoodsId(String goodsId) {
         this.goodsId = goodsId;
     }
+    public String getGoodsName() {
+        return goodsName;
+    }
+
+    public void setGoodsName(String goodsName) {
+        this.goodsName = goodsName;
+    }
     public String getGoodsLogo() {
         return goodsLogo;
     }
@@ -71,6 +82,7 @@ public class PddMallGoodsVo extends BaseVo {
         public static String id = "id";  // 
         public static String mallId = "mallId";  // 
         public static String goodsId = "goodsId";  // 
+        public static String goodsName = "goodsName";  // 
         public static String goodsLogo = "goodsLogo";  // 
         public static String logoKey = "logoKey";  // 
 

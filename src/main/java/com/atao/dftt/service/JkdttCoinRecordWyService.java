@@ -86,7 +86,7 @@ public class JkdttCoinRecordWyService extends BaseService<JkdttCoinRecord> {
 		if (StringUtils.isNotBlank(t.getCoinDay())) {
 			c.andEqualTo(JkdttCoinRecord::getCoinDay, t.getCoinDay());
 		}
-		w.and(c);
+		
 		return w;
 	}
 }

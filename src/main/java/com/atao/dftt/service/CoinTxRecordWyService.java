@@ -40,7 +40,7 @@ public class CoinTxRecordWyService extends BaseService<CoinTxRecord> {
 		if (StringUtils.isNotBlank(t.getType())) {
 			c.andEqualTo(CoinTxRecord::getType, t.getType());
 		}
-		w.and(c);
+		
 		return w;
 	}
 }

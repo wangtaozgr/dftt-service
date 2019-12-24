@@ -93,7 +93,7 @@ public class HsttCoinRecordWyService extends BaseService<HsttCoinRecord> {
 		if (StringUtils.isNotBlank(t.getCoinDay())) {
 			c.andEqualTo(HsttCoinRecord::getCoinDay, t.getCoinDay());
 		}
-		w.and(c);
+		
 		return w;
 	}
 

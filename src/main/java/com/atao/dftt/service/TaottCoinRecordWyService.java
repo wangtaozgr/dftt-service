@@ -98,7 +98,6 @@ public class TaottCoinRecordWyService extends BaseService<TaottCoinRecord> {
 		if (StringUtils.isNotBlank(t.getCoinDay())) {
 			c.andEqualTo(TaottCoinRecord::getCoinDay, t.getCoinDay());
 		}
-		w.and(c);
 		return w;
 	}
 

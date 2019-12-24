@@ -202,7 +202,8 @@ public class QRCodeUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String s = decode("https://www.pinke66.com/uploads/qrcode/23036163/23036163566_8.png");
+		//String s = decode("http://zk.gxrdwl.com/index.php/Main/TaskMem/QRcode?id=48151946334");
+		String s = decode(new File("D:\\pddImage\\123.png"));
 		System.out.println(s);
 	}
 }

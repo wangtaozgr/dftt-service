@@ -282,7 +282,7 @@ public class DfToutiaoUserWyService extends BaseService<DfToutiaoUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(DfToutiaoUser::getUsed, t.getUsed());
 		}
-		w.and(c);
+		
 		return w;
 	}
 

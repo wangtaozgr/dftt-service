@@ -1,8 +1,9 @@
 package com.atao.dftt.service;
 
+import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Random;
 
 import javax.annotation.Resource;
 
@@ -18,11 +19,11 @@ import com.atao.base.util.StringUtils;
 import com.atao.dftt.api.vo.DataVo;
 import com.atao.dftt.api.vo.PinkeduoTaskVo;
 import com.atao.dftt.http.PddHttp;
+import com.atao.dftt.http.PinkeduoHttp;
 import com.atao.dftt.mapper.PinkeduoTaskMapper;
 import com.atao.dftt.model.PddUser;
 import com.atao.dftt.model.PinkeduoTask;
 import com.atao.dftt.model.PinkeduoUser;
-import com.atao.dftt.util.MobileHttpUrlConnectUtils;
 import com.atao.dftt.util.qrcode.QRCodeUtil;
 
 import tk.mybatis.mapper.weekend.Weekend;
@@ -55,6 +56,9 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 	public DataVo createTask(String username, String taskId, String taskSn, String taskPrice, String taskRecType,
 			String taskSearchType, String taskOrderType, String taskEvaluateType, String taskGold, String taskStatus,
 			String ewmUrl, String productImg, String pjContent, String taskBuyerDesc, String taskDetail) {
+		PddUser mUser = pddUserWyService.queryUserByUsername(PddHttp.searchUsername);
+		PddHttp mHttp = new PddHttp(mUser);
+
 		DataVo vo = new DataVo(1, "", null);
 		PinkeduoUser user = pinkeduoUserWyService.queryByUsername(username);
 		if (!user.getUsed()) {
@@ -64,6 +68,7 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		}
 		PinkeduoTask t = new PinkeduoTask();
 		t.setTaskId(taskId);
+		t.setUsername(username);
 		PinkeduoTask task = super.queryOne(t, null);
 		PddUser pdd = pddUserWyService.queryUserByUsername(user.getPddUsername());
 		PddHttp http = PddHttp.getInstance(pdd);
@@ -99,7 +104,7 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 				String sellerName = sellerinfo.substring(0, sellerinfo.indexOf("|")).replace("店铺名：", "").trim();
 				String goodsName = doc.getElementsByTag("dt").get(0).text().replace("品名：", "");
 				if ("商品标题6分钟后显示，如关键词很难搜到，可等6分钟后搜索标题".equals(goodsName)) {
-					String goodsId = http.searchGoodsIdByMallNameAndGoodImg(sellerName, getImageName(productImg));
+					String goodsId = mHttp.searchGoodsIdByMallNameAndGoodImg(sellerName, getImageName(productImg));
 					if (StringUtils.isNotBlank(goodsId)) {
 						task.setTaskSearchContent(goodsName);
 						task.setTaskBuyerImg(productImg);
@@ -111,7 +116,7 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 						return vo;
 					}
 				} else {
-					String goodsId = http.searchGoodsId(goodsName, sellerName);
+					String goodsId = mHttp.searchGoodsId(goodsName, sellerName);
 					if (StringUtils.isBlank(goodsId)) {
 						logger.info("pinkeduo-{}:创建拼客多任务失败.error={}", username, "没有找到合适的商品");
 						vo = new DataVo(0, "没有找到合适的商品!", null);
@@ -124,18 +129,18 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 					task.setTaskBuyerUrl(taskBuyerUrl);
 				}
 			}
-			
-			try {
-				String taskBuyerUrl = task.getTaskBuyerUrl();
-				int endFix = taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("goods_id=") + 9);
-				if (endFix < 0)
-					endFix = taskBuyerUrl.length();
-				String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);
-				JSONObject product = http.productChromeDetail(goodsId);
-				JSONObject mall = product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject("mall");
-				pddMallWyService.savePddMall(mall.getString("mallID"), mall.getString("mallName"), mall.getString("logo"));
-			} catch (Exception e) {
-			}
+
+			/*
+			 * try { String taskBuyerUrl = task.getTaskBuyerUrl(); int endFix =
+			 * taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("goods_id=") + 9); if (endFix
+			 * < 0) endFix = taskBuyerUrl.length(); String goodsId =
+			 * taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);
+			 * JSONObject product = http.productChromeDetail(goodsId); JSONObject mall =
+			 * product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject(
+			 * "mall"); pddMallWyService.savePddMall(mall.getString("mallID"),
+			 * mall.getString("mallName"), mall.getString("logo")); } catch (Exception e) {
+			 * }
+			 */
 
 			if (StringUtils.isBlank(pjContent)) {
 				String taskEvaluateContent = getCommentContent();
@@ -153,23 +158,23 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 			int endFix = taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("goods_id=") + 9);
 			if (endFix < 0)
 				endFix = taskBuyerUrl.length();
-			String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);
+			String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix).trim();
 			boolean group = true;
 			if (task.getTaskOrderType().equals("开团"))
 				group = false;
 			DataVo orderinfo = pddUserWyService.createOrder(user.getPddUsername(), goodsId,
-					Float.valueOf(task.getTaskPrice()), group, false);
+					Float.valueOf(task.getTaskPrice()), group, false, 1, 0);
 			if (orderinfo.getStatus() == 1) {
 				JSONObject order = (JSONObject) orderinfo.getData();
 				vo = new DataVo(1, "创建pdd订单成功.", null);
 				task.setPddOrderId(order.getString("group_order_id"));
 				task.setPddOrderNo(order.getString("order_sn"));
 				task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_WAITPAY);
-				if (StringUtils.isNotBlank(task.getTaskBuyerDesc())&&task.getTaskBuyerDesc().contains("收藏")) {
-					JSONObject productDetail = http.productDetail(goodsId);
-					JSONObject goods = productDetail.getJSONObject("goods");
+				if (StringUtils.isNotBlank(task.getTaskBuyerDesc()) && task.getTaskBuyerDesc().contains("收藏")) {
+					JSONObject product = mHttp.productChromeDetail(goodsId);
+					JSONObject mall = product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject("mall");
 					http.scGoods(goodsId);
-					http.scMaller(goods.getString("mall_id"));
+					http.scMaller(mall.getString("mallID"));
 				}
 			} else {
 				vo = orderinfo;
@@ -186,8 +191,8 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 				task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_WAITSEND);
 				vo = new DataVo(1, "更新pdd订单状态成功.", null);
 			} else {
-				logger.info("pinkeduo-{}:{}:生成支付宝支付地址", username, taskSn);
 				String aliPayUrl = http.genAliPayUrl(task.getPddOrderNo());
+				logger.info("pinkeduo-{}:{}:生成支付宝支付地址,aliPayUrl={}", username, taskSn, aliPayUrl);
 				order.put("aliPayUrl", aliPayUrl);
 				vo = new DataVo(1, "生成支付宝支付地址成功.", null);
 			}
@@ -198,8 +203,13 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		return vo;
 	}
 
-	private String getCommentContent() {
-		return "五星好评,东西价格便宜性价比高，商家态度也很热情，东西到的很快!";
+	private static String getCommentContent() {
+		String[] content = { "五星好评,东西价格便宜性价比高,商家态度也很热情,东西到的很快!", "不错,很喜欢,价格便宜性价比高,商家态度也很热情!",
+				"性价比高,商家态度也很热情,东西到的很快,非常满意!", "比在商场上的强太多了,最主要很实惠.很喜欢 ,值得推荐!", "五星好评,东西价格便宜性价比高,商家态度也很热情,超喜欢下次还来!",
+				"和描述一样好,商家态度也很热情,东西到的很快!", "宝贝收到了,太好了,五星好评,最主要很实惠.很喜欢,值得推荐!", "还不错,挺好用的,商家态度也很热情,价格也不贵,值得推荐!" };
+		int size = content.length;
+		Random random = new Random();
+		return content[random.nextInt(size)];
 	}
 
 	private String getImageName(String img) {
@@ -214,7 +224,7 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		return img;
 	}
 
-	public DataVo confirmReciveGoods(String taskSn, String cookiestr) {
+	public DataVo confirmTxReciveGoods(String taskSn, String cookiestr, String Authorization) {
 		DataVo vo = new DataVo(1, "确认收货完成.", taskSn);
 		PinkeduoTask t = new PinkeduoTask();
 		t.setTaskSn(taskSn);
@@ -225,11 +235,52 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		if (endFix < 0)
 			endFix = taskBuyerUrl.length();
 		String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);
-		String msg = pddUserWyService.confirmReciveGoodsPkd(pddUsername, task.getPddOrderNo(), goodsId,
+		String msg = pddUserWyService.confirmReciveGoodsNew(pddUsername, task.getPddOrderNo(), goodsId,
 				task.getTaskEvaluateContent(), null);
 		if (StringUtils.isBlank(msg)) {
-			logger.info("pinkeduo-{}:{}|拼多多确认收货已完成，开始拼客多上传截图.", task.getUsername(), taskSn);
+			logger.info("pinkeduo-{}:{}|拼多多确认收货已完成，开始拼客多确认.", task.getUsername(), taskSn);
+			task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_FINISHED);
+			task.setTaskStatus(PinkeduoTaskVo.STATUS_WAITFINISH);
+			super.save(task);
+		} else {
+			vo = new DataVo(0, msg, taskSn);
+		}
+		return vo;
+	}
 
+	public DataVo confirmReciveGoods(String taskSn, String cookiestr, String Authorization) {
+		DataVo vo = new DataVo(1, "确认收货完成.", taskSn);
+		PinkeduoTask t = new PinkeduoTask();
+		t.setTaskSn(taskSn);
+		PinkeduoTask task = super.queryOne(t, null);
+		String pddUsername = task.getPddUsername();
+		String taskBuyerUrl = task.getTaskBuyerUrl();
+		int endFix = taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("goods_id=") + 9);
+		if (endFix < 0)
+			endFix = taskBuyerUrl.length();
+		String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);
+		String msg = "";
+		long time = (new Date().getTime() - task.getCreateTime().getTime()) / 3600000;
+		if (time >= 168) {
+			msg = pddUserWyService.confirmReciveGoodsNew(pddUsername, task.getPddOrderNo(), goodsId,
+					task.getTaskEvaluateContent(), null);
+		} else {
+			msg = pddUserWyService.confirmReciveGoodsPkd(pddUsername, task.getPddOrderNo(), goodsId,
+					task.getTaskEvaluateContent(), null);
+		}
+		if (StringUtils.isBlank(msg)) {
+			logger.info("pinkeduo-{}:{}|拼多多确认收货已完成，开始拼客多确认.", task.getUsername(), taskSn);
+			/*
+			 * PinkeduoHttp pinkeduoHttp = new PinkeduoHttp(task.getUsername(), cookiestr,
+			 * Authorization); boolean success =
+			 * pinkeduoHttp.confirmRecGoods(task.getTaskId()); if (success) {
+			 * task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_FINISHED);
+			 * task.setTaskStatus(PinkeduoTaskVo.STATUS_WAITFINISH); super.save(task); }
+			 * else { vo = new DataVo(0, "拼客多确认收货失败!", taskSn); }
+			 */
+			task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_FINISHED);
+			task.setTaskStatus(PinkeduoTaskVo.STATUS_WAITFINISH);
+			super.save(task);
 		} else {
 			vo = new DataVo(0, msg, taskSn);
 		}
@@ -240,6 +291,7 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		DataVo vo = new DataVo(1, "", null);
 		PinkeduoUser user = pinkeduoUserWyService.queryByUsername(username);
 		PinkeduoTask t = new PinkeduoTask();
+		t.setUsername(username);
 		t.setTaskSn(taskSn);
 		PinkeduoTask task = super.queryOne(t, null);
 
@@ -266,60 +318,9 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		return vo;
 	}
 
-	public void recProductFrom(String taskId, String filePath, String cookiestr) {
-		String hdShowSexPic = uploadCommentImg(taskId, filePath, cookiestr);
-		if (StringUtils.isNotBlank(hdShowSexPic)) {
-			String url = "http://www.053666.cn/user/RecProductForm.aspx?id=" + taskId;
-			String postData = "sendtasktaskid=" + taskId + "&hdShowSexPic=" + hdShowSexPic + "&taskid=" + taskId;
-			Map<String, String> heads = new HashMap<String, String>();
-			heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
-			heads.put("Accept-Encoding", "gzip, deflate");
-			heads.put("Accept-Language", "zh-CN,zh;q=0.9");
-			heads.put("User-Agent",
-					"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
-			heads.put("X-Requested-With", "XMLHttpRequest");
-			heads.put("Referer", "http://www.053666.cn/user/RecProductForm.aspx?id=" + taskId);
-			heads.put("Origin", "http://www.053666.cn");
-			heads.put("Cookie", cookiestr);
-			String result = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-			JSONObject obj = JSONObject.parseObject(result);
-			logger.info("pinkeduo-{}:完成确认收货成功.result={}", taskId, obj);
-		}
-
-	}
-
-	public String uploadCommentImg(String taskId, String filePath, String cookiestr) {
-		String url = "http://www.053666.cn/ashx/upload_json.ashx";
-		Map<String, String> postDataMap = new HashMap<String, String>();
-		postDataMap.put("SaveFile", "TaskUpPic");
-		postDataMap.put("control", "file");
-		Map<String, String> heads = new HashMap<String, String>();
-		heads.put("Accept", "application/json, text/javascript, */*; q=0.01");
-		heads.put("Accept-Encoding", "gzip, deflate");
-		heads.put("Accept-Language", "zh-CN,zh;q=0.9");
-		heads.put("User-Agent",
-				"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
-		heads.put("X-Requested-With", "XMLHttpRequest");
-		heads.put("Referer", "http://www.053666.cn/user/RecProductForm.aspx?id=" + taskId);
-		heads.put("Origin", "http://www.053666.cn");
-		heads.put("Cookie", cookiestr);
-		String BOUNDARY = getBoundary();
-		String result = MobileHttpUrlConnectUtils.uploadFile(url, postDataMap, filePath, BOUNDARY, heads, null);
-		JSONObject obj = JSONObject.parseObject(result);
-		if (obj.getIntValue("error") == 0)
-			return obj.getString("url");
-		return result;
-	}
-
-	private String getBoundary() {
-		String random = "gOdGDotltrKycQGF";
-		return "WebKitFormBoundary" + random;
-	}
-
 	public DataVo updateTaskWap(String username, String taskId, String taskSn, String taskPrice, String taskRecType,
 			String taskSearchType, String taskOrderType, String taskGold, String taskStatus, String productImg,
-			String taskBuyerDesc,
-			String goodsId, String taskEvaluateContent, String taskEvaluateImg) {
+			String taskBuyerDesc, String goodsId, String taskEvaluateContent, String taskEvaluateImg) {
 		DataVo vo = new DataVo(1, "", null);
 		PinkeduoUser user = pinkeduoUserWyService.queryByUsername(username);
 		if (!user.getUsed()) {
@@ -364,7 +365,7 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 			if (task.getTaskOrderType().equals("开团"))
 				group = false;
 			DataVo orderinfo = pddUserWyService.createOrder(user.getPddUsername(), goodsId,
-					Float.valueOf(task.getTaskPrice()), group, false);
+					Float.valueOf(task.getTaskPrice()), group, false, 1, 0);
 			if (orderinfo.getStatus() == 1) {
 				JSONObject order = (JSONObject) orderinfo.getData();
 				vo = new DataVo(1, "创建pdd订单成功.", null);
@@ -372,11 +373,13 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 				task.setPddOrderNo(order.getString("order_sn"));
 				task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_WAITPAY);
 
-				if (StringUtils.isNotBlank(task.getTaskBuyerDesc())&&task.getTaskBuyerDesc().contains("收藏")) {
-					JSONObject productDetail = http.productDetail(goodsId);
-					JSONObject goods = productDetail.getJSONObject("goods");
+				if (StringUtils.isNotBlank(task.getTaskBuyerDesc()) && task.getTaskBuyerDesc().contains("收藏")) {
+					PddUser mUser = pddUserWyService.queryUserByUsername(PddHttp.searchUsername);
+					PddHttp mHttp = new PddHttp(mUser);
+					JSONObject product = mHttp.productChromeDetail(goodsId);
+					JSONObject mall = product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject("mall");
 					http.scGoods(goodsId);
-					http.scMaller(goods.getString("mall_id"));
+					http.scMaller(mall.getString("mallID"));
 				}
 			} else {
 				vo = orderinfo;
@@ -405,6 +408,65 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		return vo;
 	}
 
+	/**
+	 * 查询5天前的任务 未确认收货的任务
+	 * 
+	 * @param username
+	 * @return
+	 */
+	public List<PinkeduoTask> queryConfirmGoodsTask(String username) {
+		PinkeduoTask t = new PinkeduoTask();
+		t.setUsername(username);
+		t.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_WAITSEND);
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		c.add(Calendar.DAY_OF_YEAR, -3);
+		t.setCreateTime(c.getTime());
+		return super.queryList(t, null);
+	}
+
+	public int updateConfirmOrderStatus(String username) {
+		int count = 0;
+		logger.info("pingkeduo-{}|开始拼客多确认收货.", username);
+		PinkeduoHttp pinkeduoHttp = PinkeduoHttp.getInstance(username);
+		logger.info("pingkeduo-{}:|cookie={}|auth={}", username, pinkeduoHttp.cookie, pinkeduoHttp.Authorization);
+		List<PinkeduoTask> tasks = queryConfirmGoodsTask(username);
+		logger.info("pingkeduo-{}:|确认收货.任务数={}", username, tasks.size());
+		logger.info("pingkeduo-{}:|确认收货.cookie={}", username, pinkeduoHttp.getCookie());
+		for (PinkeduoTask task : tasks) {
+			logger.info("pingkeduo-{}:|确认收货.taskId={}", username, task.getTaskId());
+			String pddUsername = task.getPddUsername();
+			String taskBuyerUrl = task.getTaskBuyerUrl();
+			int endFix = taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("goods_id=") + 9);
+			if (endFix < 0)
+				endFix = taskBuyerUrl.length();
+			String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);
+			String msg = "";
+			long time = (new Date().getTime() - task.getCreateTime().getTime()) / 3600000;
+			if (time > 120) {
+				msg = pddUserWyService.confirmReciveGoodsNew(pddUsername, task.getPddOrderNo(), goodsId,
+						task.getTaskEvaluateContent(), null);
+			} else {
+				msg = pddUserWyService.confirmReciveGoodsPkd(pddUsername, task.getPddOrderNo(), goodsId,
+						task.getTaskEvaluateContent(), null);
+			}
+			if (StringUtils.isBlank(msg)) {
+				logger.info("pinkeduo-{}:{}|拼多多确认收货已完成，开始拼客多确认.", task.getUsername(), task.getTaskSn());
+				boolean success = pinkeduoHttp.confirmRecGoods(task.getTaskId());
+				if (success) {
+					task.setPddOrderStatus(PinkeduoTaskVo.PDD_STATUS_FINISHED);
+					task.setTaskStatus(PinkeduoTaskVo.STATUS_WAITFINISH);
+					super.save(task);
+					count++;
+				}
+			} else {
+				logger.info("pingkeduo-{}:{}|订单确认收货失败={}", task.getUsername(), task.getTaskSn(), msg);
+			}
+		}
+		logger.info("pingkeduo-{}|结束拼客多确认收货.", username);
+		return count;
+	}
+
 	@Override
 	public Weekend<PinkeduoTask> genSqlExample(PinkeduoTask t) {
 		Weekend<PinkeduoTask> w = super.genSqlExample(t);
@@ -427,7 +489,10 @@ public class PinkeduoTaskWyService extends BaseService<PinkeduoTask> {
 		if (StringUtils.isNotBlank(t.getPddOrderStatus())) {
 			c.andEqualTo(PinkeduoTask::getPddOrderStatus, t.getPddOrderStatus());
 		}
-		w.and(c);
+		if (t.getCreateTime() != null) {
+			c.andLessThan(PinkeduoTask::getCreateTime, t.getCreateTime());
+		}
+
 		return w;
 	}
 

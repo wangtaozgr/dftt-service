@@ -16,7 +16,7 @@ import com.atao.dftt.service.AsynService;
 import com.atao.dftt.service.ZqttCoinRecordWyService;
 import com.atao.dftt.service.ZqttUserWyService;
 
-@Component
+//@Component
 public class ZqttReadJob {
 	private static Logger logger = LoggerFactory.getLogger(ZqttReadJob.class);
 
@@ -75,13 +75,13 @@ public class ZqttReadJob {
 	/**
 	 * 每小时打一次卡
 	 */
-	@Scheduled(cron = "0 4 6-23 * * ?")
+	/*@Scheduled(cron = "0 4 6-23 * * ?")
 	public void daka() {
 		List<ZqttUser> users = zqttUserWyService.getUsedUser();
 		for (ZqttUser user : users) {
 			zqttUserWyService.daka(user);
 		}
-	}
+	}*/
 
 	/**
 	 * 查询我的金币

@@ -437,7 +437,6 @@ public class ZqttUserWyService extends BaseService<ZqttUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(ZqttUser::getUsed, t.getUsed());
 		}
-		w.and(c);
 		return w;
 	}
 }

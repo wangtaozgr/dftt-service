@@ -29,12 +29,12 @@ public class MayittUserController extends BaseController<MayittUser> {
 
 	@RequestMapping("/test")
 	public String test() throws Exception {
-		MayittUser user = mayittUserWyService.queryById(1);
+		MayittUser user = mayittUserWyService.queryById(3);
 		MayittHttp http = MayittHttp.getInstance(user);
 		/*Date endTime = new Date(new Date().getTime() + 10 * 60 * 1000l);
 		mayittUserWyService.readVideoCoin(user, endTime);*/
 		//mayittUserWyService.readNewsCoin(user);
-		mayittUserWyService.daka(user);
+		mayittUserWyService.readNewsCoin(user);
 		return null;
 	}
 }

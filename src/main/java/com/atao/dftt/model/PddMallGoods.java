@@ -31,6 +31,11 @@ public class PddMallGoods extends BaseEntity {
     /**
      * 
      */
+    @Column(name = "goods_name")
+    private String goodsName;
+    /**
+     * 
+     */
     @Column(name = "goods_logo")
     private String goodsLogo;
     /**
@@ -60,6 +65,13 @@ public class PddMallGoods extends BaseEntity {
     public void setGoodsId(String goodsId) {
         this.goodsId = goodsId;
     }
+    public String getGoodsName() {
+        return goodsName;
+    }
+
+    public void setGoodsName(String goodsName) {
+        this.goodsName = goodsName;
+    }
     public String getGoodsLogo() {
         return goodsLogo;
     }
@@ -84,6 +96,7 @@ public class PddMallGoods extends BaseEntity {
         public static String id = "id";  // 
         public static String mallId = "mall_id";  // 
         public static String goodsId = "goods_id";  // 
+        public static String goodsName = "goods_name";  // 
         public static String goodsLogo = "goods_logo";  // 
         public static String logoKey = "logo_key";  // 
 

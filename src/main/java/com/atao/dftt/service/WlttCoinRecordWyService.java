@@ -84,7 +84,6 @@ public class WlttCoinRecordWyService extends BaseService<WlttCoinRecord> {
 		if (StringUtils.isNotBlank(t.getCoinDay())) {
 			c.andEqualTo(WlttCoinRecord::getCoinDay, t.getCoinDay());
 		}
-		w.and(c);
 		return w;
 	}
 }

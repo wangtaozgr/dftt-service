@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+<title></title>
+<link href="../bootstrap/css/bootstrap.css" rel="stylesheet" />
+<style>
+.table tr td img {
+	width: 104px;
+	height: 104px;
+}
+</style>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<h3 class="text-center">拼多多商品.</h3>
+				<form class="form-search">
+					<button type="button" class="btn" onclick="loadPageData();">查找</button>
+					<button type="button" class="btn" onclick="addMall();">新增店铺</button>
+					<button type="button" class="btn" onclick="addMallName();">新增店铺名称</button>
+				</form>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>商品图片</th>
+							<th>商家url</th>
+						</tr>
+					</thead>
+					<tbody id="taskBody">
+						<script type="text/html" id="taskList">
+						{{each list as value i}}	
+						<tr class="error">
+							<td style="width:50%;"><a target="_blank" href="https://mobile.yangkeduo.com/mall_page.html?mall_id={{value.mallId}}"><img style="width:200px;height:200px;" alt="" src="{{value.goodsLogo}}"><a></td>
+							<td style="width:50%;">
+								<a type="button" class="btn btn-danger" onclick='saveGoodsId({{value.mallId}},"{{value.goodsLogo}}");'> 填写商品信息</a>
+							</td>
+						</tr>
+						{{/each}}
+						</script>
+					</tbody>
+				</table>
+				<div class="pagination pagination-right">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-hidden="true">×</button>
+			<h3 id="myModalLabel">保存商品信息</h3>
+		</div>
+		<div class="modal-body form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="i_username">商品</label>
+				<div class="controls">
+					<img style="width:200px;height:200px;" alt="" src="" id="goodsLogo">
+					<input type="hidden" name="mallId" id="mallId" value=""/>
+					<input type="hidden" name="goodsImg" id="goodsImg" value="" />
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="i_cookiestr">商品ID</label>
+				<div class="controls">
+					<input name="goodsId" id="goodsId" value="" />
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+			<button class="btn btn-primary" id="saveGoodsId">确认</button>
+		</div>
+	</div>
+	
+	
+	<div id="addMallModal" class="modal hide fade" tabindex="-1" role="dialog"
+		aria-labelledby="addMallModalLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-hidden="true">×</button>
+			<h3 id="addMallModalLabel">保存店铺信息</h3>
+		</div>
+		<div class="modal-body form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="i_username">店铺id</label>
+				<div class="controls">
+					<input name="mallId02" id="mallId02" value=""/>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="i_username">店铺名称</label>
+				<div class="controls">
+					<input name="mallName" id="mallName" value=""/>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="i_cookiestr">店铺图片</label>
+				<div class="controls">
+					<input name="mallLogo" id="mallLogo" value="" />
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+			<button class="btn btn-primary" id="saveMallBtn">确认</button>
+		</div>
+	</div>
+	
+	<div id="addMallNameModal" class="modal hide fade" tabindex="-1" role="dialog"
+		aria-labelledby="addMallNameModalLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-hidden="true">×</button>
+			<h3 id="addMallNameModalLabel">保存店铺信息</h3>
+		</div>
+		<div class="modal-body form-horizontal">
+			<div class="control-group">
+				<label class="control-label">店铺名称</label>
+				<div class="controls">
+					<input name="mName" id="mName" value=""/>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+			<button class="btn btn-primary" id="saveMallNameBtn">确认</button>
+		</div>
+	</div>
+
+	<script src="../js/jquery-1.8.2.js"></script>
+	<script src="../js/template.js"></script>
+	<script src="../bootstrap/js/bootstrap.min.js"></script>
+	<script src="../bootstrap/js/bootstrap-paginator.js"></script>
+	<script>
+		let currentPage = 1;
+		let pageSize = 50;
+		(function () {
+			template.helper('dateFormat', function(value, format) {
+				var date = new Date(value);
+				var y = date.getFullYear();
+				var m = date.getMonth() + 1;
+				m = m < 10 ? ('0' + m) : m;
+				var d = date.getDate();
+				d = d < 10 ? ('0' + d) : d;
+				var h = date.getHours();
+				h = h < 10 ? ('0' + h) : h;
+				var minute = date.getMinutes();
+				var second = date.getSeconds();
+				minute = minute < 10 ? ('0' + minute) : minute;
+				second = second < 10 ? ('0' + second) : second;
+				return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+			});
+		})();
+		$(function() {
+			loadPageData();
+			$("#saveGoodsId").click(function() {
+				var mallId = $("#mallId").val();
+				var goodsImg = $("#goodsImg").val();
+				var goodsId = $("#goodsId").val();
+
+				$.ajax({
+					type : "post",
+					url : "../pddmallgoods/saveGoodsId",
+					dataType : 'json',
+					data : {
+						mallId : mallId,
+						goodsImg : goodsImg,
+						goodsId : goodsId
+					},
+					success : function(json) {
+						$("#goodsId").val('');
+						$('#myModal').modal('hide');
+						loadPageData();
+					}
+				});
+			});
+			
+			$("#saveMallBtn").click(function() {
+				var mallId = $("#mallId02").val();
+				var mallName = $("#mallName").val();
+				var mallLogo = $("#mallLogo").val();
+
+				$.ajax({
+					type : "post",
+					url : "../pddmallgoods/saveMall",
+					dataType : 'html',
+					data : {
+						mallId : mallId,
+						mallName : mallName,
+						mallLogo : mallLogo
+					},
+					success : function(json) {
+						if(json=='店铺保存成功'){
+							$("#mallId02").val('');
+							$("#mallName").val('');
+							$("#mallLogo").val('');
+							$('#addMallModal').modal('hide');
+						}
+						else{
+							alert("店铺保存失败");
+						}
+					}
+				});
+			});
+			
+			$("#saveMallNameBtn").click(function() {
+				var mallName = $("#mName").val();
+				$.ajax({
+					type : "post",
+					url : "../pddmallgoods/saveMallName",
+					dataType : 'html',
+					data : {
+						mallName : mallName
+					},
+					success : function(json) {
+						if(json=='店铺保存成功'){
+							$("#mName").val('');
+							$('#addMallNameModal').modal('hide');
+						}
+						else{
+							alert("店铺保存失败");
+						}
+					}
+				});
+			});
+			
+		});
+		
+		function addMall(){
+			$('#addMallModal').modal('show');
+			$("#mallId").focus();
+		}
+		
+		function saveGoodsId(mallId, goodsImg){
+			$("#mallId").val(mallId);
+			$("#goodsImg").val(goodsImg);
+			$("#goodsLogo").attr("src", goodsImg);
+			$('#myModal').modal('show');
+			$("#goodsId").focus();
+
+		}
+		function loadPageData() {
+			$.ajax({
+				type : "post",
+				url : "../pddmallgoods/orderPageData",
+				dataType : 'json',
+				success : function(data) {
+					console.log(data);
+					var html1 = template("taskList", {
+						list : data
+					});
+					document.getElementById("taskBody").innerHTML = html1;
+				}
+			});
+
+		}
+		
+		function addMallName(){
+			$('#addMallNameModal').modal('show');
+		}
+	</script>
+</body>
+</html>

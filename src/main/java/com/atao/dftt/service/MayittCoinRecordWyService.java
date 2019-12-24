@@ -92,7 +92,7 @@ public class MayittCoinRecordWyService extends BaseService<MayittCoinRecord> {
 		if (StringUtils.isNotBlank(t.getCoinDay())) {
 			c.andEqualTo(MayittCoinRecord::getCoinDay, t.getCoinDay());
 		}
-		w.and(c);
+		
 		return w;
 	}
 }

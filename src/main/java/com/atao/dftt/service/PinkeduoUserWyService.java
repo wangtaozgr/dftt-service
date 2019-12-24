@@ -55,7 +55,7 @@ public class PinkeduoUserWyService extends BaseService<PinkeduoUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(PinkeduoUser::getUsed, t.getUsed());
 		}
-		w.and(c);
+		
 		return w;
 	}
 }

@@ -291,6 +291,8 @@ public class JkdttHttp {
 					reportAd(renderAdvert);
 				page++;
 				return list;
+			}else if("获取文章列表为空".equals(object.getString("rtn_msg"))) {
+				page =1;
 			}
 			logger.error("jkdtt-{}:获取新闻列表失败,msg={}", user.getUsername(), content);
 		} catch (Exception e) {

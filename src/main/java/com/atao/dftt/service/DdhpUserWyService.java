@@ -54,7 +54,7 @@ public class DdhpUserWyService extends BaseService<DdhpUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(DdhpUser::getUsed, t.getUsed());
 		}
-		w.and(c);
+		
 		return w;
 	}
 

@@ -7,9 +7,9 @@
 <title></title>
 <link href="../bootstrap/css/bootstrap.css" rel="stylesheet" />
 <style>
-.table tr td img{
-	width: 54px;
-    height: 54px;
+.table tr td img {
+	width: 104px;
+	height: 104px;
 }
 </style>
 </head>
@@ -21,22 +21,31 @@
 				<form class="form-search">
 					<select id="username">
 						<option value="">全部用户</option>
+						<option value="13865429076">13865429076</option>
+						<option value="17356575091">17356575091</option>
+						<option value="15256211039">13865429076</option>
 						<option value="wangtaozgr">wangtaozgr</option>
-					</select>
-					<input class="input-medium search-query" type="text" />
+						<option value="18714990981">18714990981</option>
+						
+					</select> <select id="pddOrderStatus">
+						<option value="1">已付款</option>
+						<option value="4">已完成</option>
+						<option value="">全部</option>
+					</select> 
+					<input class="input-medium search-query" type="text" id="pddOrderNo"/>
 					<button type="button" class="btn" onclick="loadPageData();">查找</button>
 					<button type="button" class="btn btn-primary" id="startTask">开始接任务</button>
-					<a href="#myModal" role="button" class="btn btn-danger" data-toggle="modal">设置cookie</a>
-					
+					<!-- <a href="#myModal" role="button" class="btn btn-danger" data-toggle="modal">设置cookie</a> -->
+
 				</form>
 				<table class="table">
 					<thead>
 						<tr>
 							<th>商品</th>
 							<th>任务信息</th>
-							<th>任务状态</th>
-							<th>拼多多订单号</th>
-							<th>拼多多状态</th>
+							<th>拼多多订单号/状态</th>
+							<th>任务要求</th>
+							<th>评论内容</th>
 							<th>操作</th>
 						</tr>
 					</thead>
@@ -44,11 +53,11 @@
 						<script type="text/html" id="taskList">
 						{{each list as value i}}	
 						<tr class="error">
-							<td><img alt="" src="{{value.taskBuyerImg}}"></td>
-							<td>{{value.taskNo}}<br/>任务价格：￥{{value.taskPrice}}<br/>任务佣金：{{value.taskGold}}元</td>
-							<td>{{value.taskStatus}} </td>
-							<td>{{value.taskNo}}</td>
-							<td>{{value.taskStatus}} </td>
+							<td style="width:120px;"><img style="width:120px;" alt="" src="{{value.taskBuyerImg}}"></td>
+							<td>接单帐号：{{value.username}}<br/>任务价格：￥{{value.taskPrice}}<br/>任务佣金：{{value.taskGold}}元<br/>任务状态：{{value.taskStatus=="0"?"已接单":value.taskStatus=="3"?"已完成":"未知"}}<br/>任务时间：{{value.createTime | dateFormat: 'yyyy-MM-dd hh:mm:ss'}}</td>
+							<td>{{value.pddOrderNo}}<br/>任务状态：{{value.pddOrderStatus=="1"?"已付款":value.pddOrderStatus=="4"?"已完成":"未支付"}}<br/>拼多多用户：{{value.pddUsername}}</td>
+							<td style="width:15%;">{{value.taskBuyerDesc}} </td>
+							<td style="width:15%;">{{value.taskEvaluateContent}} </td>
 							<td></td>
 						</tr>
 						{{/each}}
@@ -56,54 +65,67 @@
 					</tbody>
 				</table>
 				<div class="pagination pagination-right">
-					<ul>
-						<li><a href="#">上一页</a></li>
-						<li><a href="#">1</a></li>
-						<li><a href="#">2</a></li>
-						<li><a href="#">3</a></li>
-						<li><a href="#">4</a></li>
-						<li><a href="#">5</a></li>
-						<li><a href="#">下一页</a></li>
-					</ul>
 				</div>
 			</div>
 		</div>
 	</div>
-	
+
 	<!-- Modal -->
-	<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-header">
-	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-	    <h3 id="myModalLabel">设置cooke</h3>
-	  </div>
-	  <div class="modal-body form-horizontal">
+	<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-hidden="true">×</button>
+			<h3 id="myModalLabel">设置cooke</h3>
+		</div>
+		<div class="modal-body form-horizontal">
 			<div class="control-group">
-			    <label class="control-label" for="i_username">用户名</label>
-			    <div class="controls">
-			      <select id="i_username">
-					 <option value="wangtaozgr">wangtaozgr</option>
-				  </select>
-			    </div>
-		  	</div>
-		  	<div class="control-group">
-		    	<label class="control-label" for="i_cookiestr">cookie值</label>
-		    	<div class="controls">
-		     		<textarea rows="3" id="i_cookiestr"></textarea>
-		    	</div>
-		  	</div>
-	  </div>
-	  <div class="modal-footer">
-	    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-	    <button class="btn btn-primary" id="saveUserCookieValue">确认</button>
-	  </div>
+				<label class="control-label" for="i_username">用户名</label>
+				<div class="controls">
+					<select id="i_username">
+						<option value="wangtaozgr">wangtaozgr</option>
+					</select>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="i_cookiestr">cookie值</label>
+				<div class="controls">
+					<textarea rows="3" id="i_cookiestr"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+			<button class="btn btn-primary" id="saveUserCookieValue">确认</button>
+		</div>
 	</div>
-	
+
 	<script src="../js/jquery-1.8.2.js"></script>
 	<script src="../js/template.js"></script>
 	<script src="../bootstrap/js/bootstrap.min.js"></script>
+	<script src="../bootstrap/js/bootstrap-paginator.js"></script>
 	<script>
-		$(function(){
-			$("#saveUserCookieValue").click(function(){
+		let currentPage = 1;
+		let pageSize = 50;
+		(function () {
+			template.helper('dateFormat', function(value, format) {
+				var date = new Date(value);
+				var y = date.getFullYear();
+				var m = date.getMonth() + 1;
+				m = m < 10 ? ('0' + m) : m;
+				var d = date.getDate();
+				d = d < 10 ? ('0' + d) : d;
+				var h = date.getHours();
+				h = h < 10 ? ('0' + h) : h;
+				var minute = date.getMinutes();
+				var second = date.getSeconds();
+				minute = minute < 10 ? ('0' + minute) : minute;
+				second = second < 10 ? ('0' + second) : second;
+				return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+			});
+		})();
+		$(function() {
+			$("#saveUserCookieValue").click(function() {
 				var username = $("#i_username").val();
 				var cookiestr = $("#i_cookiestr").val();
 				$.ajax({
@@ -121,18 +143,24 @@
 					}
 				});
 			});
-			
+
 			loadPageData();
 		});
-		
-		function loadPageData(){
+
+		function loadPageData() {
 			var username = $("#username").val();
+			var pddOrderStatus = $("#pddOrderStatus").val();
+			var pddOrderNo = $("#pddOrderNo").val();
 			$.ajax({
 				type : "post",
-				url : "../ddhp/orderPageData",
+				url : "../taodan/orderPageData",
 				dataType : 'json',
 				data : {
-					username : username
+					page : currentPage,
+					rows : pageSize,
+					username : username,
+					pddOrderNo:pddOrderNo,
+					pddOrderStatus : pddOrderStatus
 				},
 				success : function(data) {
 					console.log(data);
@@ -140,9 +168,28 @@
 						list : data.list
 					});
 					document.getElementById("taskBody").innerHTML = html1;
+					setPage(data.pageNum, Math.ceil(data.total / pageSize),
+							loadPageData);
 				}
 			});
-			
+
+		}
+
+		function setPage(pageCurrent, pageSum, callback) {
+			$(".pagination").bootstrapPaginator({
+				//设置版本号
+				bootstrapMajorVersion : 2,
+				// 显示第几页
+				currentPage : pageCurrent,
+				// 总页数
+				totalPages : pageSum,
+				//当单击操作按钮的时候, 执行该函数, 调用ajax渲染页面
+				onPageClicked : function(event, originalEvent, type, page) {
+					// 把当前点击的页码赋值给currentPage, 调用ajax,渲染页面
+					currentPage = page
+					callback && callback()
+				}
+			})
 		}
 	</script>
 </body>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atao.dftt.mapper.ZhuankeTaskMapper">
+    <resultMap id="BaseResultMap" type="ZhuankeTask">
+    <id property="id" column="id" jdbcType="BIGINT" />
+
+    <result property="username" column="username" jdbcType="VARCHAR" />
+    <result property="userId" column="user_id" jdbcType="BIGINT" />
+    <result property="taskId" column="task_id" jdbcType="VARCHAR" />
+    <result property="taskSn" column="task_sn" jdbcType="VARCHAR" />
+    <result property="taskPrice" column="task_price" jdbcType="VARCHAR" />
+    <result property="taskSearchType" column="task_search_type" jdbcType="VARCHAR" />
+    <result property="taskSearchContent" column="task_search_content" jdbcType="VARCHAR" />
+    <result property="taskRecType" column="task_rec_type" jdbcType="VARCHAR" />
+    <result property="taskOrderType" column="task_order_type" jdbcType="VARCHAR" />
+    <result property="taskEvaluateType" column="task_evaluate_type" jdbcType="VARCHAR" />
+    <result property="taskEvaluateContent" column="task_evaluate_content" jdbcType="VARCHAR" />
+    <result property="taskEvaluateImg" column="task_evaluate_img" jdbcType="VARCHAR" />
+    <result property="taskGold" column="task_gold" jdbcType="VARCHAR" />
+    <result property="taskStatus" column="task_status" jdbcType="VARCHAR" />
+    <result property="taskBuyerImg" column="task_buyer_img" jdbcType="VARCHAR" />
+    <result property="taskBuyerUrl" column="task_buyer_url" jdbcType="VARCHAR" />
+    <result property="skuNumber" column="sku_number" jdbcType="VARCHAR" />
+    <result property="couponPrice" column="coupon_price" jdbcType="VARCHAR" />
+    <result property="taskBuyerDesc" column="task_buyer_desc" jdbcType="VARCHAR" />
+    <result property="pddUserId" column="pdd_user_id" jdbcType="BIGINT" />
+    <result property="pddUsername" column="pdd_username" jdbcType="VARCHAR" />
+    <result property="pddOrderId" column="pdd_order_id" jdbcType="VARCHAR" />
+    <result property="pddOrderNo" column="pdd_order_no" jdbcType="VARCHAR" />
+    <result property="pddOrderStatus" column="pdd_order_status" jdbcType="VARCHAR" />
+    <result property="createTime" column="create_time" jdbcType="TIMESTAMP" />
+</resultMap>
+
+    <sql id="BaseColumnList">
+        id,username,user_id,task_id,task_sn,
+        task_price,task_search_type,task_search_content,task_rec_type,task_order_type,
+        task_evaluate_type,task_evaluate_content,task_evaluate_img,task_gold,task_status,
+        task_buyer_img,task_buyer_url,sku_number,coupon_price,task_buyer_desc,
+        pdd_user_id,pdd_username,pdd_order_id,pdd_order_no,pdd_order_status,
+        create_time
+    </sql>
+
+
+    <sql id="TableClause"> ${}.ZHUANKE_TASK </sql>
+
+
+    <select id="queryByCriteria" resultMap="BaseResultMap" parameterType="CriteriaQuery">
+        <include refid="public.Select4Query" />
+    </select>
+
+    <select id="countByCriteria" resultType="int" parameterType="CriteriaQuery">
+        <include refid="public.Count4Query" />
+    </select>
+
+    <delete id="deleteByCriteria" parameterType="CriteriaQuery">
+        <include refid="public.Delete4Query" />
+    </delete>
+</mapper>

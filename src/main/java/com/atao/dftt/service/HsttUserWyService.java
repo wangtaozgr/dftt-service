@@ -398,7 +398,7 @@ public class HsttUserWyService extends BaseService<HsttUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(HsttUser::getUsed, t.getUsed());
 		}
-		w.and(c);
+		
 		return w;
 	}
 

@@ -268,7 +268,7 @@ public class JkdttUserWyService extends BaseService<JkdttUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(JkdttUser::getUsed, t.getUsed());
 		}
-		w.and(c);
+		
 		return w;
 	}
 

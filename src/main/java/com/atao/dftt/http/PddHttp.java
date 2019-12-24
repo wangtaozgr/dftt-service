@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import com.atao.dftt.util.CommonUtils;
 import com.atao.dftt.util.FileUtils;
 import com.atao.dftt.util.FreemarkerUtils;
 import com.atao.dftt.util.MobileHttpUrlConnectUtils;
+import com.atao.dftt.util.SmsUtils;
 import com.atao.util.DateUtils;
 
 import ch.qos.logback.core.util.FileUtil;
@@ -45,9 +47,21 @@ public class PddHttp {
 	private static Logger logger = LoggerFactory.getLogger(PddHttp.class);
 	private static Map<String, PddHttp> userMap = new HashMap<String, PddHttp>();
 	public PddUser user;
-	public String anti_content = "0alAfandFyhYq9duvXi6MC9Z7uUPkCjk__lgNHfdJ_jX-jT2p_BSBiwdqOn12lMiu5zQ_2i07iQMq0mDk9i7AMAJ8QlQDJ59P0y2qxqw0EBP8mXG95BJlMhYTnI-urdWuirueate3z_NKI7Z3ddCLDMcMfYtj_DqCHb7i1VOJcidcrzzSHcIEm1Uj8UpIIFUfEZm5B5PWe0bCvHH-5yYBx39WEESSTgL1_vcks1igt-7wjb4GMiuUr1zm-358T53qpI3r-u5lgCxQXwPZb5UYJQLvokQLxcKEITbQeK8cS1oOOUnkNUugmCeXNGOp8m-njSKxJVtg99QGsdEpGbeDPKogcIF4ro0ZUxC-EKMxBWhI-02CZs446ox4Sxkop9t3O_U9-w4mUNs64WqIXbwawbUFP1TYarLSl6y-SizKOxqdybDsjOac0yrN6E3cdnIYzI_ogpWvY1awyZPLVqzOD0ypJrcfrajL7aQUoiT0t0VYlKVQXf6RhHe2NA7cq4C3ewrIhXJIf8ZXuH5rtuilwImIS6vD-dr65quLho-jxLdOAlDa_-VdFXlSpexXeVE9Tr0flqHrnz78kxukZnJuW0moWbhSN4EjbqBW4mbLoORjM9KZ5_ARhKa7NxqqQrj3QHy50y7PMqQB9rTf3b4DIftxnCqyK8lLnBIBuS1-Hx7_-Yxs_EFHUwpFCmhhuosxWaqNoFmzDTT8iQQCK-qdtIwhxE3pw-33_FyihVkIvHhrVgiaiMMRr4zt8VC9";
+	public String anti_content = "";
 	// 多多进宝token
 	public String ddjbToken = "727CRKX32I4IEJTRN2OCT47GBFHFQ45ZNKC6OP3WAEYPK4MWAXVA103f010";
+	private static Map<String, Map<String,JSONObject>> productsMap = new HashMap<String, Map<String,JSONObject>>();
+	public static String searchUsername = "m_17755117870";
+	public static void nextSearchUser() {
+		if(searchUsername.equals("m_17755117870")) {
+			searchUsername = "m_19965180126";
+		}else if(searchUsername.equals("m_19965180126")) {
+			searchUsername = "m_17356575091";
+		}
+		else if(searchUsername.equals("m_17356575091")) {
+			searchUsername = "m_17755117870";
+		}
+	}
 	public PddHttp(PddUser user) {
 		this.user = user;
 	}
@@ -75,16 +89,108 @@ public class PddHttp {
 		user.setUsername("17755117870");
 		user.setUid("1723813480085");
 		user.setAddressId("4169994514");
-		user.setToken("HFYZ4SBUH6HTDI5UC5KJKUM5HOVLVVHIBQMBYILCKZS3XSY5OAZQ113f010");
-		// 34GNCXZLFY645W2FESF67UUUO7SZJPPPUPJVI6K3C2BLND5UAPPQ113f010
-		// 34GNCXZLFY645W2FESF67UUUO7SZJPPPUPJVI6K3C2BLND5UAPPQ113f010
-
-		// user.setToken("X6W7XXM5X77SH5CTPZYPRCPYTP55B624B3BJGY3LQ2K367UVLA2A100a459");
+		user.setToken("XYVH4ZFZKU47BMDAVGMUBIFKPVTLOLG3T3M72FR236YDUNFHN2NA113f010");
 		user.setApiUid("rBUGzVwUht4AJXpZhdyiAg==");
+		
+		/*user.setUsername("19965180126");
+		user.setUid("7887501021770");
+		user.setAddressId("4526882634");
+		user.setToken("VO4SWHLPBGFPUIRFWCXNZF5ITU7LSB2HLC5HGGLHIMXBJSPBVBFQ1124a60");*/
+		
+		
+		/*user.setToken("7RBKRY7ZE5UB7FOCOKACUDMI235YW6XC356DEZKPLLYRZDE7GSKA110a459");
 		user.setUserAgent(
-				"android Mozilla/5.0 (Linux; Android 7.1.2; MI 5X Build/N2G47H; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/64.0.3282.137 Mobile Safari/537.36  phh_android_version/4.33.0 phh_android_build/a2d7218bda21579f6f922dd29885b0d04b040338_pdd_patch phh_android_channel/xm");
+				"Mozilla/5.0 (Linux; U; Android 7.1.2; zh-CN; MI 5X Build/N2G47H) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.2.2.1002 Mobile Safari/537.36");
+		*/
 		PddHttp http = PddHttp.getInstance(user);
-		http.productDetail02("1029935892");
+		http.searchGoodsIdByMallId("832159590", "832159590");
+		/*String  taskBuyerUrl = "https://mobile.yangkeduo.com/duo_coupon_landing.html?goods_id=66373090239&pid=8721488_103150331&cpsSign=CC_191215_8721488_103150331_2fd43d93df03682762300a87cc7404af&duoduo_type=3";
+		JSONObject couponDetail = http.couponUrlDetail(taskBuyerUrl);
+		JSONObject couponData = couponDetail.getJSONObject("store").getJSONObject("couponData");
+		JSONObject mallCollectCoupon = couponData.getJSONObject("mallCollectCoupon");
+		String couponPriceAct = couponData.getString("discount");
+		String couponSn = couponData.getString("couponSn");
+		int endFix = taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("pid=") + 4);
+		if (endFix < 0)
+			endFix = taskBuyerUrl.length();
+		String pid = taskBuyerUrl.substring(taskBuyerUrl.indexOf("pid=") + 4, endFix);
+		endFix = taskBuyerUrl.indexOf("&", taskBuyerUrl.indexOf("goods_id=") + 9);
+		if (endFix < 0)
+			endFix = taskBuyerUrl.length();
+		String goodsId = taskBuyerUrl.substring(taskBuyerUrl.indexOf("goods_id=") + 9, endFix);*/
+		//A0087VC-510454880426000555   349434027  66373090239  8721488_103150331
+		//boolean success = http.getGoodsCoupon("349434027", "66373090239", "A0087VC-510454880426000555", "8721488_103150331");
+		//boolean success = http.getGoodsCoupon(couponData.getString("mallId"), goodsId, couponSn, pid);
+		
+		
+		//JSONObject mallObject = http.searchMallName("威易仕成人用品旗舰店");
+		//logger.info("{}",mallObject);
+		//http.submitAppOrder("47565412", "23559781959", "403293341022", "57504422295", "", false, 1, 0);
+		/*for(int i=0;i<100;i++) {
+			http.productChromeDetail("54342085854");
+			http.searchProduct("贝施恩居家日用专营店");
+		}*/
+		//http.downloadProductSearchImage("aaaaa", "7893008474", "保健品男用持久", "D:/logs");
+		//JSONObject detail = http.productChromeDetail("40759897275");
+		//JSONObject detail = http.productDetail02("2729390615");
+		//logger.info("{}",detail);
+		System.out.println(PddHttp.searchUsername);
+		PddHttp.nextSearchUser();
+		System.out.println(PddHttp.searchUsername);
+		PddHttp.nextSearchUser();
+		System.out.println(PddHttp.searchUsername);
+		PddHttp.nextSearchUser();
+		System.out.println(PddHttp.searchUsername);
+		PddHttp.nextSearchUser();
+		System.out.println(PddHttp.searchUsername);
+
+		//http.getCouponSn("36450184543", 5f);
+		//http.productDetail02("3556225209");
+		//http.productChromeDetail("3556225209");
+		//http.submitAppOrder("47565412", "23559781959", "403293341022", "57504422295", "", false, 1, 0);
+		//http.searchMall("贝施恩居家日用专营店", "dd");
+		
+		/*JSONObject goods = http.searchGoodsIdByMallId("821532779","6e45a1e0-642c-4322-8247-91be9e4055ea");
+		for(int i=0;i<100;i++) {
+			goods = http.searchGoodsIdByMallId("821532779","6e45a1e0-642c-4322-8247-91be9e4055ea");
+		}
+		logger.info("{}",goods);*/
+		//http.queryOrderDetail("191104-369033544834080");
+		//http.mallGroups("303549022");
+		//http.getCoupon("517233923", "2744565842");
+		//http.getGoodsCoupon("517233923", "54342085854", "A0045VC-502855056299361539", "9290340_115513700");
+		//http.orderCheckout("23056680217", "382279309428", "54342085854");
+		//String couponUrl = http.decodeCouponUrl("https://p.pinduoduo.com/Id2XBFcQ");
+		//http.couponUrlDetail(couponUrl);
+		//http.productDetail("54342085854");
+		//191018-167735788434080
+		//http.orderDetail("191018-167735788434080");
+		//http.queryWlDetail("191018-235986289734080");
+		//http.queryOrderDetail("191018-167735788434080");
+		//http.submitAppOrder("47565412", "23559781959", "403293341022", "57504422295", "", false, 1, 0);
+		//http.uploadPic("//zk.gxrdwl.com/UploadPic/Task/2019/20191020/20191020160238_84726.jpg");
+		//http.searchMall("贝施恩居家日用专营店", "dd");
+		//JSONObject goods = http.searchGoodsIdByMallId("2226847", "265b589a-bc01-47ca-8b13-6267b10f41cf");
+		//logger.info("{}",goods);
+		//http.productDetail("4770114334");
+		//http.getProductDetailCoupon("4770114334");
+		//http.genAliPayUrl("191012-278582395574080");
+		//http.productDetail("18385532048");
+		//JSONObject obj = http.searchGoodsIdByMallId("569331555", "5f3dc35d-5f78-4226-a7ce-5eb441930981");
+		//JSONObject goods = http.searchGoodsIdByMallId("2226847", "3d4d47e3-660c-40c3-af9c-37626b8eb06a");
+		//logger.info("{}",goods);
+		//http.productDetail("2669961521");
+		//http.searchMallName("普宁姐姐");
+		//JSONObject commentDetail = http.commentDetail("190907-351498732214080");
+		//http.downloadCommentImage("190907-351498732214080", "D:\\pddImage");
+		//logger.info("pdd-{}: 查询商品详细.{}", user.getUsername(), content);
+		
+		//https://p.pinduoduo.com/DX8rXeHP
+
+		//http.downloadProductSearchImage("47629189830", "47629189830", "卫衣女秋冬季加绒加厚银狐绒外套新款韩版宽松立领半拉链百搭上衣", "百搭上衣女秋", "D:/");
+		//JSONObject order = http.queryOrderDetail("191012-592149873874080");
+		//http.isSign(order);
+		//http.productDetail02("1029935892");
 		//System.out.println(http.getShareUrl("2389768826"));
 		// String pddImgPath = "D:/pddImage";
 		//http.downloadAllCommentImage(pddImgPath);
@@ -104,8 +210,8 @@ public class PddHttp {
 		String skuId = sku.getString("sku_id");
 		//http.orderCheckout(groupId, skuId, goodsId);
 		
-		JSONObject order = http.submitAppOrder("", groupId, skuId, goodsId, "", true);*/
-
+		JSONObject order = http.submitAppOrder("", groupId, skuId, goodsId, "", true);
+		 */
 
 		//JSONObject order = http.queryOrderDetail("191002-518060770234080");
 		//System.out.println(order);
@@ -182,7 +288,7 @@ public class PddHttp {
 	 * @return
 	 */
 	private int myComment(String pddImgPath, int count, int page, String lastReviewId, String lastCreateTime) {
-		if(page>8) return count;
+		if(page>3) return count;
 		logger.info("pdd-{}:开始下载评论图片.page={}", user.getUsername(),page);
 		JSONObject json = myComments(page, lastReviewId, lastCreateTime);
 		JSONArray myComments = json.getJSONArray("data");
@@ -219,6 +325,7 @@ public class PddHttp {
 	private Map<String, Object> parseComment(JSONObject myComment){
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		JSONObject order = myComment.getJSONObject("order_info");
+		dataMap.put("username", myComment.getString("name"));
 		dataMap.put("userImg", myComment.getString("avatar"));
 		String pjTime = DateUtils.formatDate(new Date(myComment.getLongValue("time") * 1000), "yyyy.MM.dd");
 		dataMap.put("pjTime", pjTime);
@@ -291,6 +398,76 @@ public class PddHttp {
 		return dataMap;
 	}
 	
+	private Map<String, Object> parseOrderDetailComment(JSONObject myComment){
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		JSONObject order = myComment.getJSONObject("orderInfo");
+		dataMap.put("username", myComment.getString("name"));
+		dataMap.put("userImg", myComment.getString("avatar"));
+		dataMap.put("pjTime", myComment.getString("time"));
+		List<String> pjImageUrls = new ArrayList<String>();
+		JSONArray pictures = myComment.getJSONArray("pictures");
+		int maxPicNum = pictures == null ? 0 : pictures.size() < 3 ? pictures.size() : 3;
+		for (int j = 0; j < maxPicNum; j++) {
+			JSONObject picture = pictures.getJSONObject(j);
+			pjImageUrls.add(picture.getString("url"));
+		}
+		dataMap.put("pjImgs", pjImageUrls);
+		dataMap.put("goodsImg", order.getString("orderGoodsImage"));
+		String goodsName = order.getString("orderGoodsName");
+		String goodsName01 = "";
+		String goodsName02 = "";
+		if (goodsName.length() > 38) {
+			goodsName01 = goodsName.substring(0, 19);
+			goodsName02 = goodsName.substring(19, 38);
+		} else if (goodsName.length() > 19) {
+			goodsName01 = goodsName.substring(0, 19);
+			goodsName02 = goodsName.substring(19, goodsName.length());
+		} else {
+			goodsName01 = goodsName;
+		}
+		dataMap.put("goodsName01", goodsName01);// 19
+		if (StringUtils.isNotBlank(goodsName02)) {
+			dataMap.put("goodsName02", goodsName02);
+		}
+		String spec = myComment.getString("specs");
+		String spec01 = "";
+		String spec02 = "";
+		if (spec.length() > 30) {
+			spec01 = spec.substring(0, 15);
+			spec02 = spec.substring(15, 30);
+		} else if (spec.length() > 15) {
+			spec01 = spec.substring(0, 15);
+			spec02 = spec.substring(15, spec.length());
+		} else {
+			spec01 = spec;
+		}
+		dataMap.put("spec01", spec01);// 15
+		dataMap.put("spec02", spec02);
+		dataMap.put("orderAmount", order.getString("orderAmount"));
+		String comment = myComment.getString("comment");
+		String comment01 = "";
+		String comment02 = "";
+		String comment03 = "";
+		if (comment.length() > 72) {
+			comment01 = comment.substring(0, 24);
+			comment02 = comment.substring(24, 48);
+			comment03 = comment.substring(48, 72);
+		} else if (comment.length() > 48) {
+			comment01 = comment.substring(0, 24);
+			comment02 = comment.substring(24, 48);
+			comment03 = comment.substring(48, comment.length());
+		} else if (comment.length() > 24) {
+			comment01 = comment.substring(0, 24);
+			comment02 = comment.substring(24, comment.length());
+		} else {
+			comment01 = comment;
+		}
+		dataMap.put("comment01", comment01);// 15
+		dataMap.put("comment02", comment02);
+		dataMap.put("comment03", comment03);
+		return dataMap;
+	}
+	
 	private String getImageName(String img) {
 		if (img.indexOf(".jp") > -1) {
 			img = img.substring(0, img.indexOf(".jp"));
@@ -310,6 +487,17 @@ public class PddHttp {
 	 * @return
 	 */
 	public JSONObject productDetail(String goodsId) {
+		/*String today = DateUtils.formatDate(new Date(), DateUtils.DATE_PATTERN);
+		Map<String,JSONObject> productMap = productsMap.get(today);
+		if(productMap==null) {
+			productsMap = new HashMap<String, Map<String,JSONObject>>();//每天清空
+			productMap = new HashMap<String, JSONObject>();
+			productsMap.put(today, productMap);
+		}else {
+			JSONObject obj = productMap.get(goodsId);
+			if(obj!=null) return obj;
+		}*/
+		
 		String url = "https://api.yangkeduo.com/api/oak/integration/render?pdduid=" + user.getUid();
 		Map<String, String> heads = new HashMap<String, String>();
 		heads.put("User-Agent", user.getUserAgent());
@@ -317,27 +505,29 @@ public class PddHttp {
 		heads.put("Content-Type", "application/json;charset=UTF-8");
 		heads.put("AccessToken", user.getToken());
 		heads.put("Cookie", "api_uid=" + user.getApiUid());
-		String postData = "{\"goods_id\":" + goodsId + ",\"page_from\":2}";
+		String postData = "{\"goods_id\":" + goodsId + ",\"page_from\":1}";//page_from 1和2有差别
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-		//logger.info("pddms-{}: 查询商品详细.{}", user.getUsername(), content);
+		logger.info("pdd-{}: 查询商品详细.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
+			//productMap.put(goodsId, jsonObj);
 			return jsonObj;
 		}
 		return null;
 	}
 	
 	public JSONObject productDetail02(String goodsId) {
-		String url = "http://api.yangkeduo.com/api/oakstc/v14/goods/"+goodsId+"?goods_id="+goodsId+"&pdduid=" + user.getUid();
+		//https://api.yangkeduo.com/api/oakstc/v15/goods/57136621646?goods_id=57136621646&from=35&pdduid=1852788720
+		String url = "http://api.yangkeduo.com/api/oakstc/v15/goods/"+goodsId+"?goods_id="+goodsId+"&pdduid=" + user.getUid();
 		Map<String, String> heads = new HashMap<String, String>();
 		heads.put("User-Agent", user.getUserAgent());
 		heads.put("Accept-Encoding", "gzip");
 		heads.put("Content-Type", "application/json;charset=UTF-8");
 		heads.put("AccessToken", user.getToken());
 		heads.put("Cookie", "api_uid=" + user.getApiUid());
-		String postData = "{\"goods_id\":" + goodsId + ",\"page_from\":2}";
+		String postData = "{\"goods_id\":" + goodsId + ",\"page_from\":1}";
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-		logger.info("pddms-{}: 查询商品详细.{}", user.getUsername(), content);
+		logger.info("pdd-{}: 查询商品详细.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			return jsonObj;
@@ -346,7 +536,7 @@ public class PddHttp {
 	}
 	
 	public JSONObject orderDetail(String orderSn) {
-		String url = "https://api.pinduoduo.com/order/"+orderSn+"?pdduid=1852788720" + user.getUid();
+		String url = "https://api.pinduoduo.com/order/"+orderSn+"?pdduid=" + user.getUid();
 		Map<String, String> heads = new HashMap<String, String>();
 		heads.put("User-Agent", user.getUserAgent());
 		heads.put("Accept-Encoding", "gzip");
@@ -356,30 +546,30 @@ public class PddHttp {
 		heads.put("PDD-CONFIG", "00102");
 		heads.put("p-mode", "1");
 		String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-		logger.info(content);
-		return null;
+		//logger.info(content);
+		JSONObject jsonObj = JSONObject.parseObject(content);
+		return jsonObj;
 	}
 	
-	public JSONObject orderDetail02(String orderSn) {
-		String url = "https://mobile.yangkeduo.com/order.html?order_sn="+orderSn+"&type=0&ts="+new Date().getTime();
+	public JSONObject commentDetail(String orderSn) {
+		JSONObject orderDetail  = orderDetail(orderSn);
+		JSONObject commentDetail = orderDetail.getJSONObject("comment_detail");
+		if(commentDetail==null) return null;
+		String commentUrl = commentDetail.getString("comment_url");
+		if(StringUtils.isBlank(commentUrl)) return null;
+		String url = "https://mobile.yangkeduo.com/"+commentUrl;
 		Map<String, String> heads = new HashMap<String, String>();
-		heads.put("Accept",
-				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
-		heads.put("Accept-Encoding", "gzip, deflate, br");
-		heads.put("Accept-Language", "zh-CN,zh;q=0.9");
 		heads.put("User-Agent", user.getUserAgent());
-		heads.put("AccessToken", user.getToken());
+		heads.put("Accept-Encoding", "gzip");
 		heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
 		String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 		int start = content.indexOf("window.rawData=") + 15;
 		int end = content.indexOf("}};", start) + 2;
 		content = content.substring(start, end);
-		//logger.info("pddms-{}: 查询商品详细.{}", user.getUsername(), content);
-		if (StringUtils.isNotBlank(content)) {
-			JSONObject jsonObj = JSONObject.parseObject(content);
-			return jsonObj;
-		}
-		return null;
+		logger.info(content);
+		JSONObject jsonObj = JSONObject.parseObject(content);
+		return jsonObj;
+
 	}
 
 	public JSONArray groups(String goodsId) {
@@ -392,7 +582,7 @@ public class PddHttp {
 		heads.put("Cookie", "api_uid=" + user.getApiUid());
 		String postData = "{\"goods_id\":" + goodsId + "}";
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-		// logger.info("pddms-{}: 查询拼组.{}", user.getUsername(), content);
+		// logger.info("pdd-{}: 查询拼组.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			JSONArray array = jsonObj.getJSONArray("local_group");
@@ -413,6 +603,17 @@ public class PddHttp {
 	 * @return
 	 */
 	public JSONObject productChromeDetail(String goodsId) {
+		//https://api.yangkeduo.com/api/oakstc/v15/goods/57136621646?goods_id=57136621646&from=35&pdduid=1852788720
+		String today = DateUtils.formatDate(new Date(), DateUtils.DATE_PATTERN);
+		Map<String,JSONObject> productMap = productsMap.get(today);
+		if(productMap==null) {
+			productsMap = new HashMap<String, Map<String,JSONObject>>();//每天清空
+			productMap = new HashMap<String, JSONObject>();
+			productsMap.put(today, productMap);
+		}else {
+			JSONObject obj = productMap.get(goodsId);
+			if(obj!=null) return obj;
+		}
 		String url = "https://mobile.yangkeduo.com/goods.html?goods_id=" + goodsId;
 		Map<String, String> heads = new HashMap<String, String>();
 		heads.put("Accept",
@@ -426,9 +627,18 @@ public class PddHttp {
 		int start = content.indexOf("window.rawData=") + 15;
 		int end = content.indexOf("}};", start) + 2;
 		content = content.substring(start, end);
-		//logger.info("pddms-{}: 查询商品详细.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
+			if(content.startsWith(" null;")) {
+				logger.info("pdd-{}: 查询商品详细.{}", user.getUsername(), content);
+				logger.info("goodsId={},username={},查询失败发送验证码.", goodsId, PddHttp.searchUsername);
+				PddHttp.nextSearchUser();
+				//SmsUtils.sendSms("17755117870", "SMS_178765470", null);
+				SmsUtils.sendMsg("17755117870", "SMS_181210223", user.getUsername());
+				return null;
+			}
+			//System.out.println(content);
 			JSONObject jsonObj = JSONObject.parseObject(content);
+			productMap.put(goodsId, jsonObj);
 			return jsonObj;
 		}
 		return null;
@@ -461,7 +671,7 @@ public class PddHttp {
 			postData.fluentPut("group_order_id", groupOrderId);
 		}
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		// logger.info("pddms-{}: 提交订单结果={}", user.getUsername(), content);
+		// logger.info("pdd-{}: 提交订单结果={}", user.getUsername(), content);
 
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
@@ -479,73 +689,88 @@ public class PddHttp {
 	 * @param goodsId
 	 * @param ddtz
 	 *            是否使用多多团长
+	 * @param skuNumber 商品数量         
+	 * @param couponPrice 优惠卷价格
 	 * @return
 	 */
 	public JSONObject submitAppOrder(String activityId, String groupId, String skuId, String goodsId,
-			String groupOrderId, boolean ddtz) {
-		String url = "http://api.yangkeduo.com/order?pdduid=" + user.getUid();
-		Map<String, String> heads = new HashMap<String, String>();
-		heads.put("User-Agent", user.getUserAgent());
-		heads.put("Accept-Encoding", "gzip");
-		heads.put("Content-Type", "application/json;charset=UTF-8");
-		heads.put("Cookie", "api_uid=" + user.getApiUid());
-		heads.put("AccessToken", user.getToken());
-		heads.put("ETag", "b0LzKmIm");
-		heads.put("lat", "TDDLQTU2MDK3WJ54Z5UTYICXCCBN374EJ6JF5M67PGTZ3CNTSZSQ103f010");
-		heads.put("PDD-CONFIG", "00102");
-		heads.put("Referer", "Android");
-		heads.put("X-PDD-QUERIES", "width=1080&height=1920&net=1&brand=xiaomi&model=MI+5X&osv=7.1.2&appv=4.33.0&pl=2");
-		// heads.put("anti-token",
-		// "2afEFCN1/ylZYEt5aQ/mRzIgeygAjbO3Jsh0iivSzz3lSMLzTYmFdDosscIsMkz9HOj+Oc68NXRl2Q6gnUNNo1QttFKVney5cdoiS+FNOssMdJ5qJ+z5GQJl5QPjdQ3r4edw0yW5m4cJCo5CNfEyBHRcy/RPbrzoqTn0hrbU47FWtjvNmIKZyzTomuAZQvOW6utRUTblriX2tbJjv2SMQBz1jaFKYZvIlAulB9BAx2tXZHrdsNk/Q20Tl6acmPLeQimj0SX+be0vden5WSNnxb4LsVLinsBgy8bAAZkXSUtpJA1GJW3YIC6iC8vouXqyzrRk0hI56PMV/jviaj+OWIneCoidKUhm2MfCog3jX9svpqlLGHPleNxMo8SDRWK97tnqG0QB8DLXJ8BP939+kB6WiHMAlxaWpS7JjwPj9UZq6gQkmmDVL3kJf+va5sYaBsuixM1Q0uyruN6Wk/qqNk9EIZEJGpe+7EEVsV6HQLqjB/FdyhAwRTmksoagBhzq0Emgvn6xozDg4vFGjARqavp09jgMsXsxy8ZAFeTiWNWbVOUIaw0BJTEhr5nsjLYfcgcs69FGBQc5uQaSrHEOE/iZOZHFwHtrl5w5ahVwd7e3FMn7VceBDM1TFbk0reG8AGjSHvVsesmW+AiqYxnBdfsNA==");
-		JSONArray goods = new JSONArray();
-		JSONObject goods01 = new JSONObject(true);
-		goods01.fluentPut("goods_id", goodsId).fluentPut("sku_id", skuId).fluentPut("sku_number", 1);
-		goods.add(goods01);
-		JSONObject postData = new JSONObject(true);
-		JSONObject orderCheckout = orderCheckout(groupId, skuId, goodsId);
-		JSONObject extendMap = orderCheckout.getJSONObject("store").getJSONObject("extendMap");
-		JSONObject goodsInfo = orderCheckout.getJSONObject("store").getJSONObject("goodsInfo");
-		activityId = goodsInfo.getString("activityId");
-		postData = postData.fluentPut("activity_id", activityId);
-		String create_order_token = extendMap.getString("create_order_token");
-		String create_order_check = extendMap.getString("create_order_check");
-		String original_front_env = extendMap.getString("original_front_env");
-		String current_front_env = extendMap.getString("current_front_env");
-		String uuid = extendMap.getString("PTRACER-TRACE-UUID");
-		JSONObject attributeFields = new JSONObject(true);
-		attributeFields.fluentPut("create_order_token", create_order_token).fluentPut("create_order_check", create_order_check).fluentPut("original_front_env", original_front_env).fluentPut("current_front_env", current_front_env).fluentPut("PTRACER-TRACE-UUID", uuid);
-		int type = 0;
-		int duoduo_type = 0;
-		if (ddtz) {
-			String ddtzUrl = getShareUrl(goodsId);
-			if (StringUtils.isNotBlank(ddtzUrl)) {
-				type = 2;
-				duoduo_type=2;
-				String ddPid = ddtzUrl.substring(ddtzUrl.indexOf("pid=") + 4,
-						ddtzUrl.indexOf("&", ddtzUrl.indexOf("pid=") + 4));
-				String cpsSign = ddtzUrl.substring(ddtzUrl.indexOf("cpsSign=") + 4,
-						ddtzUrl.indexOf("&", ddtzUrl.indexOf("cpsSign") + 4));
-				attributeFields.fluentPut("DUO_DUO_PID", ddPid).fluentPut("cps_sign", cpsSign);
+			String groupOrderId, boolean ddtz, int skuNumber, float couponPrice) {
+		try {
+			String url = "http://api.yangkeduo.com/order?pdduid=" + user.getUid();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("Content-Type", "application/json;charset=UTF-8");
+			heads.put("Cookie", "api_uid=" + user.getApiUid());
+			heads.put("AccessToken", user.getToken());
+			heads.put("ETag", "b0LzKmIm");
+			heads.put("lat", "TDDLQTU2MDK3WJ54Z5UTYICXCCBN374EJ6JF5M67PGTZ3CNTSZSQ103f010");
+			heads.put("PDD-CONFIG", "00102");
+			heads.put("Referer", "Android");
+			heads.put("X-PDD-QUERIES", "width=1080&height=1920&net=1&brand=xiaomi&model=MI+5X&osv=7.1.2&appv=4.33.0&pl=2");
+			// heads.put("anti-token",
+			// "2afEFCN1/ylZYEt5aQ/mRzIgeygAjbO3Jsh0iivSzz3lSMLzTYmFdDosscIsMkz9HOj+Oc68NXRl2Q6gnUNNo1QttFKVney5cdoiS+FNOssMdJ5qJ+z5GQJl5QPjdQ3r4edw0yW5m4cJCo5CNfEyBHRcy/RPbrzoqTn0hrbU47FWtjvNmIKZyzTomuAZQvOW6utRUTblriX2tbJjv2SMQBz1jaFKYZvIlAulB9BAx2tXZHrdsNk/Q20Tl6acmPLeQimj0SX+be0vden5WSNnxb4LsVLinsBgy8bAAZkXSUtpJA1GJW3YIC6iC8vouXqyzrRk0hI56PMV/jviaj+OWIneCoidKUhm2MfCog3jX9svpqlLGHPleNxMo8SDRWK97tnqG0QB8DLXJ8BP939+kB6WiHMAlxaWpS7JjwPj9UZq6gQkmmDVL3kJf+va5sYaBsuixM1Q0uyruN6Wk/qqNk9EIZEJGpe+7EEVsV6HQLqjB/FdyhAwRTmksoagBhzq0Emgvn6xozDg4vFGjARqavp09jgMsXsxy8ZAFeTiWNWbVOUIaw0BJTEhr5nsjLYfcgcs69FGBQc5uQaSrHEOE/iZOZHFwHtrl5w5ahVwd7e3FMn7VceBDM1TFbk0reG8AGjSHvVsesmW+AiqYxnBdfsNA==");
+			JSONArray goods = new JSONArray();
+			JSONObject goods01 = new JSONObject(true);
+			goods01.fluentPut("goods_id", goodsId).fluentPut("sku_id", skuId).fluentPut("sku_number", skuNumber);
+			goods.add(goods01);
+			JSONObject postData = new JSONObject(true);
+			JSONObject orderCheckout = orderCheckout(groupId, skuId, goodsId, skuNumber);
+			JSONObject extendMap = orderCheckout.getJSONObject("store").getJSONObject("extendMap");
+			JSONObject goodsInfo = orderCheckout.getJSONObject("store").getJSONObject("goodsInfo");
+			activityId = goodsInfo.getString("activityId");
+			postData = postData.fluentPut("activity_id", activityId);
+			String create_order_token = extendMap.getString("create_order_token");
+			String create_order_check = extendMap.getString("create_order_check");
+			String original_front_env = extendMap.getString("original_front_env");
+			String current_front_env = extendMap.getString("current_front_env");
+			String uuid = extendMap.getString("PTRACER-TRACE-UUID");
+			JSONObject attributeFields = new JSONObject(true);
+			attributeFields.fluentPut("create_order_token", create_order_token).fluentPut("create_order_check", create_order_check).fluentPut("original_front_env", original_front_env).fluentPut("current_front_env", current_front_env).fluentPut("PTRACER-TRACE-UUID", uuid);
+			int type = 0;
+			int duoduo_type = 0;
+			if (ddtz) {
+				String ddtzUrl = getShareUrl(goodsId);
+				if (StringUtils.isNotBlank(ddtzUrl)) {
+					type = 2;
+					duoduo_type=2;
+					String ddPid = ddtzUrl.substring(ddtzUrl.indexOf("pid=") + 4,
+							ddtzUrl.indexOf("&", ddtzUrl.indexOf("pid=") + 4));
+					String cpsSign = ddtzUrl.substring(ddtzUrl.indexOf("cpsSign=") + 8,
+							ddtzUrl.indexOf("&", ddtzUrl.indexOf("cpsSign") + 8));
+					attributeFields.fluentPut("DUO_DUO_PID", ddPid).fluentPut("cps_sign", cpsSign);
+				}
 			}
-		}
-		postData = postData.fluentPut("attribute_fields", attributeFields);
-		/*postData.fluentPut("address_id", user.getAddressId()).fluentPut("award_type", 0).fluentPut("biz_type", 0)
-				.fluentPut("coupon_number", 0).fluentPut("type", type).fluentPut("goods", goods)
-				.fluentPut("group_id", groupId).fluentPut("is_app", 1).fluentPut("page_from", "0")
-				.fluentPut("pay_app_id", "35").fluentPut("duoduo_type", duoduo_type).fluentPut("source_channel", -1).fluentPut("source_type", 0).fluentPut("version", 1).fluentPut("is_app", "1")
-				.fluentPut("version_type", 1);*/
-		postData.fluentPut("address_id", user.getAddressId()).fluentPut("group_id", groupId).fluentPut("duoduo_type", duoduo_type).fluentPut("type", type).fluentPut("biz_type", 0)
-		.fluentPut("source_channel", -1).fluentPut("source_type", 0).fluentPut("goods", goods)
-		.fluentPut("pay_app_id", "35").fluentPut("is_app", 1).fluentPut("version", 1).fluentPut("page_id", "10004_"+new Date().getTime()+"_UF7Vy91SFm");
-		if (StringUtils.isNotBlank(groupOrderId)) {
-			postData.fluentPut("group_order_id", groupOrderId);
-		}
-		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info("pddms-{}: 提交订单结果.{}", user.getUsername(), content);
-		//{"server_time":1570525629,"order_sn":"191008-040803042414080","group_order_id":"906040803042414080","order_amount":1200,"fp_id":"tzuo9hWfdAIDEoltJe_VHx1AmVVfBPKVhmyiuZFWl24"}
-		if (StringUtils.isNotBlank(content)) {
-			JSONObject jsonObj = JSONObject.parseObject(content);
-			return jsonObj;
+			postData = postData.fluentPut("attribute_fields", attributeFields);
+			postData.fluentPut("address_id", user.getAddressId()).fluentPut("group_id", groupId).fluentPut("duoduo_type", duoduo_type).fluentPut("type", type).fluentPut("biz_type", 0)
+			.fluentPut("source_channel", -1).fluentPut("source_type", 0).fluentPut("goods", goods)
+			.fluentPut("pay_app_id", "35").fluentPut("is_app", 1).fluentPut("version", 1).fluentPut("page_id", "10004_"+new Date().getTime()+"_UF7Vy91SFm");
+			if (StringUtils.isNotBlank(groupOrderId)) {
+				postData.fluentPut("group_order_id", groupOrderId);
+			}
+			if(couponPrice>0) {
+				JSONObject promotionInfo = orderCheckout.getJSONObject("store").getJSONObject("promotionInfo");
+				logger.info("pdd-{}: 优惠卷信息.coupon = {}", user.getUsername(), promotionInfo);
+				if(promotionInfo==null) return null;
+				JSONObject mallCoupon = promotionInfo.getJSONObject("mallCoupon");//店铺优惠卷
+				if(mallCoupon==null) return null;
+				int discount = mallCoupon.getIntValue("discount");
+				if(discount/100f==couponPrice) {
+					postData.fluentPut("merchant_coupon_id", mallCoupon.getString("couponId"));
+				}else {
+					return null;
+				}
+			}
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
+			logger.info("pdd-{}: 提交订单结果.{}", user.getUsername(), content);
+			//{"server_time":1570525629,"order_sn":"191008-040803042414080","group_order_id":"906040803042414080","order_amount":1200,"fp_id":"tzuo9hWfdAIDEoltJe_VHx1AmVVfBPKVhmyiuZFWl24"}
+			if (StringUtils.isNotBlank(content)) {
+				JSONObject jsonObj = JSONObject.parseObject(content);
+				return jsonObj;
+			}
+		}catch (Exception e) {
+			SmsUtils.sendMsg("17755117870", "SMS_181210223", user.getUsername());
+			logger.info("pdd-{}: 提交订单异常.{}", user.getUsername(), "可能要更新cookie");
 		}
 		return null;
 	}
@@ -579,7 +804,7 @@ public class PddHttp {
 				.fluentPut("source_channel", 0).fluentPut("is_app", 0).fluentPut("pay_app_id", "2")
 				.fluentPut("source_type", 0).fluentPut("version", 1);
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info(content);
+		//logger.info(content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			return jsonObj;
@@ -607,7 +832,7 @@ public class PddHttp {
 		heads.put("Referer", "Android");
 		String postData = "{\"duoGroupCreateVO\":{\"groupType\":2,\"goodsId\":" + goodsId + "}}";
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-		logger.info("pddms-{}: 获取多多团长组id.{}", user.getUsername(), content);
+		logger.info("pdd-{}: 获取多多团长组id.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			if (jsonObj.getBooleanValue("success"))
@@ -631,7 +856,7 @@ public class PddHttp {
 		heads.put("Referer", "Android");
 		String postData = "{}";
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData, heads, null);
-		logger.info("pddms-{}: 获取多多团长sign={}", user.getUsername(), content);
+		logger.info("pdd-{}: 获取多多团长sign={}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			if (jsonObj.getBooleanValue("success"))
@@ -662,9 +887,9 @@ public class PddHttp {
 			int end = content.indexOf("}};", start) + 2;
 			content = content.substring(start, end);
 			JSONObject jsonObj = JSONObject.parseObject(content);
-			logger.info("pddms-{}:查询分享商品址结果={}", user.getUsername(), jsonObj);
+			//logger.info("pdd-{}:查询分享商品址结果={}", user.getUsername(), jsonObj);
 			String shareUrl = jsonObj.getJSONObject("store").getJSONObject("goods").getString("weAppWebViewUrl");
-			logger.info("pddms-{}:查询分享商品址={}", user.getUsername(), shareUrl);
+			//logger.info("pdd-{}:查询分享商品址={}", user.getUsername(), shareUrl);
 			return shareUrl;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -692,7 +917,7 @@ public class PddHttp {
 		postData.fluentPut("goodsId", goodsId).fluentPut("generateShortUrl", false).fluentPut("sectionId", null)
 				.fluentPut("pageId", null).fluentPut("searchId", null);
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info("pddms-{}: 获取推广url结果.{}", user.getUsername(), content);
+		//logger.info("pdd-{}: 获取推广url结果.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			if (jsonObj.getBooleanValue("success"))
@@ -723,7 +948,7 @@ public class PddHttp {
 			postData.fluentPut("pay_app_id", 9).fluentPut("version", 3).fluentPut("attribute_fields", pappay)
 					.fluentPut("return_url", returnurl).fluentPut("order_sn", orderSn);
 			String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-			//logger.info("pddms-{}: 生成支付宝地址结果.{}", user.getUsername(), content);
+			//logger.info("pdd-{}: 生成支付宝地址结果.{}", user.getUsername(), content);
 			if (StringUtils.isNotBlank(content)) {
 				// https://mapi.alipay.com/gateway.do?service=alipay.wap.create.direct.pay.by.user&partner=2088911201740274&seller_id=pddzhifubao%40yiran.com&payment_type=1&notify_url=http%3A%2F%2Fpayv3.yangkeduo.com%2Fnotify%2F9&out_trade_no=XP0019090410200461997673007674&subject=%E8%AE%A2%E5%8D%95%E7%BC%96%E5%8F%B7190904-204448727833236&total_fee=5.37&return_url=https%3A%2F%2Fm.yangkeduo.com%2Ftransac_wappay_callback.html%3Forder_sn%3D190904-204448727833236&sign=a1f1zTYs%2BfGKzf68hrwCs5TNAL%2F0hOsqr7xTYkK0%2BG%2B0w2HG%2BGN7hlnJOa%2BseW%2BCMcgyCYigvwsvoIzGzyNU%2BeJs%2F5XXtvnEM22Kv7b1LZB%2B7TYpPTsIFWYi2cQACQSIyCTFnu92fBSvBaSlua4rcYlmQZzp%2FBv0X9HCW8DjpfI%3D&sign_type=RSA&goods_type=1&_input_charset=utf-8
 				// https://mapi.alipay.com/gateway.do?service=alipay.wap.create.direct.pay.by.user&partner=2088911201740274&seller_id=pddzhifubao@yiran.com&payment_type=1&notify_url=http://payv3.yangkeduo.com/notify/9&out_trade_no=XP0019090410200461997673007674&subject=è®¢åç¼å·190904-204448727833236&total_fee=5.37&return_url=https://m.yangkeduo.com/transac_wappay_callback.html?order_sn=190904-204448727833236&sign=a1f1zTYs+fGKzf68hrwCs5TNAL/0hOsqr7xTYkK0+G+0w2HG+GN7hlnJOa+seW+CMcgyCYigvwsvoIzGzyNU+eJs/5XXtvnEM22Kv7b1LZB+7TYpPTsIFWYi2cQACQSIyCTFnu92fBSvBaSlua4rcYlmQZzp/Bv0X9HCW8DjpfI=&sign_type=RSA&goods_type=1&_input_charset=utf-8
@@ -765,7 +990,7 @@ public class PddHttp {
 		postData.fluentPut("goodsId", goodsId).fluentPut("goodsName", goodsName).fluentPut("spikeType", 0)
 				.fluentPut("startTime", startTime);
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info("pddms-{}: 商品预约结果={}", user.getUsername(), content);
+		logger.info("pdd-{}: 商品预约结果={}", user.getUsername(), content);
 		JSONObject jsonObj = JSONObject.parseObject(content);
 		if (jsonObj.getBooleanValue("success")) {
 			return true;
@@ -781,9 +1006,9 @@ public class PddHttp {
 	 * @param goodsId
 	 * @return
 	 */
-	public JSONObject orderCheckout(String groupId, String skuId, String goodsId) {
+	public JSONObject orderCheckout(String groupId, String skuId, String goodsId, int skuNumber) {
 		String url = "https://mobile.yangkeduo.com/order_checkout.html?sku_id=" + skuId + "&group_id=" + groupId
-				+ "&goods_id=" + goodsId + "&goods_number=1&ts="+new Date().getTime();
+				+ "&goods_id=" + goodsId + "&goods_number="+skuNumber+"&ts="+new Date().getTime();
 		Map<String, String> heads = new HashMap<String, String>();
 		heads.put("User-Agent", user.getUserAgent());
 		heads.put("Accept-Encoding", "gzip");
@@ -793,7 +1018,7 @@ public class PddHttp {
 		int end = content.indexOf("}};", start) + 2;
 		content = content.substring(start, end);
 		JSONObject jsonObj = JSONObject.parseObject(content);
-		//logger.info("pddms-{}:查询活动json={}", user.getUsername(), jsonObj);
+		//logger.info("pdd-{}:提交订单前json={}", user.getUsername(), jsonObj);
 		return jsonObj;
 	}
 
@@ -814,7 +1039,7 @@ public class PddHttp {
 		heads.put("PDD-CONFIG", "00102");
 		heads.put("p-mode", "1");
 		String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-		// logger.info("pddms-{}:可购买幸运人气王商品列表={}",user.getUsername(), content);
+		// logger.info("pdd-{}:可购买幸运人气王商品列表={}",user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			return jsonObj;
@@ -840,7 +1065,7 @@ public class PddHttp {
 		heads.put("PDD-CONFIG", "00102");
 		heads.put("p-mode", "1");
 		String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-		// logger.info("pddms-{}:幸运人气王详细数据={}",user.getUsername(), content);
+		// logger.info("pdd-{}:幸运人气王详细数据={}",user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			return jsonObj;
@@ -873,7 +1098,7 @@ public class PddHttp {
 				.fluentPut("anti_content", anti_content).fluentPut("address_id", user.getAddressId())
 				.fluentPut("biz_type", 2016).fluentPut("pay_app_id", 4).fluentPut("is_app", 1);
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info("pddms-{}:购买幸运人气王商品下单结果={}", user.getUsername(), content);
+		logger.info("pdd-{}:购买幸运人气王商品下单结果={}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			return jsonObj;
@@ -1014,7 +1239,7 @@ public class PddHttp {
 	public JSONObject queryOrderDetail(String orderSn) {
 		try {
 			String url = "https://mobile.yangkeduo.com/order.html?order_sn=" + orderSn
-					+ "&refer_page_name=my_order&_x_src=homepop&_x_platform=wechat";
+					+ "&&type=3&ts="+new Date().getTime();
 			Map<String, String> heads = new HashMap<String, String>();
 			heads.put("User-Agent", user.getUserAgent());
 			heads.put("Accept-Encoding", "gzip");
@@ -1024,8 +1249,31 @@ public class PddHttp {
 			int end = content.indexOf("}};", start) + 2;
 			content = content.substring(start, end);
 			JSONObject jsonObj = JSONObject.parseObject(content);
-			// logger.info("pddms-{}:orderSn={},订单明细={}", user.getUsername(), orderSn,
-			// jsonObj);
+			//logger.info("pdd-{}:orderSn={},订单明细={}", user.getUsername(), orderSn, jsonObj);
+			return jsonObj.getJSONObject("data");
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * 物流信息
+	 * @param orderSn
+	 * @return
+	 */
+	public JSONObject queryWlDetail(String orderSn) {
+		try {
+			String url = "https://mobile.yangkeduo.com/goods_express.html?order_sn="+orderSn;
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			int start = content.indexOf("window.rawData=") + 15;
+			int end = content.indexOf("}};", start) + 2;
+			content = content.substring(start, end);
+			JSONObject jsonObj = JSONObject.parseObject(content);
+			logger.info("pdd-{}:orderSn={},物流明细={}", user.getUsername(), orderSn, jsonObj);
 			return jsonObj.getJSONObject("data");
 		} catch (Exception e) {
 			return null;
@@ -1034,13 +1282,19 @@ public class PddHttp {
 
 	public boolean isSign(JSONObject order) {
 		JSONObject express = order.getJSONObject("expressInfo");
+		//logger.info("{}",express);
 		if (express != null) {
 			JSONArray traces = express.getJSONArray("traces");
-			for (int i = 0; i < traces.size(); i++) {
-				JSONObject trace = traces.getJSONObject(i);
-				if (trace.getString("status").equals("SIGN") || trace.getString("status").equals("SIGN_ON_BEHALF"))
-					return true;
+			if(traces==null||traces.size()<1) return false;
+			JSONObject trace = traces.getJSONObject(0);
+			if (trace.getString("status").equals("SIGN") || trace.getString("status").equals("SIGN_ON_BEHALF")) {
+				return true;
 			}
+			if("安迅物流".equals(express.getString("shippingName"))) {
+				if(trace.getString("info").contains("已签收")) return true;
+			}
+		}else {
+			return true;//没有物流信息为虚拟物品，默认签收
 		}
 		return false;
 	}
@@ -1075,7 +1329,7 @@ public class PddHttp {
 		int end = content.indexOf("}};", start) + 2;
 		content = content.substring(start, end);
 		JSONObject jsonObj = JSONObject.parseObject(content);
-		//logger.info("pddms-{}:我的评价列表={}", user.getUsername(), jsonObj);
+		//logger.info("pdd-{}:我的评价列表={}", user.getUsername(), jsonObj);
 		return jsonObj;
 	}
 	
@@ -1089,7 +1343,7 @@ public class PddHttp {
 		heads.put("AccessToken", user.getToken());
 		String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 		JSONObject jsonObj = JSONObject.parseObject(content);
-		//logger.info("pddms-{}:我的评价列表={}", user.getUsername(), jsonObj);
+		//logger.info("pdd-{}:我的评价列表={}", user.getUsername(), jsonObj);
 		return jsonObj;
 	}
 
@@ -1118,7 +1372,7 @@ public class PddHttp {
 		JSONObject postData = new JSONObject(true);
 		postData.fluentPut("anti_content", "");
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info("pddms-{}: 确认收货结果.{}", user.getUsername(), content);
+		logger.info("pdd-{}: 确认收货结果.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			// {"server_time":1567419492,"quantity":null,"nickname":"177****7870","share_code":null}
 			JSONObject jsonObj = JSONObject.parseObject(content);
@@ -1170,7 +1424,7 @@ public class PddHttp {
 				.fluentPut("pictures", pictures).fluentPut("labels", new JSONArray()).fluentPut("anonymous", 0)
 				.fluentPut("anti_content", "");
 		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
-		logger.info("pddms-{}: 提交评论结果.{}", user.getUsername(), content);
+		logger.info("pdd-{}: 提交评论结果.{}", user.getUsername(), content);
 		if (StringUtils.isNotBlank(content)) {
 			// {"review_id":"241849880151973085","rating_id":241849880151973085,"masked_comment":"给个好评，给个好评，给个好评，给个好评"}
 			JSONObject jsonObj = JSONObject.parseObject(content);
@@ -1275,90 +1529,16 @@ public class PddHttp {
 			if (new File(orginImg).exists()) {
 				return "";
 			}
-			JSONObject json = myComments();
-			JSONArray myComments = json.getJSONObject("store").getJSONArray("list");
-			for (int i = 0; i < myComments.size(); i++) {
-				JSONObject myComment = myComments.getJSONObject(i);
-				JSONObject order = myComment.getJSONObject("order_info");
-				if (orderSn.equals(order.getString("order_sn"))) {
-					Map<String, Object> dataMap = new HashMap<String, Object>();
-					dataMap.put("userImg", myComment.getString("avatar"));
-					String pjTime = DateUtils.formatDate(new Date(myComment.getLongValue("time") * 1000), "yyyy.MM.dd");
-					dataMap.put("pjTime", pjTime);
-					List<String> pjImageUrls = new ArrayList<String>();
-					JSONArray pictures = myComment.getJSONArray("pictures");
-					int maxPicNum = pictures == null ? 0 : pictures.size() < 3 ? pictures.size() : 3;
-					for (int j = 0; j < maxPicNum; j++) {
-						JSONObject picture = pictures.getJSONObject(j);
-						pjImageUrls.add(picture.getString("url"));
-					}
-					dataMap.put("pjImgs", pjImageUrls);
-					dataMap.put("goodsImg", order.getString("goods_picture"));
-					String goodsName = order.getString("goods_name");
-					String goodsName01 = "";
-					String goodsName02 = "";
-					if (goodsName.length() > 38) {
-						goodsName01 = goodsName.substring(0, 19);
-						goodsName02 = goodsName.substring(19, 38);
-					} else if (goodsName.length() > 19) {
-						goodsName01 = goodsName.substring(0, 19);
-						goodsName02 = goodsName.substring(19, goodsName.length());
-					} else {
-						goodsName01 = goodsName;
-					}
-					dataMap.put("goodsName01", goodsName01);// 19
-					if (StringUtils.isNotBlank(goodsName02)) {
-						dataMap.put("goodsName02", goodsName02);
-					}
-					JSONArray specs = JSONArray.parseArray(myComment.getString("specs"));
-					String spec = "";
-					for (int m = 0; m < specs.size(); m++) {
-						spec += specs.getJSONObject(m).getString("spec_key") + ":"
-								+ specs.getJSONObject(m).getString("spec_value");
-					}
-					String spec01 = "";
-					String spec02 = "";
-					if (spec.length() > 30) {
-						spec01 = spec.substring(0, 15);
-						spec02 = spec.substring(15, 30);
-					} else if (spec.length() > 15) {
-						spec01 = spec.substring(0, 15);
-						spec02 = spec.substring(15, spec.length());
-					} else {
-						spec01 = spec;
-					}
-					dataMap.put("spec01", spec01);// 15
-					dataMap.put("spec02", spec02);
-					dataMap.put("orderAmount", order.getFloat("order_amount") / 100);
-					String comment = myComment.getString("comment");
-					String comment01 = "";
-					String comment02 = "";
-					String comment03 = "";
-					if (comment.length() > 72) {
-						comment01 = comment.substring(0, 24);
-						comment02 = comment.substring(24, 48);
-						comment03 = comment.substring(48, 72);
-					} else if (comment.length() > 48) {
-						comment01 = comment.substring(0, 24);
-						comment02 = comment.substring(24, 48);
-						comment03 = comment.substring(48, comment.length());
-					} else if (comment.length() > 24) {
-						comment01 = comment.substring(0, 24);
-						comment02 = comment.substring(24, comment.length());
-					} else {
-						comment01 = comment;
-					}
-					dataMap.put("comment01", comment01);// 15
-					dataMap.put("comment02", comment02);
-					dataMap.put("comment03", comment03);
-					String html = FreemarkerUtils.loadTemplate("pj.ftl", dataMap);
-					FileUtils.htmlToImage(html, 900, orginImg);
-					logger.info("pdd-{}:{}-下载评论图片成功.", user.getUsername(), orderSn);
-					return "";
-				}
+			JSONObject commentDetail = commentDetail(orderSn);
+			if(commentDetail==null) {
+				logger.info("pdd-{}:{}-没有找到相关评论，无法下载评论图片.", user.getUsername(), orderSn);
+				return "没有找到相关评论，无法下载评论图片!";
 			}
-			logger.info("pdd-{}:{}-没有找到相关评论，无法下载评论图片.", user.getUsername(), orderSn);
-			return "没有找到相关评论，无法下载评论图片!";
+			Map<String, Object> dataMap = parseOrderDetailComment(commentDetail.getJSONObject("store"));
+			String html = FreemarkerUtils.loadTemplate("pj.ftl", dataMap);
+			FileUtils.htmlToImage(html, 900, orginImg);
+			logger.info("pdd-{}:{}-下载评论图片成功.", user.getUsername(), orderSn);
+			return "";
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("pdd-{}:{}-下载评论图片失败，发生异常!", user.getUsername(), orderSn);
@@ -1379,13 +1559,26 @@ public class PddHttp {
 			heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
 			heads.put("Upgrade-Insecure-Requests", "1");
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-			Document doc = Jsoup.parse(content);
-			content = doc.getElementById("__NEXT_DATA__").html();
-			JSONObject jsonObj = JSONObject.parseObject(content);
-			//logger.info("pddms-{}:搜索结果={}", user.getUsername(), jsonObj);
-			return jsonObj.getJSONObject("props").getJSONObject("pageProps").getJSONObject("data")
-					.getJSONObject("ssrListData").getJSONArray("list");
+			/*Document doc = Jsoup.parse(content);
+			content = doc.getElementById("__NEXT_DATA__").html();*/
+			int start = content.indexOf("window.rawData=") + 15;
+			int end = content.indexOf("}};", start) + 2;
+			content = content.substring(start, end);
+			if (StringUtils.isNotBlank(content)) {
+				if(content.startsWith(" null;")) {
+					logger.info("pdd-{}: 搜索商品.{}", user.getUsername(), content);
+					logger.info("username={},搜索商品失败发送验证码.", PddHttp.searchUsername);
+					PddHttp.nextSearchUser();
+					SmsUtils.sendMsg("17755117870", "SMS_181210223", user.getUsername());
+					return null;
+				}
+				JSONObject jsonObj = JSONObject.parseObject(content);
+				return jsonObj.getJSONObject("store").getJSONObject("data")
+						.getJSONObject("ssrListData").getJSONArray("list");
+			}
+			return null;
 		} catch (Exception e) {
+			logger.error("pdd-{}:搜索商品异常，可能要验证码", user.getUsername());
 			return null;
 		}
 	}
@@ -1452,12 +1645,15 @@ public class PddHttp {
 			heads.put("Upgrade-Insecure-Requests", "1");
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 			Document doc = Jsoup.parse(content);
-			content = doc.getElementById("__NEXT_DATA__").html();
+			int start = content.indexOf("window.rawData=") + 15;
+			int end = content.indexOf("}};", start) + 2;
+			content = content.substring(start, end);
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			//logger.info("pdd-{}:搜索结果={}", user.getUsername(), jsonObj);
-			return jsonObj.getJSONObject("props").getJSONObject("pageProps").getJSONObject("data")
+			return jsonObj.getJSONObject("store").getJSONObject("data")
 					.getJSONArray("mallList");
 		} catch (Exception e) {
+			logger.error("搜索商铺异常了，请确认是否cookie失效!!!!!!!!!!!!!!!!");
 			return null;
 		}
 	}
@@ -1477,10 +1673,36 @@ public class PddHttp {
 			heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
 			heads.put("Upgrade-Insecure-Requests", "1");
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
-			//logger.info("pddms-{}: 查询店铺详细.{}", user.getUsername(), content);
+			logger.info("pdd-{}: 查询店铺详细.{}", user.getUsername(), content);
 			int start = content.indexOf("window.rawData=") + 15;
 			int end = content.indexOf("}};", start) + 2;
 			content = content.substring(start, end);
+			if (StringUtils.isNotBlank(content)) {
+				JSONObject jsonObj = JSONObject.parseObject(content);
+				return jsonObj;
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		return null;
+	}
+	
+	public JSONObject mallGroups(String mallId) {
+		try {
+			String url = "https://mobile.yangkeduo.com/mall_groups.html?mall_id="+mallId;
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept",
+					"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+			heads.put("Accept-Encoding", "gzip, deflate, br");
+			heads.put("Accept-Language", "zh-CN,zh;q=0.9");
+			heads.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
+			heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
+			heads.put("Upgrade-Insecure-Requests", "1");
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			int start = content.indexOf("window.rawData=") + 15;
+			int end = content.indexOf("}};", start) + 2;
+			content = content.substring(start, end);
+			//logger.info("pdd-{}: 查询店铺在拼商品列表.{}", user.getUsername(), content);
 			if (StringUtils.isNotBlank(content)) {
 				JSONObject jsonObj = JSONObject.parseObject(content);
 				return jsonObj;
@@ -1589,13 +1811,16 @@ public class PddHttp {
 		}
 		if (StringUtils.isBlank(mallId))
 			return "";
-		JSONObject mallDetail = mallDetail(mallId);
-		JSONArray products = mallDetail.getJSONObject("store").getJSONObject("mallGroupInfo")
-				.getJSONObject("groupResult").getJSONArray("result");
+		JSONObject mallDetail = mallGroups(mallId);
+		JSONArray products = mallDetail.getJSONObject("store").getJSONObject("mallGroupInfo").getJSONArray("list");
 		for (int i = 0; i < products.size(); i++) {
 			JSONObject goods = products.getJSONObject(i);
 			String goodsId = goods.getString("goodsId");
-			JSONObject product = productDetail(goodsId);
+			if (goods.toString().contains(goodsImg)) {
+				return goodsId;
+			}
+			JSONObject product = productChromeDetail(goodsId);
+			if(product==null) continue;
 			if (product.toString().contains(goodsImg))
 				return goodsId;
 		}
@@ -1607,16 +1832,33 @@ public class PddHttp {
 	 * @param goodsImg 商品名称
 	 * @return
 	 */
-	public String searchGoodsIdByMallId(String mallId, String goodsImg) {
-		JSONObject mallDetail = mallDetail(mallId);
-		JSONArray products = mallDetail.getJSONObject("store").getJSONObject("mallGroupInfo")
-				.getJSONObject("groupResult").getJSONArray("result");
+	public JSONObject searchGoodsIdByMallId(String mallId, String goodsImg) {
+		JSONObject result = new JSONObject();
+		JSONObject mallDetail = mallGroups(mallId);
+		JSONArray products = mallDetail.getJSONObject("store").getJSONObject("mallGroupInfo").getJSONArray("list");
+		//JSONArray products = mallDetail.getJSONObject("store").getJSONObject("mallGroupInfo").getJSONObject("groupResult").getJSONArray("result");
 		for (int i = 0; i < products.size(); i++) {
 			JSONObject goods = products.getJSONObject(i);
 			String goodsId = goods.getString("goodsId");
-			JSONObject product = productDetail(goodsId);
-			if (product.toString().contains(goodsImg))
-				return goodsId;
+			String goodsName = goods.getString("goodsName");
+			if (goods.toString().contains(goodsImg)) {
+				result.put("goodsId", goodsId);
+				result.put("goodsName", goodsName);
+				return result;
+			}
+		}
+
+		for (int i = 0; i < products.size(); i++) {
+			JSONObject goods = products.getJSONObject(i);
+			String goodsId = goods.getString("goodsId");
+			String goodsName = goods.getString("goodsName");
+			JSONObject product = productChromeDetail(goodsId);
+			if(product==null) continue;
+			if (product.toString().contains(goodsImg)) {
+				result.put("goodsId", goodsId);
+				result.put("goodsName", goodsName);
+				return result;
+			}
 		}
 		return null;
 	}
@@ -1640,6 +1882,7 @@ public class PddHttp {
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 			JSONObject jsonObj = JSONObject.parseObject(content);
 			JSONArray suggestList = jsonObj.getJSONArray("suggest_list");
+			//logger.info("搜索店铺，自动提示={}",suggestList);
 			for (int i = 0; i < suggestList.size(); i++) {
 				JSONObject mall = suggestList.getJSONObject(i).getJSONObject("item_data").getJSONObject("mall_head");
 				if (mall.getString("mall_logo").contains(mallImg)) {
@@ -1651,10 +1894,10 @@ public class PddHttp {
 			return null;
 		}
 	}
-
+	
 	/**
 	 * 搜索店铺id
-	 * @param mallName 店铺名称
+	 * @param mallName 不完整店铺名称 
 	 * @param mallImg 图片
 	 * @return
 	 */
@@ -1676,5 +1919,314 @@ public class PddHttp {
 			return "";
 		return mallId;
 	}
+	
+	/**
+	 * 完整的商铺名称
+	 * @param mallName
+	 * @return
+	 */
+	public JSONObject searchMallName(String mallName) {
+		JSONObject result = new JSONObject();
+		String mallId = "";
+		JSONArray mallList = searchMall(mallName);
+		if (mallList == null)
+			return null;
+		for (int i = 0; i < mallList.size(); i++) {
+			JSONObject mall = mallList.getJSONObject(i);
+			String mName = mall.getJSONArray("displayItems1").getJSONObject(0).getString("text");
+			if (mallName.equals(mName)) {
+				mallId = mall.getString("mallId");
+				result.put("mallId", mallId);
+				String mallLogo = mall.getString("mallLogo");
+				result.put("mallImg", mallLogo);
+				return result;
+			}
+		}
+		return null;
+	}
 
+	
+	public String downloadProductSearchImage(String taskSn, String goodsId, String keyword, String pddImgPath) {
+		try {
+			String orginImg = pddImgPath + File.separator + taskSn + ".png";
+			if (new File(orginImg).exists()) {
+				return "";
+			}
+			JSONArray products = searchProduct(keyword);
+			JSONObject product = null;
+			logger.info("pdd-{}:{}-搜索商品关键字开始.", user.getUsername(), taskSn);
+			for (int i = 0; i < products.size(); i++) {
+				product = products.getJSONObject(i);
+				String gId = product.getString("goodsID");
+				if(gId.equals(goodsId)) {
+					Map<String, Object> dataMap = parseSearchProducts(products, i, keyword);
+					String html = FreemarkerUtils.loadTemplate("productlist.ftl", dataMap);
+					FileUtils.htmlToImage(html, 505, orginImg);
+					logger.info("pdd-{}:{}-下载搜索商品图片成功.", user.getUsername(), taskSn);
+					return "";
+				}
+			}			
+			logger.info("pdd-{}:{}-搜索商品名称开始.", user.getUsername(), taskSn);
+			product = productChromeDetail(goodsId);
+			JSONObject goods = product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject("goods");
+			String goodsName = goods.getString("goodsName");
+			products = searchProduct(goodsName);
+			for (int i = 0; i < products.size(); i++) {
+				product = products.getJSONObject(i);
+				String gId = product.getString("goodsID");
+				if(gId.equals(goodsId)) {
+					Map<String, Object> dataMap = parseSearchProducts(products,i, keyword);
+					String html = FreemarkerUtils.loadTemplate("productlist.ftl", dataMap);
+					FileUtils.htmlToImage(html, 505, orginImg);
+					logger.info("pdd-{}:{}-下载搜索商品图片成功.", user.getUsername(), taskSn);
+					return "";
+				}
+			}	
+			logger.info("pdd-{}:{}-没有找到搜索商品图片，无法下载搜索商品图片.", user.getUsername(), taskSn);
+			return "没有找到搜索商品图片，无法下载搜索商品图片!";
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("pdd-{}:{}-下载搜索商品图片失败，发生异常!", user.getUsername(), taskSn);
+			return "下载搜索商品图片失败，发生异常!";
+		}
+	}
+	
+	private Map<String, Object> parseSearchProduct(JSONObject product) {
+		Map<String, Object> product1 = new HashMap<String, Object>();
+		product1.put("goodsName", product.getString("goodsName"));
+		product1.put("goodsImg", product.getString("imgUrl"));
+		product1.put("mallName", product.getString("mallName"));
+		product1.put("mallStyle", product.getString("mallStyle"));
+		JSONArray tagList = product.getJSONArray("tagList");
+		for(int i=0;i<tagList.size();i++) {
+			JSONObject tag = tagList.getJSONObject(i);
+			product1.put("tag0"+(i+1), tag.getString("text"));
+			product1.put("tagColor0"+(i+1), tag.getString("textColor"));
+			product1.put("tagBackgroudColor0"+(i+1), tag.getString("textColor").equals("#FF5706")?"#fff1eb":"#fceeed");
+			product1.put("tagurl0"+(i+1), tag.getString("url"));
+		}
+		//爱逛街 满31返2
+		int width = 225;
+		JSONArray prefixIcons = product.getJSONArray("prefixIcons");
+		for(int i=0;i<prefixIcons.size();i++) {
+			JSONObject prefixIcon = prefixIcons.getJSONObject(i);
+			product1.put("prefixIcons0"+(i+1), prefixIcon.getString("url"));
+			if(prefixIcon.getString("url").contains("shipintag3")) width = width - 30;
+			else {
+				width = width - 65;
+			}
+		}
+		product1.put("goodsNameWith", width+"px");
+		product1.put("price", product.getString("price"));
+		product1.put("salesTip", product.getString("salesTip"));
+		return product1;
+	}
+	
+	private Map<String, Object> parseSearchProducts(JSONArray products, int index, String keyword) {
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		dataMap.put("keyword", keyword);
+		Date searchDate = DateUtils.add(new Date(), Calendar.MINUTE, 2);
+		dataMap.put("time", DateUtils.formatDate(searchDate, "HH:mm"));
+		if(index%2==0) {
+			if(index==18) {
+				Map<String, Object> product1 = parseSearchProduct(products.getJSONObject(index-2));
+				dataMap.put("product1", product1);
+				Map<String, Object> product2 = parseSearchProduct(products.getJSONObject(index-1));
+				dataMap.put("product2", product2);
+				Map<String, Object> product3 = parseSearchProduct(products.getJSONObject(index));
+				dataMap.put("product3", product3);
+				Map<String, Object> product4 = parseSearchProduct(products.getJSONObject(index+1));
+				dataMap.put("product4", product4);
+			}else {
+				Map<String, Object> product1 = parseSearchProduct(products.getJSONObject(index));
+				dataMap.put("product1", product1);
+				Map<String, Object> product2 = parseSearchProduct(products.getJSONObject(index+1));
+				dataMap.put("product2", product2);
+				Map<String, Object> product3 = parseSearchProduct(products.getJSONObject(index+2));
+				dataMap.put("product3", product3);
+				Map<String, Object> product4 = parseSearchProduct(products.getJSONObject(index+3));
+				dataMap.put("product4", product4);
+			}
+		}else {
+			if(index==19) {
+				Map<String, Object> product1 = parseSearchProduct(products.getJSONObject(index-3));
+				dataMap.put("product1", product1);
+				Map<String, Object> product2 = parseSearchProduct(products.getJSONObject(index-2));
+				dataMap.put("product2", product2);
+				Map<String, Object> product3 = parseSearchProduct(products.getJSONObject(index-1));
+				dataMap.put("product3", product3);
+				Map<String, Object> product4 = parseSearchProduct(products.getJSONObject(index));
+				dataMap.put("product4", product4);
+			}else {
+				Map<String, Object> product1 = parseSearchProduct(products.getJSONObject(index-1));
+				dataMap.put("product1", product1);
+				Map<String, Object> product2 = parseSearchProduct(products.getJSONObject(index));
+				dataMap.put("product2", product2);
+				Map<String, Object> product3 = parseSearchProduct(products.getJSONObject(index+1));
+				dataMap.put("product3", product3);
+				Map<String, Object> product4 = parseSearchProduct(products.getJSONObject(index+2));
+				dataMap.put("product4", product4);
+			}
+		}
+		//logger.info("{}",dataMap);
+		return dataMap;
+	}
+	
+	public boolean getCoupon(String mallId,String batchId) {
+		String url = "https://api.pinduoduo.com/api/liverpool/coupon_center/take_coupon_for_user_coupon_page?pdduid="
+				+ user.getUid();
+		Map<String, String> heads = new HashMap<String, String>();
+		heads.put("User-Agent", user.getUserAgent());
+		heads.put("Accept-Encoding", "gzip");
+		heads.put("Content-Type", "application/json;charset=UTF-8");
+		heads.put("Referer", "https://mobile.yangkeduo.com/coupons.html?ts="+new Date().getTime());
+		heads.put("AccessToken", user.getToken());
+		heads.put("Cookie", "api_uid=" + user.getApiUid());
+		JSONObject postData = new JSONObject(true);
+		postData.fluentPut("mall_id", mallId).fluentPut("batch_id", batchId);
+		String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
+		logger.info("pdd-{}: 获取优惠卷结果.{}", user.getUsername(), content);
+		if (StringUtils.isNotBlank(content)) {
+			// {"time":1568622264,"server_time":1568622264}
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 领取赚客优惠卷
+	 * @param mallId
+	 * @param goodsId
+	 * @param couponSn
+	 * @param pid
+	 * @return
+	 */
+	public boolean getGoodsCoupon(String mallId, String goodsId, String couponSn, String pid) {
+		try {
+			String url = "https://api.pinduoduo.com/api/daenerys/take_coupon_v2?pdduid="
+					+ user.getUid();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("Content-Type", "application/json;charset=UTF-8");
+			heads.put("AccessToken", user.getToken());
+			heads.put("Cookie", "api_uid=" + user.getApiUid());
+			JSONObject postData = new JSONObject(true);
+			//{"mallId":517233923,"goodsId":"54342085854","couponSn":"A0045VC-502855056299361539","pid":"9290340_115513700","sourceId":2}
+			postData.fluentPut("mallId", mallId).fluentPut("goodsId", goodsId).fluentPut("couponSn", couponSn).fluentPut("sourceId", 2).fluentPut("pid", pid);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
+			logger.info("pdd-{}: 获取优惠卷结果.{}", user.getUsername(), content);
+			JSONObject jsonObj = JSONObject.parseObject(content);
+			if(jsonObj.getBooleanValue("result")) return true;
+		}catch (Exception e) {
+			logger.info("pdd-{}: 获取优惠卷异常", user.getUsername());
+			return false;
+		}
+		return false;
+	}
+	
+	public String getCouponSn(String goodsId, float discount) {
+		try {
+			JSONObject product = productChromeDetail(goodsId);
+			JSONArray couponList = product.getJSONObject("store").getJSONObject("initDataObj").getJSONObject("lisbonInfo").getJSONArray("mallCoupons");
+			for(int i=0;i<couponList.size();i++) {
+				JSONObject coupon = couponList.getJSONObject(i);
+				if(coupon.getIntValue("discount")/1f==discount) {
+					return coupon.getString("batchSn");
+				}
+			}
+		}catch (Exception e) {
+			return null;
+		}
+		return null;
+
+	}
+	
+	public boolean getProductDetailCoupon(String goodsId, String couponSn) {
+		//String couponSn = getCouponSn(goodsId, discount);
+		if(StringUtils.isBlank(couponSn)) return false;
+		try {
+			String url = "https://mobile.yangkeduo.com/proxy/api/api/promotion/take_merchant_coupon?pdduid="+user.getUid();
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept-Encoding", "gzip, deflate, br");
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Referer", "https://mobile.yangkeduo.com/goods.html?goods_id="+goodsId);
+			heads.put("Origin", "https://mobile.yangkeduo.com");
+			heads.put("Content-Type", "application/json;charset=UTF-8");
+			heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
+			heads.put("AccessToken", user.getToken());
+			JSONObject postData = new JSONObject(true);
+			postData.fluentPut("batch_sn", couponSn).fluentPut("merchant_tag", 4);
+			String content = MobileHttpUrlConnectUtils.httpPost(url, postData.toJSONString(), heads, null);
+			logger.info("pdd-{}: 获取优惠卷结果.{}", user.getUsername(), content);
+			JSONObject jsonObj = JSONObject.parseObject(content);
+			if(StringUtils.isNotBlank(jsonObj.getString("coupon_id"))) return true;
+		}catch (Exception e) {
+			logger.info("pdd-{}: 获取优惠卷异常", user.getUsername());
+			return false;
+		}
+		return false;
+	}
+	
+	/**
+	 * 获取优惠卷地址
+	 * @param url
+	 * @return
+	 */
+	public String decodeCouponUrl(String url) {
+		try {
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("User-Agent", user.getUserAgent());
+			heads.put("Accept-Encoding", "gzip");
+			heads.put("Content-Type", "application/json;charset=UTF-8");
+			heads.put("AccessToken", user.getToken());
+			heads.put("Cookie", "api_uid=" + user.getApiUid());
+			String couponUrl = MobileHttpUrlConnectUtils.http302Get(url, heads, null);
+			couponUrl = couponUrl.substring(couponUrl.indexOf("duo_coupon_landing.html"));
+			couponUrl = "https://mobile.yangkeduo.com/"+couponUrl;
+			return couponUrl;
+		}catch (Exception e) {
+			return null;
+		}
+		
+	}
+	
+	/**
+	 * 优惠卷详细信息
+	 */
+	public JSONObject couponUrlDetail(String url) {
+		try {
+			Map<String, String> heads = new HashMap<String, String>();
+			heads.put("Accept",
+					"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+			heads.put("Accept-Encoding", "gzip, deflate, br");
+			heads.put("Accept-Language", "zh-CN,zh;q=0.9");
+			heads.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
+			heads.put("Cookie", "PDDAccessToken=" + user.getToken() + ";");
+			heads.put("Upgrade-Insecure-Requests", "1");
+			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
+			int start = content.indexOf("window.rawData=") + 15;
+			int end = content.indexOf("}};", start) + 2;
+			content = content.substring(start, end);
+			if (StringUtils.isNotBlank(content)) {
+				if(content.startsWith(" null;")) {
+					logger.info("username={},查询优惠卷详细发送验证码.",PddHttp.searchUsername);
+					PddHttp.nextSearchUser();
+					SmsUtils.sendMsg("17755117870", "SMS_181210223", user.getUsername());
+					return null;
+				}
+				JSONObject jsonObj = JSONObject.parseObject(content);
+				return jsonObj;
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		return null;
+	}
+	
+
+	/*public boolean saveCoupon(String url) {
+		JSONObject couponDetail = couponUrlDetail(url);
+		return getGoodsCoupon(mallId, goodsId, couponSn, pid);
+	}*/
 }

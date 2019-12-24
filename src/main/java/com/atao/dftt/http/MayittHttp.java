@@ -129,7 +129,7 @@ public class MayittHttp {
 			heads.put("Referer", userinfo.getString("red_packet_url"));
 			String content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
-			if (object.getIntValue("status") == 0) {
+			if (object.getIntValue("status") == 1) {
 				logger.info("mayitt-{}:签到成功", user.getUsername());
 				return true;
 			}
@@ -488,7 +488,7 @@ public class MayittHttp {
 		JSONObject userinfo = userinfo();
 		String content = "";
 		try {
-			String url = "https://ktt.woyaoq.com/TaskCenter/daily_task?";
+			String url = "https://ktt.woyaoq.com/TaskCenter/task_browse?";			
 			String token_sign = userinfo.getString("token_sign");
 			String cookieStr = token_sign.replace("zn=", "cookie=").replace("zt=", "cookie_id=");
 			String request_time = System.currentTimeMillis() / 1000 + "";
@@ -509,8 +509,7 @@ public class MayittHttp {
 			heads.put("Upgrade-Insecure-Requests", "1");
 			content = MobileHttpUrlConnectUtils.httpGet(url, heads, null);
 			Document doc = Jsoup.parse(content);
-			Elements taskEl = doc.getElementsByClass("Earns-kankan");
-			Elements hongbaoEl = doc.getElementsByClass("Earns-hongbao");
+			Elements taskEl = doc.getElementsByClass("kankan_mainLi");
 			JSONObject object = new JSONObject();
 			if (taskEl != null&&taskEl.size()>0) {
 				String c = taskEl.get(0).attr("onclick");
@@ -519,37 +518,6 @@ public class MayittHttp {
 				String kankanUrl = c.substring(start, end);
 				logger.info("mayitt-{}: 解析任务中心的看看赚地址成功 url={}", user.getUsername(), kankanUrl);
 				object.put("kankanUrl", kankanUrl);
-			}else {
-				taskEl = doc.getElementsByClass("EarnsU");
-				String c = taskEl.get(0).attr("onclick");
-				int start = c.indexOf("openWindows('") + 13;
-				int end = c.indexOf("'", start);
-				String kankanUrl = c.substring(start, end);
-				logger.info("mayitt-{}: 解析任务中心的看看赚地址成功 url={}", user.getUsername(), kankanUrl);
-				object.put("kankanUrl", kankanUrl);
-
-			}
-			if (hongbaoEl != null&&hongbaoEl.size()>0) {
-				hongbaoEl = doc.getElementsByClass("Earns-hongbao");
-				String c = hongbaoEl.get(0).attr("onclick");
-				int start = c.indexOf("openWindows('") + 13;
-				int end = c.indexOf("'", start);
-				String hongbaoUrl = c.substring(start, end);
-				logger.info("mayitt-{}: 解析任务中心的红包赚地址成功 url={}", user.getUsername(), hongbaoUrl);
-				object.put("hongbaoUrl", hongbaoUrl);
-			}else {
-				hongbaoEl = doc.getElementsByTag("li");
-				for(Element hb : hongbaoEl) {
-					if("红包赚".equals(hb.text())) {
-						String c = hb.attr("onclick");
-						int start = c.indexOf("openWindows('") + 13;
-						int end = c.indexOf("'", start);
-						String hongbaoUrl = c.substring(start, end);
-						logger.info("mayitt-{}: 解析任务中心的红包赚地址成功 url={}", user.getUsername(), hongbaoUrl);
-						object.put("hongbaoUrl", hongbaoUrl);
-					}
-				}
-				
 			}
 			return object;
 		} catch (Exception e) {
@@ -685,11 +653,12 @@ public class MayittHttp {
 	}
 
 	public JSONObject taskApi() {
-		JSONObject taskUrl = adTaskUrl();
-		if (taskUrl == null || StringUtils.isBlank(taskUrl.getString("taskApiUrl"))) {
+		JSONObject taskUrl = kkUrl();
+		if (taskUrl == null || StringUtils.isBlank(taskUrl.getString("kankanUrl"))) {
 			return null;
 		}
-		String url = taskUrl.getString("taskApiUrl");
+		String url = taskUrl.getString("kankanUrl");
+		url = url.replace("task_kankan_ad", "task_browse");
 		try {
 			Map<String, String> heads = new HashMap<String, String>();
 			heads.put("Accept", "*/*");
@@ -699,7 +668,7 @@ public class MayittHttp {
 			heads.put("Origin", "https://ktt.woyaoq.com");
 			String content = MobileHttpUrlConnectUtils.httpPost(url, null, heads, null);
 			JSONObject object = JSONObject.parseObject(content);
-			logger.info("mayitt-{}: taskApi数据={}", user.getUsername(), object.toJSONString());
+			//logger.info("mayitt-{}: taskApi数据={}", user.getUsername(), object.toJSONString());
 			return object;
 		} catch (Exception e) {
 			logger.error("mayitt-{}:查询taskApi异常,msg={}", user.getUsername(), e.getMessage());
@@ -707,29 +676,6 @@ public class MayittHttp {
 		return null;
 	}
 	
-	public JSONObject hongbaoApi() {
-		JSONObject taskUrl = adTaskUrl();
-		if (taskUrl == null || StringUtils.isBlank(taskUrl.getString("hongbaoApiUrl"))) {
-			return null;
-		}
-		String url = taskUrl.getString("hongbaoApiUrl");
-		try {
-			Map<String, String> heads = new HashMap<String, String>();
-			heads.put("Accept", "*/*");
-			heads.put("Accept-Encoding", "gzip, deflate");
-			heads.put("User-Agent", user.getUserAgent());
-			heads.put("X-Requested-With", "XMLHttpRequest");
-			heads.put("Origin", "https://ktt.woyaoq.com");
-			String content = MobileHttpUrlConnectUtils.httpPost(url, null, heads, null);
-			JSONObject object = JSONObject.parseObject(content);
-			logger.info("mayitt-{}: hongbaoApiUrl数据={}", user.getUsername(), object.toJSONString());
-			return object;
-		} catch (Exception e) {
-			logger.error("mayitt-{}:查询hongbaoApiUrl异常,msg={}", user.getUsername(), e.getMessage());
-		}
-		return null;
-	}
-
 	public JSONObject readRwCoin(String ad_id) {
 		try {
 			String url = "https://ktt.woyaoq.com/v5/user/task_ad_callback.json?";

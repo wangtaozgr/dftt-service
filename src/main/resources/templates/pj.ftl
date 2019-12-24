@@ -16,7 +16,7 @@
                                 <img src="${userImg}" style="border-radius:50px;width:100%;height:100%;">
                             </div>
                             <div class="comment-customer-desc" style="display: inline-block;width:400px;">
-                                <div class="comment-customer-name" style="font-size:30px;color: #151516;margin-top: 4px;margin-bottom: 12px;overflow: hidden;">177****7870</div>
+                                <div class="comment-customer-name" style="font-size:30px;color: #151516;margin-top: 4px;margin-bottom: 12px;overflow: hidden;">${username}</div>
                                 <div class="comment-customer-time" style="font-size:25px;color: #9c9c9c;">${pjTime}</div>
                             </div>
                             <div class="comment-customer-operator"></div>

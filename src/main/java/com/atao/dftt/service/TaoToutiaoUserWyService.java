@@ -253,7 +253,6 @@ public class TaoToutiaoUserWyService extends BaseService<TaoToutiaoUser> {
 		if (t.getUsed() != null) {
 			c.andEqualTo(TaoToutiaoUser::getUsed, t.getUsed());
 		}
-		w.and(c);
 		return w;
 	}
 }

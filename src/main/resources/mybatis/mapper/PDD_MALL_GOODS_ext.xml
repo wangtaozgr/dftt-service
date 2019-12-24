@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atao.dftt.mapper.PddMallGoodsMapper">
+	<select id="queryNoGoodsIdList" resultMap="BaseResultMap">
+		select
+		<include refid="BaseColumnList" />
+		from pdd_mall_goods
+		WHERE goods_id is null order by mall_id
+	</select>
+</mapper>

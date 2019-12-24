@@ -1,8 +1,6 @@
 package com.atao.dftt.quartz;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
 
@@ -30,56 +28,43 @@ public class TaodanJob {
 	public void updateConfirmOrderStatus() throws Exception {
 		logger.info("taodan:开始确认收货任务");
 		List<TaodanUser> users = taodanUserWyService.getUsedUser();
-		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (TaodanUser user : users) {
-			Future<Integer> future = asynService.updateConfirmOrderStatus(user.getUsername());
-			futures.add(future);
-		}
-		for (Future<Integer> future : futures) {
-			future.get();
+			taodanTaskWyService.update10000OrderStatus(user.getUsername());
+			int num = taodanTaskWyService.updateConfirmOrderStatus(user.getUsername());
+			logger.info("taodan-{}:确认收货成功数量,count={}", user.getUsername(), num);
 		}
 		logger.info("taodan:结束确认收货任务");
 	}
 
-	@Scheduled(cron = "0 25 10,17,21 * * ?")
+	@Scheduled(cron = "0 15 10,17,21 * * ?")
 	public void downloadAllCommentImage() throws Exception {
 		logger.info("taodan:开始下载评价图片和上传淘单图片任务");
 		List<TaodanUser> users = taodanUserWyService.getUsedUser();
-		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (TaodanUser user : users) {
-			Future<Integer> future = asynService.downloadAllCommentImage(user.getUsername());
-			futures.add(future);
-		}
-		for (Future<Integer> future : futures) {
-			future.get();
+			int num = taodanTaskWyService.downloadAllCommentImage(user.getUsername());
+			logger.info("taodan-{}:下载评价图片任务数量,count={}", user.getUsername(), num);
+			num = taodanTaskWyService.uploadTaodanImg(user.getUsername());
+			logger.info("taodan-{}:上传淘单图片任务数量,count={}", user.getUsername(), num);
 		}
 	}
-	
-	@Scheduled(cron = "0 0 22 * * 1-4")
+
+	//@Scheduled(cron = "0 0 22 * * 1-4")
 	public void txje() throws Exception {
-		logger.info("taodan:开始提现任务");
 		List<TaodanUser> users = taodanUserWyService.getUsedUser();
-		List<Future<String>> futures = new ArrayList<Future<String>>();
 		for (TaodanUser user : users) {
-			Future<String> future = asynService.withdraw(user.getUsername());
-			futures.add(future);
-		}
-		for (Future<String> future : futures) {
-			future.get();
+			logger.info("taodan-{}:开始提现任务", user.getUsername());
+			String msg = taodanTaskWyService.withdraw(user.getUsername());
+			logger.info("taodan-{}:结束提现任务,msg={}", user.getUsername(), msg);
 		}
 	}
-	
-	@Scheduled(cron = "0 30 17 * * 5")
+
+	@Scheduled(cron = "0 30 17 * * 1-5")
 	public void txje02() throws Exception {
-		logger.info("taodan:开始提现任务");
 		List<TaodanUser> users = taodanUserWyService.getUsedUser();
-		List<Future<String>> futures = new ArrayList<Future<String>>();
 		for (TaodanUser user : users) {
-			Future<String> future = asynService.withdraw(user.getUsername());
-			futures.add(future);
-		}
-		for (Future<String> future : futures) {
-			future.get();
+			logger.info("taodan-{}:开始提现任务", user.getUsername());
+			String msg = taodanTaskWyService.withdraw(user.getUsername());
+			logger.info("taodan-{}:结束提现任务,msg={}", user.getUsername(), msg);
 		}
 	}
 }

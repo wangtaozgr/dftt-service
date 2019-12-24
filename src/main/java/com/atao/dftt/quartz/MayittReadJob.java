@@ -57,7 +57,7 @@ public class MayittReadJob {
 		logger.info("mayitt:结束阅读视频金币任务");
 	}
 
-	@Scheduled(cron = "0 0,10,20,30,40,50 13 * * ?")
+	/*@Scheduled(cron = "0 0,10,20,30,40,50 13 * * ?")
 	public void readAdTask() throws Exception {
 		logger.info("mayitt:开始阅读广告金币任务");
 		List<MayittUser> users = mayittUserWyService.getUsedUser();
@@ -70,7 +70,7 @@ public class MayittReadJob {
 			future.get();
 		}
 		logger.info("mayitt:结束阅读广告金币任务");
-	}
+	}*/
 
 	@Scheduled(cron = "0 0,10,20,30,40,50 16 * * ?")
 	public void readRwTask() throws Exception {
@@ -102,7 +102,7 @@ public class MayittReadJob {
 		logger.info("mayitt:结束阅读更多金币任务");
 	}
 
-	@Scheduled(cron = "0 0,10,20,30,40,50 22 * * ?")
+	/*@Scheduled(cron = "0 0,10,20,30,40,50 22 * * ?")
 	public void readMayittHongbaoTask() throws Exception {
 		logger.info("mayitt:开始阅读红包金币任务");
 		List<MayittUser> users = mayittUserWyService.getUsedUser();
@@ -115,7 +115,7 @@ public class MayittReadJob {
 			future.get();
 		}
 		logger.info("mayitt:结束阅读红包金币任务");
-	}
+	}*/
 
 	/**
 	 * 查询我的金币

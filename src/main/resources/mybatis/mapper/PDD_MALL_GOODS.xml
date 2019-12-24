@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atao.dftt.mapper.PddMallGoodsMapper">
+    <resultMap id="BaseResultMap" type="PddMallGoods">
+    <id property="id" column="id" jdbcType="BIGINT" />
+
+    <result property="mallId" column="mall_id" jdbcType="VARCHAR" />
+    <result property="goodsId" column="goods_id" jdbcType="VARCHAR" />
+    <result property="goodsName" column="goods_name" jdbcType="VARCHAR" />
+    <result property="goodsLogo" column="goods_logo" jdbcType="VARCHAR" />
+    <result property="logoKey" column="logo_key" jdbcType="VARCHAR" />
+</resultMap>
+
+    <sql id="BaseColumnList">
+        id,mall_id,goods_id,goods_name,goods_logo,
+        logo_key
+    </sql>
+
+
+    <sql id="TableClause"> ${}.PDD_MALL_GOODS </sql>
+
+
+    <select id="queryByCriteria" resultMap="BaseResultMap" parameterType="CriteriaQuery">
+        <include refid="public.Select4Query" />
+    </select>
+
+    <select id="countByCriteria" resultType="int" parameterType="CriteriaQuery">
+        <include refid="public.Count4Query" />
+    </select>
+
+    <delete id="deleteByCriteria" parameterType="CriteriaQuery">
+        <include refid="public.Delete4Query" />
+    </delete>
+</mapper>
